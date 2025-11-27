@@ -1,6 +1,6 @@
 import { Piece, PlayerColor, Coordinate } from './types';
 
-export const BOARD_SIZE = 20;
+export const BOARD_SIZE = 21;
 
 export const ALL_COLORS: PlayerColor[] = [
     'BLUE', 'YELLOW', 'RED', 'GREEN',
@@ -69,8 +69,8 @@ export const CORNER_POSITIONS: Coordinate[] = [
 ];
 
 export const BONUS_SQUARES: Coordinate[] = [
-    // Inner Ring (Center Control)
-    { x: 8, y: 8 }, { x: 8, y: 11 }, { x: 11, y: 8 }, { x: 11, y: 11 },
-    // Outer Ring (Flank Aggression)
-    { x: 9, y: 2 }, { x: 2, y: 9 }, { x: 17, y: 10 }, { x: 10, y: 17 }
+    // Inner Ring (Center Control) - Centered around (10,10)
+    { x: 9, y: 9 }, { x: 9, y: 11 }, { x: 11, y: 9 }, { x: 11, y: 11 },
+    // Outer Ring (Flank Aggression) - Centered axes
+    { x: 10, y: 2 }, { x: 2, y: 10 }, { x: 18, y: 10 }, { x: 10, y: 18 }
 ];
