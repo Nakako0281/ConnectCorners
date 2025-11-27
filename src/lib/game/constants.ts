@@ -38,9 +38,7 @@ export const PIECES: Omit<Piece, 'id'>[] = [
     { value: 5, shape: [[0, 1, 1], [1, 1, 0], [0, 1, 0]] }, // F5
 ];
 
-// Correcting shapes to be more precise based on standard Blokus
-// I'll redefine them carefully to ensure all 21 are correct.
-// 1 monomino, 1 domino, 2 trominoes, 5 tetrominoes, 12 pentominoes = 21 total.
+import { CHARACTERS } from './characters';
 
 const STANDARD_PIECES: Piece[] = PIECES.map((p, index) => ({
     id: `p${index}`,
@@ -49,8 +47,6 @@ const STANDARD_PIECES: Piece[] = PIECES.map((p, index) => ({
 }));
 
 export const TOTAL_PIECES_COUNT = STANDARD_PIECES.length + 1; // 21 standard + 1 special
-
-import { CHARACTERS } from './characters';
 
 export const getInitialPieces = (color: PlayerColor): Piece[] => {
     const character = CHARACTERS[color];

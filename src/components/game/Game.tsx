@@ -9,7 +9,6 @@ import { GameResultModal } from './GameResultModal';
 import { ScorePopup } from './ScorePopup';
 import { Button } from '@/components/ui/button';
 import {
-    GameState,
     PlayerColor,
     Piece,
     Coordinate,
@@ -24,7 +23,6 @@ import {
     getAllValidMoves
 } from '@/lib/game/logic';
 import {
-    INITIAL_PIECES,
     getInitialPieces,
     ALL_COLORS,
     CORNER_POSITIONS,
@@ -34,17 +32,17 @@ import {
 import { CHARACTERS } from '@/lib/game/characters';
 import { getAIMove } from '@/lib/game/ai';
 import { usePeer, NetworkMessage } from '@/lib/hooks/usePeer';
-import { RotateCw, FlipHorizontal, SkipForward, RefreshCw, Volume2, VolumeX } from 'lucide-react';
+import { RefreshCw, Volume2, VolumeX } from 'lucide-react';
 import { PlayerList } from './PlayerList';
 import { SelectedPiecePanel } from './SelectedPiecePanel';
 import { useSoundContext } from '@/contexts/SoundContext';
 
 export const Game: React.FC = () => {
     // Sound Context
-    const { isMuted, toggleMute, playClick, playTurnStart, playGameOver, playPlace, playError, playGameBgm, stopGameBgm } = useSoundContext();
+    const { isMuted, toggleMute, playClick, playTurnStart, playPlace, playError } = useSoundContext();
 
     // P2P State
-    const { peerId, isHost, connections, hostGame, joinGame, sendData, setOnData, setOnConnect } = usePeer();
+    const { peerId, isHost, hostGame, joinGame, sendData, setOnData, setOnConnect } = usePeer();
     const [isMultiplayer, setIsMultiplayer] = useState(false);
     const [connectedPlayerIds, setConnectedPlayerIds] = useState<string[]>([]);
     const [myPlayerColor, setMyPlayerColor] = useState<PlayerColor>('BLUE'); // Default for single player

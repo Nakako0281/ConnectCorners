@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, Copy, Play, Gamepad2, Check, HelpCircle, Volume2, VolumeX, CheckCircle2 } from 'lucide-react';
+import { Users, Copy, Gamepad2, Check, HelpCircle, Volume2, VolumeX, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSoundContext } from '@/contexts/SoundContext';
 import { ALL_COLORS } from '@/lib/game/constants';
