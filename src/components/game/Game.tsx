@@ -6,6 +6,7 @@ import { Hand } from './Hand';
 import { PieceView } from './Piece';
 import { Lobby } from './Lobby';
 import { GameResultModal } from './GameResultModal';
+import { ScorePopup } from './ScorePopup';
 import { Button } from '@/components/ui/button';
 import {
     GameState,
@@ -24,8 +25,11 @@ import {
 } from '@/lib/game/logic';
 import {
     INITIAL_PIECES,
+    getInitialPieces,
     ALL_COLORS,
-    CORNER_POSITIONS
+    CORNER_POSITIONS,
+    BONUS_SQUARES,
+    TOTAL_PIECES_COUNT
 } from '@/lib/game/constants';
 import { CHARACTERS } from '@/lib/game/characters';
 import { getAIMove } from '@/lib/game/ai';
@@ -59,30 +63,15 @@ export const Game: React.FC = () => {
     const [isFlipped, setIsFlipped] = useState(false);
     const [hoverPos, setHoverPos] = useState<Coordinate | null>(null);
 
-    // Effect for Turn Start Sound
-    useEffect(() => {
-        const currentPlayer = players[currentPlayerIndex];
-        if (gameStatus === 'playing' && currentPlayer && !currentPlayer.hasPassed) {
-            playPlace();
-        }
-    }, [currentPlayerIndex, gameStatus, players, playTurnStart]);
-
-    // Effect for Game Over Sound
-    useEffect(() => {
-        if (gameStatus === 'finished') {
-            playGameOver();
-        }
-    }, [gameStatus, playGameOver]);
-
-    // Effect for Game BGM
-    useEffect(() => {
-        if (gameStatus === 'playing') {
-            playGameBgm();
-        } else {
-            stopGameBgm();
-        }
-        return () => stopGameBgm();
-    }, [gameStatus, playGameBgm, stopGameBgm]);
+    // Score Animation State
+    interface ScorePopupData {
+        id: string;
+        score: number;
+        x: number;
+        y: number;
+        hasBonus: boolean;
+    }
+    const [scorePopups, setScorePopups] = useState<ScorePopupData[]>([]);
 
     // Initialize Single Player Game
     const initSinglePlayer = (selectedColor: PlayerColor) => {
@@ -98,9 +87,10 @@ export const Game: React.FC = () => {
         const initialPlayers: Player[] = gameColors.map((color, index) => ({
             id: color,
             color: color as PlayerColor,
-            pieces: [...INITIAL_PIECES],
+            pieces: getInitialPieces(color as PlayerColor),
             isHuman: index === 0,
-            hasPassed: false
+            hasPassed: false,
+            bonusScore: 0
         }));
         setBoard(createInitialBoard());
         setPlayers(initialPlayers);
@@ -108,6 +98,7 @@ export const Game: React.FC = () => {
         setGameStatus('playing');
         setIsMultiplayer(false);
         setMyPlayerColor(selectedColor);
+        playTurnStart();
     };
 
 
@@ -116,26 +107,6 @@ export const Game: React.FC = () => {
         playClick();
         if (!isHost) return;
 
-        // For MVP, we'll just assign colors based on order for now, 
-        // but ideally we'd negotiate. 
-        // Host gets their selected color (stored in myPlayerColor if we set it earlier, 
-        // but currently we don't have it in state before game starts in this component structure).
-        // Actually, Lobby passes it to onHost, but we need to store it.
-        // Let's assume for now Host is always index 0, so they get the first color in a list?
-        // No, we need to respect the selection.
-
-        // Since we didn't store selectedColor in Game state yet (it's in Lobby),
-        // we need to pass it here or store it when onHost is called.
-        // I'll update the component to store selectedColor from Lobby interactions.
-
-        // Wait, I can't easily access selectedColor here if it's passed to onHost but onHost just calls hostGame().
-        // I will update the Lobby props below to pass the color to these handlers, 
-        // and these handlers will update a local state `mySelectedColor`.
-
-        // But startMultiplayerGame is called by onStart, which doesn't take arguments in Lobby.
-        // So I need to store the color when onHost/onJoin is called.
-
-        // Let's use a default for now and fix it in the next chunk where I add the state.
         const hostColor = myPlayerColor;
 
         // Pick 3 other colors
@@ -147,9 +118,10 @@ export const Game: React.FC = () => {
             return {
                 id: index === 0 ? peerId : (conn ? conn.peer : `AI-${color}`),
                 color: color as PlayerColor,
-                pieces: [...INITIAL_PIECES],
+                pieces: getInitialPieces(color as PlayerColor),
                 isHuman: index === 0 || !!conn, // AI if no connection
-                hasPassed: false
+                hasPassed: false,
+                bonusScore: 0
             };
         });
 
@@ -216,7 +188,7 @@ export const Game: React.FC = () => {
                     // Validate on Host
                     const isFirstMove = piece.value === 0;
                     // Actually we need to check if it's the first move for THIS player.
-                    const isFirst = player.pieces.length === 21;
+                    const isFirst = player.pieces.length === TOTAL_PIECES_COUNT;
                     const startPos = CORNER_POSITIONS[playerIndex];
 
                     if (isValidMove(board, shape, position, player.color, isFirst, startPos)) {
@@ -271,7 +243,7 @@ export const Game: React.FC = () => {
 
         if (shouldHandleAI && currentPlayer && !currentPlayer.isHuman && !currentPlayer.hasPassed) {
             const timer = setTimeout(() => {
-                const isFirstMove = currentPlayer.pieces.length === 21;
+                const isFirstMove = currentPlayer.pieces.length === TOTAL_PIECES_COUNT;
                 const startPos = CORNER_POSITIONS[currentPlayerIndex];
                 const move = getAIMove(board, currentPlayer.pieces, currentPlayer.color, isFirstMove, startPos);
 
@@ -317,7 +289,7 @@ export const Game: React.FC = () => {
         if (!isMyTurn) return; // Only check for my turn
 
         // Check if player has any valid moves
-        const isFirstMove = currentPlayer.pieces.length === 21;
+        const isFirstMove = currentPlayer.pieces.length === TOTAL_PIECES_COUNT;
         const startPos = CORNER_POSITIONS[currentPlayerIndex];
         const validMoves = getAllValidMoves(board, currentPlayer.pieces, currentPlayer.color, isFirstMove, startPos);
 
@@ -346,17 +318,56 @@ export const Game: React.FC = () => {
         } else {
             // Host or Single Player: Apply locally
             const newBoard = placePiece(board, shape, position, currentPlayer.color);
+            const bonusPoints = calculateBonusPoints(shape, position);
+            const totalScore = piece.value + bonusPoints;
+
             setBoard(newBoard);
 
             const newPlayers = [...players];
             newPlayers[currentPlayerIndex] = {
                 ...currentPlayer,
-                pieces: currentPlayer.pieces.filter(p => p.id !== piece.id)
+                pieces: currentPlayer.pieces.filter(p => p.id !== piece.id),
+                bonusScore: currentPlayer.bonusScore + bonusPoints
             };
             setPlayers(newPlayers);
             setSelectedPieceId(null);
             setRotation(0);
             setIsFlipped(false);
+
+            // Create score popup animation
+            // Calculate center position of the placed piece in screen coordinates
+            const boardElement = document.getElementById('game-board');
+            if (boardElement) {
+                const boardRect = boardElement.getBoundingClientRect();
+                const cellSize = boardRect.width / 20; // BOARD_SIZE = 20
+
+                // Find center of placed piece
+                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+                shape.forEach((row, dy) => {
+                    row.forEach((cell, dx) => {
+                        if (cell) {
+                            minX = Math.min(minX, dx);
+                            maxX = Math.max(maxX, dx);
+                            minY = Math.min(minY, dy);
+                            maxY = Math.max(maxY, dy);
+                        }
+                    });
+                });
+
+                const centerX = position.x + (minX + maxX) / 2;
+                const centerY = position.y + (minY + maxY) / 2;
+                const screenX = boardRect.left + centerX * cellSize;
+                const screenY = boardRect.top + centerY * cellSize;
+
+                const popupId = `${Date.now()}-${Math.random()}`;
+                setScorePopups(prev => [...prev, {
+                    id: popupId,
+                    score: totalScore,
+                    x: screenX,
+                    y: screenY,
+                    hasBonus: bonusPoints > 0
+                }]);
+            }
 
             const nextIdx = nextTurnIndex(newPlayers, currentPlayerIndex);
             setCurrentPlayerIndex(nextIdx);
@@ -365,6 +376,22 @@ export const Game: React.FC = () => {
                 broadcastUpdate(newBoard, newPlayers, nextIdx);
             }
         }
+    };
+
+    const calculateBonusPoints = (shape: number[][], position: Coordinate): number => {
+        let points = 0;
+        shape.forEach((row, dy) => {
+            row.forEach((cell, dx) => {
+                if (cell) {
+                    const x = position.x + dx;
+                    const y = position.y + dy;
+                    if (BONUS_SQUARES.some(bs => bs.x === x && bs.y === y)) {
+                        points++;
+                    }
+                }
+            });
+        });
+        return points;
     };
 
     const handlePass = () => {
@@ -407,7 +434,7 @@ export const Game: React.FC = () => {
         if (!isMyTurn || !selectedPiece) return;
 
         const shape = getTransformedPiece(selectedPiece, rotation, isFlipped);
-        const isFirstMove = currentPlayer.pieces.length === 21;
+        const isFirstMove = currentPlayer.pieces.length === TOTAL_PIECES_COUNT;
         const startPos = CORNER_POSITIONS[currentPlayerIndex];
 
         if (isValidMove(board, shape, pos, currentPlayer.color, isFirstMove, startPos)) {
@@ -423,7 +450,7 @@ export const Game: React.FC = () => {
 
     // Preview Logic
     const previewShape = selectedPiece ? getTransformedPiece(selectedPiece, rotation, isFlipped) : undefined;
-    const isFirstMove = currentPlayer?.pieces.length === 21;
+    const isFirstMove = currentPlayer?.pieces.length === TOTAL_PIECES_COUNT;
     const startPos = currentPlayer ? CORNER_POSITIONS[currentPlayerIndex] : undefined;
     const isValidPreview = selectedPiece && hoverPos && currentPlayer
         ? isValidMove(board, previewShape!, hoverPos, currentPlayer.color, isFirstMove, startPos)
@@ -491,6 +518,7 @@ export const Game: React.FC = () => {
             >
                 <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
                 <Board
+                    id="game-board"
                     board={board}
                     onCellClick={onBoardClick}
                     onCellHover={onBoardHover}
@@ -554,6 +582,18 @@ export const Game: React.FC = () => {
                 onPlayAgain={handleRestart}
                 onClose={() => setIsResultModalOpen(false)}
             />
+
+            {/* Score Popups */}
+            {scorePopups.map((popup) => (
+                <ScorePopup
+                    key={popup.id}
+                    score={popup.score}
+                    x={popup.x}
+                    y={popup.y}
+                    hasBonus={popup.hasBonus}
+                    onComplete={() => setScorePopups(prev => prev.filter(p => p.id !== popup.id))}
+                />
+            ))}
 
         </div>
     );

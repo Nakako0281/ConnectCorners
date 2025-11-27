@@ -25,7 +25,7 @@ const PlayerListComponent = ({ players, currentPlayerId }: PlayerListProps) => {
             <h3 className="font-semibold text-sm text-slate-400 mb-2 uppercase tracking-wider">Players</h3>
             {players.map(p => {
                 const remainingSquares = p.pieces.reduce((acc, piece) => acc + piece.value, 0);
-                const score = 89 - remainingSquares + (p.pieces.length === 0 ? 15 : 0);
+                const score = 95 - remainingSquares + (p.pieces.length === 0 ? 15 : 0) + (p.bonusScore || 0);
                 const isCurrent = p.id === currentPlayerId;
 
                 return (

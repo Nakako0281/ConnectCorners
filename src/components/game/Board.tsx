@@ -1,9 +1,14 @@
 import React from 'react';
 import { BoardState, PlayerColor, Coordinate } from '@/lib/game/types';
 import { cn } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import {
+  BOARD_SIZE,
+  BONUS_SQUARES
+} from '@/lib/game/constants';
+import { Star } from 'lucide-react';
 
 interface BoardProps {
+  id?: string;
   board: BoardState;
   onCellClick: (pos: Coordinate) => void;
   onCellHover?: (pos: Coordinate) => void;
@@ -47,6 +52,8 @@ const BoardCell = React.memo(({
   onClick: (pos: Coordinate) => void;
   onHover?: (pos: Coordinate) => void;
 }) => {
+  const isBonus = !cell && BONUS_SQUARES.some(bs => bs.x === c && bs.y === r);
+
   return (
     <div
       className="w-6 h-6 border-[0.5px] border-white/10 relative"
@@ -55,6 +62,13 @@ const BoardCell = React.memo(({
     >
       {/* Background/Empty Cell */}
       <div className="absolute inset-0 bg-transparent" />
+
+      {/* Bonus Star */}
+      {isBonus && (
+        <div className="absolute inset-0 flex items-center justify-center opacity-30">
+          <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+        </div>
+      )}
 
       {/* Start Position Indicator */}
       {startColor && !cell && (
@@ -79,7 +93,7 @@ const BoardCell = React.memo(({
         <div className={cn(
           "absolute inset-0 z-10",
           isValidPreview
-            ? `opacity-50 ${COLOR_MAP[previewColor]}`
+            ? `opacity - 50 ${COLOR_MAP[previewColor]} `
             : "bg-red-400 opacity-50"
         )} />
       )}
@@ -96,6 +110,7 @@ const BoardCell = React.memo(({
 });
 
 export const Board: React.FC<BoardProps> = ({
+  id,
   board,
   onCellClick,
   onCellHover,
@@ -127,6 +142,7 @@ export const Board: React.FC<BoardProps> = ({
 
   return (
     <div
+      id={id}
       className="inline-grid bg-white/5 backdrop-blur-md p-1 rounded-xl shadow-2xl border border-white/20"
       style={{
         gridTemplateColumns: `repeat(${board.length}, 24px)`,
@@ -144,7 +160,7 @@ export const Board: React.FC<BoardProps> = ({
 
           return (
             <BoardCell
-              key={`${r}-${c}`}
+              key={`${r} -${c} `}
               r={r}
               c={c}
               cell={cell}

@@ -8,6 +8,7 @@ export interface Character {
     description: string;
     imagePath: string;
     personality: string;
+    specialPieceShape: number[][];
 }
 
 export const CHARACTERS: Record<PlayerColor, Character> = {
@@ -18,7 +19,8 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         color: 'BLUE',
         description: '冷静沈着なリーダー格。幾何学を愛する理論派。',
         imagePath: '/Character/Riz.png',
-        personality: '成績優秀で真面目。「角を制する者は宇宙を制す」が口癖。'
+        personality: '成績優秀で真面目。「角を制する者は宇宙を制す」が口癖。',
+        specialPieceShape: [[1, 1, 1, 1, 1, 1]] // Long Bar
     },
     RED: {
         id: 'rocca',
@@ -27,7 +29,8 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         color: 'RED',
         description: '猪突猛進のエースアタッカー。攻撃的な配置が得意。',
         imagePath: '/Character/Rocca.png',
-        personality: '情熱的で負けず嫌い。「細かいことはいいからドーンと行こう！」がモットー。'
+        personality: '情熱的で負けず嫌い。「細かいことはいいからドーンと行こう！」がモットー。',
+        specialPieceShape: [[1, 1, 0], [1, 1, 1], [0, 1, 0]] // Heart-ish
     },
     GREEN: {
         id: 'mallo',
@@ -36,7 +39,8 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         color: 'GREEN',
         description: 'おっとり癒やし系の守護神。鉄壁の守りを誇る。',
         imagePath: '/Character/Mallo.png',
-        personality: 'マイペースで争いごとは苦手。植物の妖精を連れている。'
+        personality: 'マイペースで争いごとは苦手。植物の妖精を連れている。',
+        specialPieceShape: [[1, 0], [1, 0], [1, 0], [1, 0], [1, 1]] // Big L
     },
     YELLOW: {
         id: 'pico',
@@ -45,7 +49,8 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         color: 'YELLOW',
         description: '神出鬼没のトリックスター。セオリー無視の変な手を打つ。',
         imagePath: '/Character/Pico.png',
-        personality: 'イタズラ好きのガジェットオタク。場を混乱させるのが大好き。'
+        personality: 'イタズラ好きのガジェットオタク。場を混乱させるのが大好き。',
+        specialPieceShape: [[0, 1, 0], [1, 1, 1], [0, 1, 0], [0, 1, 0]] // Cross
     },
     LIGHTBLUE: {
         id: 'mizuki',
@@ -54,7 +59,8 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         color: 'LIGHTBLUE',
         description: '理知的なクールビューティー。データ分析が得意。',
         imagePath: '/Character/Mizuki.png',
-        personality: '頭脳明晰で論理的。「敗因は必ずデータに現れる」と信じている。'
+        personality: '頭脳明晰で論理的。「敗因は必ずデータに現れる」と信じている。',
+        specialPieceShape: [[1, 0, 0], [1, 1, 0], [0, 1, 1], [0, 0, 1]] // Stairs
     },
     PINK: {
         id: 'amour',
@@ -63,7 +69,8 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         color: 'PINK',
         description: '愛と芸術のロマンチスト。美しい配置を追求する。',
         imagePath: '/Character/Amour.png',
-        personality: '感情豊かで、自分の陣地を「愛の城」と呼ぶ。'
+        personality: '感情豊かで、自分の陣地を「愛の城」と呼ぶ。',
+        specialPieceShape: [[0, 0, 1], [0, 1, 1], [1, 1, 1]] // Pyramid
     },
     ORANGE: {
         id: 'soleil',
@@ -72,7 +79,8 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         color: 'ORANGE',
         description: '天真爛漫なムードメーカー。直感と運で勝負する。',
         imagePath: '/Character/Soleil.png',
-        personality: '明るくポジティブ。「楽しくなきゃゲームじゃない！」が口癖。'
+        personality: '明るくポジティブ。「楽しくなきゃゲームじゃない！」が口癖。',
+        specialPieceShape: [[0, 1, 0], [1, 1, 1], [1, 0, 1]] // Star-ish
     },
     PURPLE: {
         id: 'noir',
@@ -81,6 +89,7 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         color: 'PURPLE',
         description: '孤高のミステリアスな魔女。最小手数での勝利を目指す。',
         imagePath: '/Character/Noir.png',
-        personality: '無口で物静か。ミニマリスト戦略家。'
+        personality: '無口で物静か。ミニマリスト戦略家。',
+        specialPieceShape: [[1, 1, 1], [1, 0, 0], [1, 0, 0], [1, 0, 0]] // Hook
     }
 };

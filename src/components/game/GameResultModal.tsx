@@ -23,7 +23,7 @@ export const GameResultModal: React.FC<GameResultModalProps> = ({
     // Calculate scores and determine if anyone achieved perfect game
     const playersWithScores = players.map(p => {
         const remainingSquares = p.pieces.reduce((acc, piece) => acc + piece.value, 0);
-        const score = 89 - remainingSquares + (p.pieces.length === 0 ? 15 : 0);
+        const score = 89 - remainingSquares + (p.pieces.length === 0 ? 15 : 0) + (p.bonusScore || 0);
         const isPerfect = p.pieces.length === 0;
         return { ...p, score, isPerfect };
     }).sort((a, b) => b.score - a.score);

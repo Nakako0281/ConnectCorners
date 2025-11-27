@@ -81,6 +81,23 @@ export const HowToPlayModal: React.FC<HowToPlayModalProps> = ({ isOpen, onClose 
                             <span>全21ピース配置ボーナス</span>
                             <span className="font-mono font-bold text-yellow-400">+15 ポイント</span>
                         </div>
+                        <div className="flex justify-between text-sm text-slate-300 mt-1">
+                            <span className="flex items-center gap-1">
+                                <span className="text-yellow-400">★</span> ボーナスマス配置
+                            </span>
+                            <span className="font-mono font-bold text-yellow-400">+1 ポイント</span>
+                        </div>
+                    </div>
+
+                    {/* Unique Pieces */}
+                    <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 p-4 rounded-lg border border-slate-700/30">
+                        <h3 className="font-bold text-slate-200 mb-2 flex items-center gap-2">
+                            <span className="text-xl">🧩</span> キャラクター固有ピース
+                        </h3>
+                        <p className="text-sm text-slate-300 leading-relaxed">
+                            各キャラクターは、通常の21個のピースに加えて、<span className="font-bold text-white">1個の「固有ピース」</span>を持っています。
+                            この強力な6マス分のピースをいつ使うかが勝負の鍵を握ります！
+                        </p>
                     </div>
                 </div>
 

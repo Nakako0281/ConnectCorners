@@ -1,16 +1,15 @@
-import { HowToPlayModal } from './HowToPlayModal';
-import { HelpCircle, Volume2, VolumeX, CheckCircle2 } from 'lucide-react';
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, Copy, Play, Gamepad2, Check } from 'lucide-react';
+import { Users, Copy, Play, Gamepad2, Check, HelpCircle, Volume2, VolumeX, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSoundContext } from '@/contexts/SoundContext';
 import { ALL_COLORS } from '@/lib/game/constants';
 import { PlayerColor } from '@/lib/game/types';
 import { CHARACTERS } from '@/lib/game/characters';
+import { PieceView } from './Piece';
+import { HowToPlayModal } from './HowToPlayModal';
 
 interface LobbyProps {
     peerId: string;
@@ -141,9 +140,6 @@ export const Lobby: React.FC<LobbyProps> = ({
                     <br />
                     CORNERS
                 </h1>
-                <p className="text-slate-400 text-lg mt-4 tracking-widest uppercase font-semibold">
-                    Strategic Block Battle
-                </p>
             </motion.div>
 
             <motion.div
@@ -169,16 +165,25 @@ export const Lobby: React.FC<LobbyProps> = ({
                                                 className="w-full h-full object-cover"
                                             />
                                         </div>
-                                        <div className="flex-1 space-y-1">
+                                        <div className="flex-1 space-y-2">
                                             <div className="flex items-center gap-2">
                                                 <h3 className="text-xl font-bold text-white">{CHARACTERS[selectedColor].japaneseName}</h3>
                                                 <span className="text-xs font-mono text-slate-400 px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700">
                                                     {CHARACTERS[selectedColor].name}
                                                 </span>
                                             </div>
-                                            <p className="text-sm text-slate-300 leading-relaxed">
-                                                {CHARACTERS[selectedColor].description}
-                                            </p>
+
+                                            <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700/50">
+                                                <div className="text-xs text-slate-400 mb-2 uppercase tracking-wider font-semibold">Special Piece</div>
+                                                <div className="flex justify-center h-[80px] items-center">
+                                                    <PieceView
+                                                        shape={CHARACTERS[selectedColor].specialPieceShape}
+                                                        color={selectedColor}
+                                                        cellSize={16}
+                                                        className="drop-shadow-lg"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -189,7 +194,7 @@ export const Lobby: React.FC<LobbyProps> = ({
                                                 key={color}
                                                 onClick={() => { playClick(); setSelectedColor(color); }}
                                                 className={`
-                                                    relative group aspect-square rounded-lg overflow-hidden transition-all duration-300
+                                                    relative group aspect-square rounded-xl overflow-hidden transition-all duration-300
                                                     ${selectedColor === color ? 'ring-2 ring-white ring-offset-2 ring-offset-black/50 scale-105 z-10' : 'hover:scale-105 opacity-60 hover:opacity-100'}
                                                 `}
                                                 style={{

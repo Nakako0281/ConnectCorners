@@ -17,6 +17,7 @@ export interface Player {
   pieces: Piece[];
   isHuman: boolean;
   hasPassed: boolean;
+  bonusScore: number;
 }
 
 export type BoardState = (PlayerColor | null)[][];
@@ -29,7 +30,6 @@ export interface GameState {
   turnNumber: number;
   history: Move[];
 }
-
 export interface Move {
   player: PlayerColor;
   pieceId: string;
