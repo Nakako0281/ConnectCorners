@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, Copy, Gamepad2, Check, HelpCircle, CheckCircle2, Trophy } from 'lucide-react';
 import { Users, Copy, Gamepad2, Check, HelpCircle, Volume2, VolumeX, CheckCircle2, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSoundContext } from '@/contexts/SoundContext';
@@ -98,42 +97,37 @@ export const Lobby: React.FC<LobbyProps> = ({
             )}
 
             {/* Top Right Controls */}
-            <div className="absolute top-0 right-0 p-4 flex gap-2 z-50">
-                <VolumeControl />
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleOpenAchievements}
-                    className="text-slate-400 hover:text-white hover:bg-white/10 gap-2"
-                >
-                    <Trophy className="w-5 h-5" />
-                    <span className="hidden sm:inline">Trophies</span>
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleOpenAchievements}
-                    className="text-slate-400 hover:text-white hover:bg-white/10 gap-2"
-                >
-                    <Trophy className="w-5 h-5" />
-                    <span className="hidden sm:inline">Trophies</span>
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleOpenHowToPlay}
-                    className="text-slate-400 hover:text-white hover:bg-white/10 gap-2"
-                >
-                    <HelpCircle className="w-5 h-5" />
-                    <span className="hidden sm:inline">How to Play</span>
-                </Button>
+            {/* Top Right Controls - Styled Toolbar */}
+            <div className="absolute top-4 right-4 z-50">
+                <div className="flex items-center gap-1 p-1.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-full shadow-xl">
+                    <VolumeControl />
+                    <div className="w-px h-4 bg-white/10 mx-1" />
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleOpenAchievements}
+                        className="rounded-full text-slate-400 hover:text-white hover:bg-white/10 w-9 h-9"
+                        title="Trophies"
+                    >
+                        <Trophy className="w-4 h-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleOpenHowToPlay}
+                        className="rounded-full text-slate-400 hover:text-white hover:bg-white/10 w-9 h-9"
+                        title="How to Play"
+                    >
+                        <HelpCircle className="w-4 h-4" />
+                    </Button>
+                </div>
             </div>
 
             <motion.div
                 initial={{ opacity: 0, y: -50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, type: "spring" }}
-                className="text-center mb-12"
+                className="text-center mb-12 mt-20 md:mt-0"
             >
                 <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 drop-shadow-2xl filter">
                     CONNECT

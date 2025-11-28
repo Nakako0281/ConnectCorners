@@ -18,7 +18,7 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({ isOpen, onCl
     const backdropVariants = {
         hidden: { opacity: 0 },
         visible: { opacity: 1 }
-    };
+    } as const;
 
     const modalVariants = {
         hidden: {
@@ -31,7 +31,7 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({ isOpen, onCl
             scale: 1,
             y: 0,
             transition: {
-                type: "spring",
+                type: "spring" as const,
                 stiffness: 300,
                 damping: 30
             }
@@ -41,7 +41,8 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({ isOpen, onCl
             scale: 0.9,
             transition: { duration: 0.2 }
         }
-    };
+    } as const;
+
 
     return (
         <AnimatePresence>
@@ -102,11 +103,10 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({ isOpen, onCl
                                 return (
                                     <div
                                         key={achievement.id}
-                                        className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${
-                                            isUnlocked
+                                        className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${isUnlocked
                                                 ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 shadow-sm'
                                                 : 'bg-slate-50 border-slate-100 opacity-60 grayscale'
-                                        }`}
+                                            }`}
                                     >
                                         <div className={`
                                             w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-sm border-2
@@ -133,7 +133,7 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({ isOpen, onCl
                         </div>
 
                         {/* Stats Summary */}
-                         <div className="bg-slate-50 p-4 border-t border-slate-100 text-xs text-slate-500 grid grid-cols-2 gap-2 shrink-0">
+                        <div className="bg-slate-50 p-4 border-t border-slate-100 text-xs text-slate-500 grid grid-cols-2 gap-2 shrink-0">
                             <div>Total Games: <span className="font-semibold text-slate-700">{stats.gamesPlayed}</span></div>
                             <div>Total Wins: <span className="font-semibold text-slate-700">{stats.wins}</span></div>
                             <div>Current Streak: <span className="font-semibold text-slate-700">{stats.currentWinStreak}</span></div>

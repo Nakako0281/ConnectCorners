@@ -114,17 +114,16 @@ export const Game: React.FC = () => {
         const otherColors = ALL_COLORS.filter(c => c !== hostColor).slice(0, 3);
         const gameColors = [hostColor, ...otherColors];
 
-        const initialPlayers: Player[] = gameColors.map((color, index) => {
-            const conn = connections[index - 1]; // connections[0] is Guest1
-            return {
-                id: index === 0 ? peerId : (conn ? conn.peer : `AI-${color}`),
+        const initialPlayers: Player[] = gameColors.map((color, index) => (
+            {
+                id: index === 0 ? peerId : `AI-${color}`,
                 color: color as PlayerColor,
                 pieces: getInitialPieces(color as PlayerColor),
-                isHuman: index === 0 || !!conn, // AI if no connection
+                isHuman: index === 0, // Only host is human for now (multiplayer needs full implementation)
                 hasPassed: false,
                 bonusScore: 0
-            };
-        });
+            }
+        ));
 
         setPlayers(initialPlayers);
         setGameStatus('playing');

@@ -4,8 +4,13 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { useSoundContext } from '@/contexts/SoundContext';
+import { cn } from '@/lib/utils';
 
-export const VolumeControl: React.FC = () => {
+interface VolumeControlProps {
+    className?: string;
+}
+
+export const VolumeControl: React.FC<VolumeControlProps> = ({ className }) => {
     const { bgmVolume, seVolume, setBgmVolume, setSeVolume, playClick } = useSoundContext();
     const [isOpen, setIsOpen] = React.useState(false);
 
@@ -24,17 +29,13 @@ export const VolumeControl: React.FC = () => {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="text-slate-400 hover:text-white hover:bg-white/10"
+                    className={cn("text-slate-400 hover:text-white hover:bg-white/10", className)}
                 >
                     <Icon className="w-5 h-5" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 bg-slate-900 border-slate-700 p-4 shadow-xl">
                 <div className="grid gap-4">
-                    <div className="space-y-2">
-                        <h4 className="font-medium leading-none text-slate-200">Volume Settings</h4>
-                        <p className="text-sm text-slate-500">Adjust the volume for BGM and Sound Effects.</p>
-                    </div>
                     <div className="grid gap-6 py-2">
                         {/* BGM Slider */}
                         <div className="flex flex-col gap-3">
@@ -47,8 +48,7 @@ export const VolumeControl: React.FC = () => {
                                 value={[bgmVolume]}
                                 max={1}
                                 step={0.01}
-                                onValueChange={(vals) => setBgmVolume(vals[0])}
-                                className="[&_.bg-primary]:bg-blue-500 [&_.border-primary]:border-blue-500"
+                                onValueChange={(vals: number[]) => setBgmVolume(vals[0])}
                             />
                         </div>
 
@@ -63,8 +63,7 @@ export const VolumeControl: React.FC = () => {
                                 value={[seVolume]}
                                 max={1}
                                 step={0.01}
-                                onValueChange={(vals) => setSeVolume(vals[0])}
-                                className="[&_.bg-primary]:bg-green-500 [&_.border-primary]:border-green-500"
+                                onValueChange={(vals: number[]) => setSeVolume(vals[0])}
                             />
                         </div>
                     </div>
