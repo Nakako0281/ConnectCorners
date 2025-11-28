@@ -7,13 +7,13 @@ export interface Achievement {
 }
 
 export const ACHIEVEMENTS: Achievement[] = [
-  { id: 'first_win', title: 'First Victory', description: 'Win your first game', icon: '🥇' },
-  { id: 'win_streak_3', title: 'On Fire', description: 'Win 3 games in a row', icon: '🔥' },
-  { id: 'win_streak_5', title: 'Unstoppable', description: 'Win 5 games in a row', icon: '🚀' },
-  { id: 'perfect_game', title: 'Perfectionist', description: 'Place all your pieces on the board', icon: '💎' },
-  { id: 'veteran', title: 'Veteran', description: 'Play 10 games', icon: '🛡️' },
-  { id: 'master', title: 'Master', description: 'Play 50 games', icon: '👑' },
-  { id: 'multiplayer_debut', title: 'Social Butterfly', description: 'Play a multiplayer game', icon: '🌍' },
+  { id: 'first_win', title: '初勝利', description: '初の勝利を果たす', icon: '🥇' },
+  { id: 'win_streak_3', title: '連勝3回', description: '3回連続で勝利を果たす', icon: '🔥' },
+  { id: 'win_streak_5', title: '連勝5回', description: '5回連続で勝利を果たす', icon: '🚀' },
+  { id: 'perfect_game', title: 'パーフェクト', description: '盤面を全て埋める', icon: '💎' },
+  { id: 'veteran', title: 'Veteran', description: '10回プレイ', icon: '🛡️' },
+  { id: 'master', title: 'Master', description: '50回プレイ', icon: '👑' },
+  { id: 'multiplayer_debut', title: 'マルチプレイ', description: 'マルチプレイを果たす', icon: '🌍' },
 ];
 
 export interface PlayerStats {
