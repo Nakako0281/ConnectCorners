@@ -167,33 +167,50 @@ export const Game: React.FC = () => {
         });
 
         // 2. Guests (from connectedPlayers)
+        // 2. Guests (from connectedPlayers)
         const guests = connectedPlayers.filter(p => p.id !== peerId);
+        const usedColors = new Set<PlayerColor>([hostColor]);
 
         guests.forEach(guest => {
+            let guestColor = guest.color;
+
+            // If color is taken, find first available
+            if (usedColors.has(guestColor)) {
+                const available = ALL_COLORS.find(c => !usedColors.has(c));
+                if (available) {
+                    guestColor = available;
+                }
+            }
+
+            usedColors.add(guestColor);
+
             gamePlayers.push({
                 id: guest.id,
-                color: guest.color,
-                pieces: getInitialPieces(guest.color),
+                color: guestColor,
+                pieces: getInitialPieces(guestColor),
                 isHuman: true,
                 hasPassed: false,
                 bonusScore: 0
             });
         });
 
-        // 3. Fill remaining slots with AI if needed
-        const usedColors = gamePlayers.map(p => p.color);
-        const remainingColors = ALL_COLORS.filter(c => !usedColors.includes(c));
+        // 3. Fill remaining slots with AI (up to 4 players total)
+        const remainingSlots = 4 - gamePlayers.length;
+        const remainingColors = ALL_COLORS.filter(c => !usedColors.has(c));
 
-        remainingColors.forEach(color => {
-            gamePlayers.push({
-                id: `AI-${color}`,
-                color: color,
-                pieces: getInitialPieces(color),
-                isHuman: false,
-                hasPassed: false,
-                bonusScore: 0
-            });
-        });
+        for (let i = 0; i < remainingSlots; i++) {
+            if (i < remainingColors.length) {
+                const color = remainingColors[i];
+                gamePlayers.push({
+                    id: `AI-${color}`,
+                    color: color,
+                    pieces: getInitialPieces(color),
+                    isHuman: false,
+                    hasPassed: false,
+                    bonusScore: 0
+                });
+            }
+        }
 
         setPlayers(gamePlayers);
         setGameStatus('playing');
