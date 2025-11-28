@@ -36,6 +36,7 @@ import { RefreshCw, Volume2, VolumeX } from 'lucide-react';
 import { PlayerList } from './PlayerList';
 import { SelectedPiecePanel } from './SelectedPiecePanel';
 import { useSoundContext } from '@/contexts/SoundContext';
+import { updateStats, Achievement } from '@/lib/achievements';
 
 export const Game: React.FC = () => {
     // Sound Context
@@ -54,6 +55,7 @@ export const Game: React.FC = () => {
     const [turnNumber, setTurnNumber] = useState(1);
     const [gameStatus, setGameStatus] = useState<'lobby' | 'playing' | 'finished'>('lobby');
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+    const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
 
     // Interaction State
     const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
@@ -221,10 +223,46 @@ export const Game: React.FC = () => {
             attempts++;
         }
         if (attempts === 4) {
-            setGameStatus('finished');
-            setIsResultModalOpen(true);
+            handleGameEnd(currentPlayers);
         }
         return nextIndex;
+    };
+
+    const handleGameEnd = (finalPlayers: Player[]) => {
+        setGameStatus('finished');
+
+        // Calculate winner and stats
+        const playersWithScores = finalPlayers.map(p => {
+            const remainingSquares = p.pieces.reduce((acc, piece) => acc + piece.value, 0);
+            const score = 89 - remainingSquares + (p.pieces.length === 0 ? 15 : 0) + (p.bonusScore || 0);
+            const isPerfect = p.pieces.length === 0;
+            return { ...p, score, isPerfect };
+        }).sort((a, b) => b.score - a.score);
+
+        const winner = playersWithScores[0];
+
+        // Update stats only if I played (or hosted single player)
+        // In single player, myPlayerColor is set. In multiplayer, we check if we participated.
+        // The simple check is: did I win? did I get a perfect game?
+
+        const myPlayer = playersWithScores.find(p => p.color === myPlayerColor);
+
+        if (myPlayer) {
+            const isWin = winner.color === myPlayerColor;
+            const isPerfect = myPlayer.isPerfect;
+
+            const { newAchievements } = updateStats({
+                isWin,
+                isPerfect,
+                isMultiplayer
+            });
+
+            if (newAchievements.length > 0) {
+                setNewAchievements(newAchievements);
+            }
+        }
+
+        setIsResultModalOpen(true);
     };
 
     const currentPlayer = players[currentPlayerIndex];
@@ -416,6 +454,7 @@ export const Game: React.FC = () => {
         setPlayers([]);
         setIsMultiplayer(false);
         setIsResultModalOpen(false);
+        setNewAchievements([]);
     };
 
     const handleRestart = () => {
@@ -425,6 +464,7 @@ export const Game: React.FC = () => {
         } else {
             initSinglePlayer(myPlayerColor);
             setIsResultModalOpen(false);
+            setNewAchievements([]);
         }
     };
 
@@ -577,6 +617,7 @@ export const Game: React.FC = () => {
             <GameResultModal
                 isOpen={isResultModalOpen}
                 players={players}
+                newAchievements={newAchievements}
                 onPlayAgain={handleRestart}
                 onClose={() => setIsResultModalOpen(false)}
             />
