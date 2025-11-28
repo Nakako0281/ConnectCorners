@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Trophy, Sparkles, X } from 'lucide-react';
 import { Player } from '@/lib/game/types';
 import { CHARACTERS } from '@/lib/game/characters';
+import { Achievement } from '@/lib/achievements';
 
 interface GameResultModalProps {
     isOpen: boolean;
     players: Player[];
+    newAchievements?: Achievement[];
     onPlayAgain: () => void;
     onClose: () => void;
 }
@@ -17,6 +19,7 @@ interface GameResultModalProps {
 export const GameResultModal: React.FC<GameResultModalProps> = ({
     isOpen,
     players,
+    newAchievements = [],
     onPlayAgain,
     onClose
 }) => {
@@ -161,6 +164,31 @@ export const GameResultModal: React.FC<GameResultModalProps> = ({
                                 )}
                             </motion.div>
                         </div>
+
+                         {/* New Achievements */}
+                         {newAchievements.length > 0 && (
+                            <div className="bg-yellow-50 p-4 border-b border-yellow-100">
+                                <h3 className="text-sm font-bold text-yellow-800 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4" /> Unlocked Achievements!
+                                </h3>
+                                <div className="space-y-2">
+                                    {newAchievements.map((achievement) => (
+                                        <motion.div
+                                            key={achievement.id}
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            className="flex items-center gap-3 bg-white p-2 rounded-lg border border-yellow-200 shadow-sm"
+                                        >
+                                            <div className="text-2xl">{achievement.icon}</div>
+                                            <div>
+                                                <div className="font-bold text-slate-800 text-sm">{achievement.title}</div>
+                                                <div className="text-xs text-slate-500">{achievement.description}</div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Rankings */}
                         <div className="p-6">

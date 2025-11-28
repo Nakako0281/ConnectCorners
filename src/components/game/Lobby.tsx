@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, Copy, Gamepad2, Check, HelpCircle, Volume2, VolumeX, CheckCircle2 } from 'lucide-react';
+import { Users, Copy, Gamepad2, Check, HelpCircle, CheckCircle2, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSoundContext } from '@/contexts/SoundContext';
 import { ALL_COLORS } from '@/lib/game/constants';
@@ -10,6 +10,8 @@ import { PlayerColor } from '@/lib/game/types';
 import { CHARACTERS } from '@/lib/game/characters';
 import { PieceView } from './Piece';
 import { HowToPlayModal } from './HowToPlayModal';
+import { AchievementModal } from './AchievementModal';
+import { VolumeControl } from './VolumeControl';
 
 interface LobbyProps {
     peerId: string;
@@ -34,8 +36,9 @@ export const Lobby: React.FC<LobbyProps> = ({
     const [copied, setCopied] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
+    const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
     const [selectedColor, setSelectedColor] = useState<PlayerColor>('BLUE');
-    const { isMuted, toggleMute, playClick, playOpen, playLobbyBgm, stopLobbyBgm } = useSoundContext();
+    const { playClick, playOpen, playLobbyBgm, stopLobbyBgm } = useSoundContext();
 
     React.useEffect(() => {
         setMounted(true);
@@ -77,46 +80,33 @@ export const Lobby: React.FC<LobbyProps> = ({
         setIsHowToPlayOpen(true);
     };
 
+    const handleOpenAchievements = () => {
+        playOpen();
+        setIsAchievementsOpen(true);
+    };
+
     return (
         <div className="relative w-full max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10">
             {/* Animated Background Elements (Floating Pieces) - Client Only */}
             {mounted && (
                 <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
                     {[...Array(15)].map((_, i) => (
-                        <motion.div
-                            key={i}
-                            className="absolute opacity-10"
-                            initial={{
-                                x: Math.random() * 1000 - 500,
-                                y: Math.random() * 1000 - 500,
-                                rotate: 0,
-                                scale: Math.random() * 0.5 + 0.5
-                            }}
-                            animate={{
-                                y: [0, -100, 0],
-                                rotate: [0, 360],
-                            }}
-                            transition={{
-                                duration: 20 + Math.random() * 10,
-                                repeat: Infinity,
-                                ease: "linear"
-                            }}
-                        >
-                            <div className={`w-16 h-16 ${['bg-blue-500', 'bg-red-500', 'bg-green-500', 'bg-yellow-500'][i % 4]} rounded-md`} />
-                        </motion.div>
+                        <BackgroundPiece key={i} index={i} />
                     ))}
                 </div>
             )}
 
             {/* Top Right Controls */}
-            <div className="absolute top-0 right-0 p-4 flex gap-2">
+            <div className="absolute top-0 right-0 p-4 flex gap-2 z-50">
+                <VolumeControl />
                 <Button
                     variant="ghost"
-                    size="icon"
-                    onClick={toggleMute}
-                    className="text-slate-400 hover:text-white hover:bg-white/10"
+                    size="sm"
+                    onClick={handleOpenAchievements}
+                    className="text-slate-400 hover:text-white hover:bg-white/10 gap-2"
                 >
-                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                    <Trophy className="w-5 h-5" />
+                    <span className="hidden sm:inline">Trophies</span>
                 </Button>
                 <Button
                     variant="ghost"
@@ -320,6 +310,41 @@ export const Lobby: React.FC<LobbyProps> = ({
             </motion.div>
 
             <HowToPlayModal isOpen={isHowToPlayOpen} onClose={() => setIsHowToPlayOpen(false)} />
+            <AchievementModal isOpen={isAchievementsOpen} onClose={() => setIsAchievementsOpen(false)} />
         </div>
+    );
+};
+
+// Component for background piece to avoid inline Math.random in render
+const BackgroundPiece = ({ index }: { index: number }) => {
+    // Generate random values once on mount
+    const [initialState] = useState(() => ({
+        x: Math.random() * 1000 - 500,
+        y: Math.random() * 1000 - 500,
+        scale: Math.random() * 0.5 + 0.5,
+        duration: 20 + Math.random() * 10
+    }));
+
+    return (
+        <motion.div
+            className="absolute opacity-10"
+            initial={{
+                x: initialState.x,
+                y: initialState.y,
+                rotate: 0,
+                scale: initialState.scale
+            }}
+            animate={{
+                y: [0, -100, 0],
+                rotate: [0, 360],
+            }}
+            transition={{
+                duration: initialState.duration,
+                repeat: Infinity,
+                ease: "linear"
+            }}
+        >
+            <div className={`w-16 h-16 ${['bg-blue-500', 'bg-red-500', 'bg-green-500', 'bg-yellow-500'][index % 4]} rounded-md`} />
+        </motion.div>
     );
 };
