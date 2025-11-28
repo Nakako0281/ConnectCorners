@@ -54,6 +54,7 @@ export const Lobby: React.FC<LobbyProps> = ({
     const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
     const [selectedColor, setSelectedColor] = useState<PlayerColor>('BLUE');
     const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>([]);
+    const [isJoining, setIsJoining] = useState(false);
     const { playClick, playOpen, playLobbyBgm, stopLobbyBgm } = useSoundContext();
 
     React.useEffect(() => {
@@ -88,6 +89,7 @@ export const Lobby: React.FC<LobbyProps> = ({
 
     const handleJoin = () => {
         playClick();
+        setIsJoining(true);
         onJoin(joinId, selectedColor);
     };
 
@@ -98,6 +100,7 @@ export const Lobby: React.FC<LobbyProps> = ({
 
     const handleBack = () => {
         playClick();
+        setIsJoining(false);
         onBack();
     };
 
@@ -169,7 +172,7 @@ export const Lobby: React.FC<LobbyProps> = ({
             >
                 <Card className="glass-panel border-0 bg-black/40 text-slate-100">
                     <CardContent className="flex flex-col gap-6 p-8">
-                        {!isHost && !connectedPlayers.length && !joinId ? (
+                        {!isHost && !connectedPlayers.length && !isJoining ? (
                             <>
                                 {/* Character Selection */}
                                 <div className="space-y-4">
