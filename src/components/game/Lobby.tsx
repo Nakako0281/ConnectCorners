@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Users, Copy, Gamepad2, Check, HelpCircle, CheckCircle2, Trophy } from 'lucide-react';
+import { Users, Copy, Gamepad2, Check, HelpCircle, Volume2, VolumeX, CheckCircle2, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSoundContext } from '@/contexts/SoundContext';
 import { ALL_COLORS } from '@/lib/game/constants';
@@ -99,6 +100,15 @@ export const Lobby: React.FC<LobbyProps> = ({
             {/* Top Right Controls */}
             <div className="absolute top-0 right-0 p-4 flex gap-2 z-50">
                 <VolumeControl />
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleOpenAchievements}
+                    className="text-slate-400 hover:text-white hover:bg-white/10 gap-2"
+                >
+                    <Trophy className="w-5 h-5" />
+                    <span className="hidden sm:inline">Trophies</span>
+                </Button>
                 <Button
                     variant="ghost"
                     size="sm"
