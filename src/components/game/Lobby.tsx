@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Users, Copy, Gamepad2, Check, HelpCircle, CheckCircle2, Trophy } from 'lucide-react';
 import { Users, Copy, Gamepad2, Check, HelpCircle, Volume2, VolumeX, CheckCircle2, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSoundContext } from '@/contexts/SoundContext';
@@ -11,6 +12,7 @@ import { CHARACTERS } from '@/lib/game/characters';
 import { PieceView } from './Piece';
 import { HowToPlayModal } from './HowToPlayModal';
 import { AchievementModal } from './AchievementModal';
+import { VolumeControl } from './VolumeControl';
 
 interface LobbyProps {
     peerId: string;
@@ -37,7 +39,7 @@ export const Lobby: React.FC<LobbyProps> = ({
     const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
     const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
     const [selectedColor, setSelectedColor] = useState<PlayerColor>('BLUE');
-    const { isMuted, toggleMute, playClick, playOpen, playLobbyBgm, stopLobbyBgm } = useSoundContext();
+    const { playClick, playOpen, playLobbyBgm, stopLobbyBgm } = useSoundContext();
 
     React.useEffect(() => {
         setMounted(true);
@@ -96,14 +98,16 @@ export const Lobby: React.FC<LobbyProps> = ({
             )}
 
             {/* Top Right Controls */}
-            <div className="absolute top-0 right-0 p-4 flex gap-2">
+            <div className="absolute top-0 right-0 p-4 flex gap-2 z-50">
+                <VolumeControl />
                 <Button
                     variant="ghost"
-                    size="icon"
-                    onClick={toggleMute}
-                    className="text-slate-400 hover:text-white hover:bg-white/10"
+                    size="sm"
+                    onClick={handleOpenAchievements}
+                    className="text-slate-400 hover:text-white hover:bg-white/10 gap-2"
                 >
-                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                    <Trophy className="w-5 h-5" />
+                    <span className="hidden sm:inline">Trophies</span>
                 </Button>
                 <Button
                     variant="ghost"

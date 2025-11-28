@@ -32,15 +32,16 @@ import {
 import { CHARACTERS } from '@/lib/game/characters';
 import { getAIMove } from '@/lib/game/ai';
 import { usePeer, NetworkMessage } from '@/lib/hooks/usePeer';
-import { RefreshCw, Volume2, VolumeX } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { PlayerList } from './PlayerList';
 import { SelectedPiecePanel } from './SelectedPiecePanel';
 import { useSoundContext } from '@/contexts/SoundContext';
+import { VolumeControl } from './VolumeControl';
 import { updateStats, Achievement } from '@/lib/achievements';
 
 export const Game: React.FC = () => {
     // Sound Context
-    const { isMuted, toggleMute, playClick, playTurnStart, playPlace, playError } = useSoundContext();
+    const { playClick, playTurnStart, playPlace, playError } = useSoundContext();
 
     // P2P State
     const { peerId, isHost, hostGame, joinGame, sendData, setOnData, setOnConnect } = usePeer();
@@ -517,14 +518,7 @@ export const Game: React.FC = () => {
 
             {/* Top Right Controls */}
             <div className="absolute top-4 right-4 z-10 flex gap-2">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={toggleMute}
-                    className="text-slate-400 hover:text-white hover:bg-white/10"
-                >
-                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                </Button>
+                <VolumeControl />
                 <Button variant="ghost" size="sm" onClick={handleReset} className="text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
                     <RefreshCw className="w-4 h-4 mr-2" /> Quit Game
                 </Button>
