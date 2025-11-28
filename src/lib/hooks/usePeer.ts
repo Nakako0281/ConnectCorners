@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import Peer, { DataConnection } from 'peerjs';
+import type Peer from 'peerjs';
+import type { DataConnection } from 'peerjs';
 import { v4 as uuidv4 } from 'uuid';
 import { PlayerColor, Coordinate } from '../game/types';
 
@@ -19,36 +20,41 @@ export const usePeer = () => {
     const onDataRef = useRef<((data: NetworkMessage, conn: DataConnection) => void) | null>(null);
     const onConnectRef = useRef<((conn: DataConnection) => void) | null>(null);
 
-    const initializePeer = useCallback(() => {
+    const initializePeer = useCallback(async () => {
         if (peerRef.current) return;
 
-        const id = uuidv4().substring(0, 6).toUpperCase(); // Short ID for easier sharing
-        const peer = new Peer(id);
+        try {
+            const { default: Peer } = await import('peerjs');
+            const id = uuidv4().substring(0, 6).toUpperCase(); // Short ID for easier sharing
+            const peer = new Peer(id);
 
-        peer.on('open', (id) => {
-            console.log('My peer ID is: ' + id);
-            setPeerId(id);
-        });
-
-        peer.on('connection', (conn) => {
-            console.log('Incoming connection:', conn.peer);
-
-            conn.on('open', () => {
-                setConnections(prev => [...prev, conn]);
-                onConnectRef.current?.(conn);
+            peer.on('open', (id) => {
+                console.log('My peer ID is: ' + id);
+                setPeerId(id);
             });
 
-            conn.on('data', (data) => {
-                console.log('Received data:', data);
-                onDataRef.current?.(data as NetworkMessage, conn);
+            peer.on('connection', (conn) => {
+                console.log('Incoming connection:', conn.peer);
+
+                conn.on('open', () => {
+                    setConnections(prev => [...prev, conn]);
+                    onConnectRef.current?.(conn);
+                });
+
+                conn.on('data', (data) => {
+                    console.log('Received data:', data);
+                    onDataRef.current?.(data as NetworkMessage, conn);
+                });
+
+                conn.on('close', () => {
+                    setConnections(prev => prev.filter(c => c.peer !== conn.peer));
+                });
             });
 
-            conn.on('close', () => {
-                setConnections(prev => prev.filter(c => c.peer !== conn.peer));
-            });
-        });
-
-        peerRef.current = peer;
+            peerRef.current = peer;
+        } catch (error) {
+            console.error('Failed to load PeerJS:', error);
+        }
     }, []);
 
     const hostGame = useCallback(() => {
@@ -56,29 +62,32 @@ export const usePeer = () => {
         initializePeer();
     }, [initializePeer]);
 
-    const joinGame = useCallback((hostId: string) => {
+    const joinGame = useCallback(async (hostId: string) => {
         setIsHost(false);
         if (!peerRef.current) {
-            // If joining, we can let PeerJS generate a random ID or use a persistent one
-            // For simplicity, let's generate one.
-            const id = uuidv4();
-            const peer = new Peer(id);
+            try {
+                const { default: Peer } = await import('peerjs');
+                const id = uuidv4();
+                const peer = new Peer(id);
 
-            peer.on('open', (myId) => {
-                setPeerId(myId);
-                const conn = peer.connect(hostId);
+                peer.on('open', (myId) => {
+                    setPeerId(myId);
+                    const conn = peer.connect(hostId);
 
-                conn.on('open', () => {
-                    setConnections([conn]);
-                    onConnectRef.current?.(conn);
+                    conn.on('open', () => {
+                        setConnections([conn]);
+                        onConnectRef.current?.(conn);
+                    });
+
+                    conn.on('data', (data) => {
+                        onDataRef.current?.(data as NetworkMessage, conn);
+                    });
+
+                    peerRef.current = peer;
                 });
-
-                conn.on('data', (data) => {
-                    onDataRef.current?.(data as NetworkMessage, conn);
-                });
-
-                peerRef.current = peer;
-            });
+            } catch (error) {
+                console.error('Failed to load PeerJS:', error);
+            }
         }
     }, []);
 
