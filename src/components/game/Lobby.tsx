@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, Copy, Gamepad2, Check, HelpCircle, Volume2, VolumeX, CheckCircle2, Trophy } from 'lucide-react';
+import { Users, Copy, Gamepad2, Check, HelpCircle, CheckCircle2, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSoundContext } from '@/contexts/SoundContext';
 import { ALL_COLORS } from '@/lib/game/constants';
@@ -12,6 +12,19 @@ import { PieceView } from './Piece';
 import { HowToPlayModal } from './HowToPlayModal';
 import { AchievementModal } from './AchievementModal';
 import { VolumeControl } from './VolumeControl';
+import { getStats, ACHIEVEMENTS } from '@/lib/achievements';
+import { Lock } from 'lucide-react';
+
+const UNLOCK_CONDITIONS: Record<PlayerColor, string | null> = {
+    BLUE: null,
+    RED: null,
+    GREEN: null,
+    YELLOW: null,
+    LIGHTBLUE: 'first_win',
+    PINK: 'perfect_game',
+    ORANGE: 'veteran',
+    PURPLE: 'win_streak_5',
+};
 
 interface LobbyProps {
     peerId: string;
@@ -40,7 +53,13 @@ export const Lobby: React.FC<LobbyProps> = ({
     const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
     const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
     const [selectedColor, setSelectedColor] = useState<PlayerColor>('BLUE');
+    const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>([]);
     const { playClick, playOpen, playLobbyBgm, stopLobbyBgm } = useSoundContext();
+
+    React.useEffect(() => {
+        const stats = getStats();
+        setUnlockedAchievements(stats.unlockedAchievements);
+    }, []);
 
     React.useEffect(() => {
         setMounted(true);
@@ -189,31 +208,52 @@ export const Lobby: React.FC<LobbyProps> = ({
 
                                     {/* Character Grid */}
                                     <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-                                        {ALL_COLORS.map((color) => (
-                                            <button
-                                                key={color}
-                                                onClick={() => { playClick(); setSelectedColor(color); }}
-                                                className={`
-                                                    relative group aspect-square rounded-xl overflow-hidden transition-all duration-300
-                                                    ${selectedColor === color ? 'ring-2 ring-white ring-offset-2 ring-offset-black/50 scale-105 z-10' : 'hover:scale-105 opacity-60 hover:opacity-100'}
-                                                `}
-                                                style={{
-                                                    boxShadow: selectedColor === color ? `0 0 15px var(--color-${color.toLowerCase()}-500, ${color.toLowerCase()})` : 'none'
-                                                }}
-                                            >
-                                                <div className={`absolute inset-0 opacity-20 bg-${color.toLowerCase()}-500 mix-blend-overlay`} />
-                                                <img
-                                                    src={CHARACTERS[color].imagePath}
-                                                    alt={CHARACTERS[color].name}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                                {selectedColor === color && (
-                                                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                                                        <CheckCircle2 className="w-5 h-5 text-white drop-shadow-md" />
-                                                    </div>
-                                                )}
-                                            </button>
-                                        ))}
+                                        {ALL_COLORS.map((color) => {
+                                            const unlockCondition = UNLOCK_CONDITIONS[color];
+                                            const isLocked = !!(unlockCondition && !unlockedAchievements.includes(unlockCondition));
+                                            const achievement = isLocked && unlockCondition ? ACHIEVEMENTS.find(a => a.id === unlockCondition) : null;
+
+                                            return (
+                                                <button
+                                                    key={color}
+                                                    onClick={() => {
+                                                        if (!isLocked) {
+                                                            playClick();
+                                                            setSelectedColor(color);
+                                                        } else {
+                                                            // Optional: Play error sound or show tooltip
+                                                        }
+                                                    }}
+                                                    disabled={isLocked}
+                                                    className={`
+                                                        relative group aspect-square rounded-xl overflow-hidden transition-all duration-300
+                                                        ${selectedColor === color ? 'ring-2 ring-white ring-offset-2 ring-offset-black/50 scale-105 z-10' : ''}
+                                                        ${isLocked ? 'opacity-50 grayscale cursor-not-allowed' : 'hover:scale-105 opacity-80 hover:opacity-100'}
+                                                    `}
+                                                    style={{
+                                                        boxShadow: selectedColor === color ? `0 0 15px var(--color-${color.toLowerCase()}-500, ${color.toLowerCase()})` : 'none'
+                                                    }}
+                                                    title={isLocked ? `Unlock: ${achievement?.title || 'Unknown'}` : CHARACTERS[color].japaneseName}
+                                                >
+                                                    <div className={`absolute inset-0 opacity-20 bg-${color.toLowerCase()}-500 mix-blend-overlay`} />
+                                                    <img
+                                                        src={CHARACTERS[color].imagePath}
+                                                        alt={CHARACTERS[color].name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    {selectedColor === color && (
+                                                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                                                            <CheckCircle2 className="w-5 h-5 text-white drop-shadow-md" />
+                                                        </div>
+                                                    )}
+                                                    {isLocked && (
+                                                        <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white p-1">
+                                                            <Lock className="w-4 h-4 mb-1" />
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
 

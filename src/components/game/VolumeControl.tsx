@@ -13,6 +13,11 @@ interface VolumeControlProps {
 export const VolumeControl: React.FC<VolumeControlProps> = ({ className }) => {
     const { bgmVolume, seVolume, setBgmVolume, setSeVolume, playClick } = useSoundContext();
     const [isOpen, setIsOpen] = React.useState(false);
+    const [mounted, setMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const handleOpenChange = (open: boolean) => {
         setIsOpen(open);
@@ -20,7 +25,10 @@ export const VolumeControl: React.FC<VolumeControlProps> = ({ className }) => {
     };
 
     // Determine icon based on max volume
-    const maxVol = Math.max(bgmVolume, seVolume);
+    // Use server defaults (BGM 0.3, SE 0.5) if not mounted to prevent hydration mismatch
+    const currentBgm = mounted ? bgmVolume : 0.3;
+    const currentSe = mounted ? seVolume : 0.5;
+    const maxVol = Math.max(currentBgm, currentSe);
     const Icon = maxVol === 0 ? VolumeX : maxVol < 0.5 ? Volume1 : Volume2;
 
     return (

@@ -13,7 +13,8 @@ import {
     Piece,
     Coordinate,
     Player,
-    BoardState
+    BoardState,
+    Move
 } from '@/lib/game/types';
 import {
     createInitialBoard,
@@ -37,7 +38,16 @@ import { PlayerList } from './PlayerList';
 import { SelectedPiecePanel } from './SelectedPiecePanel';
 import { useSoundContext } from '@/contexts/SoundContext';
 import { VolumeControl } from './VolumeControl';
-import { updateStats, Achievement } from '@/lib/achievements';
+import { getStats, updateStats, Achievement } from '@/lib/achievements';
+
+const createPlayer = (id: string, color: PlayerColor, isHuman: boolean): Player => ({
+    id,
+    color,
+    pieces: getInitialPieces(color),
+    isHuman,
+    hasPassed: false,
+    bonusScore: 0
+});
 
 export const Game: React.FC = () => {
     // Sound Context
@@ -57,6 +67,7 @@ export const Game: React.FC = () => {
     const [gameStatus, setGameStatus] = useState<'lobby' | 'playing' | 'finished'>('lobby');
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
     const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
+    const [gameHistory, setGameHistory] = useState<Move[]>([]);
 
     // Interaction State
     const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
@@ -87,33 +98,53 @@ export const Game: React.FC = () => {
     }, [gameStatus, playGameBgm, stopGameBgm]);
 
     // Initialize Single Player Game
-    const initSinglePlayer = (selectedColor: PlayerColor) => {
+    const initSinglePlayer = (playerColor: PlayerColor) => {
         playClick();
 
-        // Create player list: Human (selected) + 3 AI (random/remaining)
-        const aiColors = ALL_COLORS.filter(c => c !== selectedColor)
-            .sort(() => Math.random() - 0.5)
-            .slice(0, 3);
+        // Get unlocked characters for CPU selection
+        const stats = getStats();
+        const unlockedAchievements = stats.unlockedAchievements;
 
-        const gameColors = [selectedColor, ...aiColors];
+        // Define unlock conditions (duplicated from Lobby, ideally shared)
+        const UNLOCK_CONDITIONS: Record<PlayerColor, string | null> = {
+            BLUE: null,
+            RED: null,
+            GREEN: null,
+            YELLOW: null,
+            LIGHTBLUE: 'first_win',
+            PINK: 'perfect_game',
+            ORANGE: 'veteran',
+            PURPLE: 'win_streak_5',
+        };
 
-        const initialPlayers: Player[] = gameColors.map((color, index) => ({
-            id: color,
-            color: color as PlayerColor,
-            pieces: getInitialPieces(color as PlayerColor),
-            isHuman: index === 0,
-            hasPassed: false,
-            bonusScore: 0
-        }));
-        setBoard(createInitialBoard());
-        setPlayers(initialPlayers);
+        // Filter available colors for CPU
+        const availableColors = ALL_COLORS.filter(c => {
+            if (c === playerColor) return false;
+            const condition = UNLOCK_CONDITIONS[c];
+            return !condition || unlockedAchievements.includes(condition);
+        });
+
+        // Select 3 random opponents from available colors
+        const opponents: PlayerColor[] = [];
+        const shuffled = [...availableColors].sort(() => 0.5 - Math.random());
+        opponents.push(...shuffled.slice(0, 3));
+
+        const newPlayers: Player[] = [
+            createPlayer('p1', playerColor, true),
+            createPlayer('cpu1', opponents[0], false),
+            createPlayer('cpu2', opponents[1], false),
+            createPlayer('cpu3', opponents[2], false),
+        ];
+
+        setPlayers(newPlayers);
         setCurrentPlayerIndex(0);
         setGameStatus('playing');
         setIsMultiplayer(false);
-        setMyPlayerColor(selectedColor);
+        setMyPlayerColor(playerColor);
+        setTurnNumber(1);
+        setGameHistory([]);
         playTurnStart();
     };
-
 
     // Initialize Multiplayer Game (Host)
     const startMultiplayerGame = () => {
