@@ -41,12 +41,12 @@ import { updateStats, Achievement } from '@/lib/achievements';
 
 export const Game: React.FC = () => {
     // Sound Context
-    const { playClick, playTurnStart, playPlace, playError } = useSoundContext();
+    const { playClick, playTurnStart, playPlace, playError, playGameBgm, stopGameBgm } = useSoundContext();
 
     // P2P State
-    const { peerId, isHost, hostGame, joinGame, sendData, setOnData, setOnConnect } = usePeer();
+    const { peerId, isHost, hostGame, joinGame, sendData, setOnData, setOnConnect, disconnect, connections } = usePeer();
     const [isMultiplayer, setIsMultiplayer] = useState(false);
-    const [connectedPlayerIds, setConnectedPlayerIds] = useState<string[]>([]);
+    const [connectedPlayers, setConnectedPlayers] = useState<{ id: string, color: PlayerColor, name: string }[]>([]);
     const [myPlayerColor, setMyPlayerColor] = useState<PlayerColor>('BLUE'); // Default for single player
 
     // Game State
@@ -73,6 +73,18 @@ export const Game: React.FC = () => {
         hasBonus: boolean;
     }
     const [scorePopups, setScorePopups] = useState<ScorePopupData[]>([]);
+
+    // BGM Control
+    useEffect(() => {
+        if (gameStatus === 'playing') {
+            playGameBgm();
+        } else {
+            stopGameBgm();
+        }
+        return () => {
+            stopGameBgm();
+        };
+    }, [gameStatus, playGameBgm, stopGameBgm]);
 
     // Initialize Single Player Game
     const initSinglePlayer = (selectedColor: PlayerColor) => {
@@ -110,33 +122,60 @@ export const Game: React.FC = () => {
 
         const hostColor = myPlayerColor;
 
-        // Pick 3 other colors
-        const otherColors = ALL_COLORS.filter(c => c !== hostColor).slice(0, 3);
-        const gameColors = [hostColor, ...otherColors];
+        // Map connected players to game players
+        const gamePlayers: Player[] = [];
 
-        const initialPlayers: Player[] = gameColors.map((color, index) => (
-            {
-                id: index === 0 ? peerId : `AI-${color}`,
-                color: color as PlayerColor,
-                pieces: getInitialPieces(color as PlayerColor),
-                isHuman: index === 0, // Only host is human for now (multiplayer needs full implementation)
+        // 1. Host
+        gamePlayers.push({
+            id: peerId,
+            color: hostColor,
+            pieces: getInitialPieces(hostColor),
+            isHuman: true,
+            hasPassed: false,
+            bonusScore: 0
+        });
+
+        // 2. Guests (from connectedPlayers)
+        const guests = connectedPlayers.filter(p => p.id !== peerId);
+
+        guests.forEach(guest => {
+            gamePlayers.push({
+                id: guest.id,
+                color: guest.color,
+                pieces: getInitialPieces(guest.color),
+                isHuman: true,
                 hasPassed: false,
                 bonusScore: 0
-            }
-        ));
+            });
+        });
 
-        setPlayers(initialPlayers);
+        // 3. Fill remaining slots with AI if needed
+        const usedColors = gamePlayers.map(p => p.color);
+        const remainingColors = ALL_COLORS.filter(c => !usedColors.includes(c));
+
+        remainingColors.forEach(color => {
+            gamePlayers.push({
+                id: `AI-${color}`,
+                color: color,
+                pieces: getInitialPieces(color),
+                isHuman: false,
+                hasPassed: false,
+                bonusScore: 0
+            });
+        });
+
+        setPlayers(gamePlayers);
         setGameStatus('playing');
 
         // Broadcast Start
         const gameState = {
             board: createInitialBoard(),
-            players: initialPlayers,
+            players: gamePlayers,
             turnIndex: 0
         };
 
         sendData({ type: 'START_GAME', payload: {} });
-        broadcastUpdate(gameState.board, initialPlayers, 0);
+        broadcastUpdate(gameState.board, gamePlayers, 0);
     };
 
     // Broadcast Update (Host only)
@@ -151,16 +190,69 @@ export const Game: React.FC = () => {
         });
     };
 
+    const nextTurnIndex = (currentPlayers: Player[], currentIndex: number) => {
+        let nextIndex = (currentIndex + 1) % 4;
+        let attempts = 0;
+        while (currentPlayers[nextIndex].hasPassed && attempts < 4) {
+            nextIndex = (nextIndex + 1) % 4;
+            attempts++;
+        }
+        if (attempts === 4) {
+            handleGameEnd(currentPlayers);
+        }
+        return nextIndex;
+    };
+
+    const handleGameEnd = (finalPlayers: Player[]) => {
+        setGameStatus('finished');
+
+        // Calculate winner and stats
+        const playersWithScores = finalPlayers.map(p => {
+            const remainingSquares = p.pieces.reduce((acc, piece) => acc + piece.value, 0);
+            const score = 89 - remainingSquares + (p.pieces.length === 0 ? 15 : 0) + (p.bonusScore || 0);
+            const isPerfect = p.pieces.length === 0;
+            return { ...p, score, isPerfect };
+        }).sort((a, b) => b.score - a.score);
+
+        const winner = playersWithScores[0];
+
+        const myPlayer = playersWithScores.find(p => p.color === myPlayerColor);
+
+        if (myPlayer) {
+            const isWin = winner.color === myPlayerColor;
+            const isPerfect = myPlayer.isPerfect;
+
+            const { newAchievements } = updateStats({
+                isWin,
+                isPerfect,
+                isMultiplayer
+            });
+
+            if (newAchievements.length > 0) {
+                setNewAchievements(newAchievements);
+            }
+        }
+
+        setIsResultModalOpen(true);
+    };
+
     // Handle Incoming Data
     useEffect(() => {
         setOnConnect((conn) => {
-            setConnectedPlayerIds(prev => [...prev, conn.peer]);
+            setConnectedPlayers(prev => {
+                if (prev.some(p => p.id === conn.peer)) return prev;
+                return [...prev, { id: conn.peer, color: 'BLUE', name: `Guest-${conn.peer.substring(0, 4)}` }];
+            });
         });
 
         setOnData((data, conn) => {
             if (data.type === 'START_GAME') {
                 setGameStatus('playing');
                 setIsMultiplayer(true);
+            }
+            else if (data.type === 'JOIN') {
+                const { name, color } = data.payload;
+                setConnectedPlayers(prev => prev.map(p => p.id === conn.peer ? { ...p, name, color } : p));
             }
             else if (data.type === 'UPDATE') {
                 // Guest receiving update
@@ -213,57 +305,24 @@ export const Game: React.FC = () => {
                 }
             }
         });
-    }, [isHost, players, board, currentPlayerIndex, peerId]);
+    }, [isHost, players, board, currentPlayerIndex, peerId, setOnConnect, setOnData, sendData]);
 
-    const nextTurnIndex = (currentPlayers: Player[], currentIndex: number) => {
-        let nextIndex = (currentIndex + 1) % 4;
-        let attempts = 0;
-        while (currentPlayers[nextIndex].hasPassed && attempts < 4) {
-            nextIndex = (nextIndex + 1) % 4;
-            attempts++;
-        }
-        if (attempts === 4) {
-            handleGameEnd(currentPlayers);
-        }
-        return nextIndex;
-    };
+    // Guest: Send JOIN message when connected
+    const [hasSentJoin, setHasSentJoin] = useState(false);
 
-    const handleGameEnd = (finalPlayers: Player[]) => {
-        setGameStatus('finished');
-
-        // Calculate winner and stats
-        const playersWithScores = finalPlayers.map(p => {
-            const remainingSquares = p.pieces.reduce((acc, piece) => acc + piece.value, 0);
-            const score = 89 - remainingSquares + (p.pieces.length === 0 ? 15 : 0) + (p.bonusScore || 0);
-            const isPerfect = p.pieces.length === 0;
-            return { ...p, score, isPerfect };
-        }).sort((a, b) => b.score - a.score);
-
-        const winner = playersWithScores[0];
-
-        // Update stats only if I played (or hosted single player)
-        // In single player, myPlayerColor is set. In multiplayer, we check if we participated.
-        // The simple check is: did I win? did I get a perfect game?
-
-        const myPlayer = playersWithScores.find(p => p.color === myPlayerColor);
-
-        if (myPlayer) {
-            const isWin = winner.color === myPlayerColor;
-            const isPerfect = myPlayer.isPerfect;
-
-            const { newAchievements } = updateStats({
-                isWin,
-                isPerfect,
-                isMultiplayer
+    useEffect(() => {
+        if (!isHost && gameStatus === 'lobby' && peerId && !hasSentJoin && connections.length > 0) {
+            console.log("Sending JOIN message to host");
+            sendData({
+                type: 'JOIN',
+                payload: {
+                    name: `Guest-${peerId.substring(0, 4)}`,
+                    color: myPlayerColor
+                }
             });
-
-            if (newAchievements.length > 0) {
-                setNewAchievements(newAchievements);
-            }
+            setHasSentJoin(true);
         }
-
-        setIsResultModalOpen(true);
-    };
+    }, [isHost, gameStatus, peerId, hasSentJoin, connections, myPlayerColor, sendData]);
 
     const currentPlayer = players[currentPlayerIndex];
     const selectedPiece = currentPlayer?.pieces.find(p => p.id === selectedPieceId);
@@ -285,6 +344,7 @@ export const Game: React.FC = () => {
 
                 if (move) {
                     // Apply AI move locally then broadcast if host
+                    playPlace();
                     const newBoard = placePiece(board, move.shape, move.position, currentPlayer.color);
                     const newPlayers = [...players];
                     newPlayers[currentPlayerIndex] = {
@@ -316,7 +376,7 @@ export const Game: React.FC = () => {
             }, 500);
             return () => clearTimeout(timer);
         }
-    }, [currentPlayerIndex, gameStatus, board, players, isHost, isMultiplayer]);
+    }, [currentPlayerIndex, gameStatus, board, players, isHost, isMultiplayer, currentPlayer]);
 
     // Auto-pass for human players with no valid moves
     useEffect(() => {
@@ -349,10 +409,12 @@ export const Game: React.FC = () => {
                     position
                 }
             });
+            playPlace();
             // Optimistic update? No, wait for update.
             setSelectedPieceId(null);
         } else {
             // Host or Single Player: Apply locally
+            playPlace();
             const newBoard = placePiece(board, shape, position, currentPlayer.color);
             const bonusPoints = calculateBonusPoints(shape, position);
             const totalScore = piece.value + bonusPoints;
@@ -447,14 +509,26 @@ export const Game: React.FC = () => {
         }
     };
 
-    const handleReset = () => {
-        playClick();
+    const resetGameState = () => {
         setGameStatus('lobby');
         setBoard(createInitialBoard());
         setPlayers([]);
         setIsMultiplayer(false);
         setIsResultModalOpen(false);
         setNewAchievements([]);
+    };
+
+    const handleReset = () => {
+        playClick();
+        resetGameState();
+    };
+
+    const handleBack = () => {
+        playClick();
+        disconnect(); // Disconnect from PeerJS
+        resetGameState();
+        setConnectedPlayers([]);
+        setHasSentJoin(false);
     };
 
     const handleRestart = () => {
@@ -496,21 +570,27 @@ export const Game: React.FC = () => {
 
     if (gameStatus === 'lobby') {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-                <Lobby
-                    peerId={peerId}
-                    isHost={isHost}
-                    connectedPlayers={connectedPlayerIds}
-                    onHost={(color) => { playClick(); setMyPlayerColor(color); hostGame(); }}
-                    onJoin={(id, color) => { playClick(); setMyPlayerColor(color); joinGame(id); }}
-                    onStart={startMultiplayerGame}
-                    onSinglePlayer={initSinglePlayer}
-                />
-            </div>
+            <Lobby
+                peerId={peerId}
+                isHost={isHost}
+                connectedPlayers={connectedPlayers}
+                onHost={(color) => {
+                    setMyPlayerColor(color);
+                    hostGame();
+                }}
+                onJoin={(hostId, color) => {
+                    setMyPlayerColor(color);
+                    joinGame(hostId);
+                }}
+                onStart={startMultiplayerGame}
+                onSinglePlayer={(color) => {
+                    setMyPlayerColor(color);
+                    initSinglePlayer(color);
+                }}
+                onBack={handleBack}
+            />
         );
     }
-
-    if (!currentPlayer) return <div className="flex items-center justify-center h-screen text-white">Loading...</div>;
 
     return (
         <div className="flex flex-col lg:flex-row gap-8 items-start justify-center p-8 h-screen w-full overflow-hidden relative">
@@ -612,6 +692,7 @@ export const Game: React.FC = () => {
                 players={players}
                 newAchievements={newAchievements}
                 onPlayAgain={handleRestart}
+                onBackToTitle={handleBack}
                 onClose={() => setIsResultModalOpen(false)}
             />
 

@@ -1,13 +1,13 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Peer, { DataConnection } from 'peerjs';
 import { v4 as uuidv4 } from 'uuid';
+import { PlayerColor, Coordinate } from '../game/types';
 
 export type NetworkMessage =
-    | { type: 'JOIN', payload: { name: string } }
-    | { type: 'WELCOME', payload: { gameState: any, players: any[] } }
-    | { type: 'MOVE', payload: { pieceId: string, shape: number[][], position: { x: number, y: number } } }
+    | { type: 'START_GAME', payload: {} }
     | { type: 'UPDATE', payload: { gameState: any, players: any[], turnIndex: number } }
-    | { type: 'START_GAME', payload: {} };
+    | { type: 'MOVE', payload: { pieceId: string, shape: number[][], position: Coordinate } }
+    | { type: 'JOIN', payload: { name: string, color: PlayerColor } };
 
 export const usePeer = () => {
     const [peerId, setPeerId] = useState<string>('');
@@ -79,16 +79,6 @@ export const usePeer = () => {
 
                 peerRef.current = peer;
             });
-        } else {
-            // Already initialized (maybe failed previous join)
-            const conn = peerRef.current.connect(hostId);
-            conn.on('open', () => {
-                setConnections([conn]);
-                onConnectRef.current?.(conn);
-            });
-            conn.on('data', (data) => {
-                onDataRef.current?.(data as NetworkMessage, conn);
-            });
         }
     }, []);
 
@@ -108,6 +98,16 @@ export const usePeer = () => {
         onConnectRef.current = fn;
     }, []);
 
+    const disconnect = useCallback(() => {
+        if (peerRef.current) {
+            peerRef.current.destroy();
+            peerRef.current = null;
+        }
+        setPeerId('');
+        setConnections([]);
+        setIsHost(false);
+    }, []);
+
     return {
         peerId,
         isHost,
@@ -116,6 +116,7 @@ export const usePeer = () => {
         joinGame,
         sendData,
         setOnData,
-        setOnConnect
+        setOnConnect,
+        disconnect
     };
 };

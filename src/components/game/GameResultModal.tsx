@@ -13,6 +13,7 @@ interface GameResultModalProps {
     players: Player[];
     newAchievements?: Achievement[];
     onPlayAgain: () => void;
+    onBackToTitle: () => void;
     onClose: () => void;
 }
 
@@ -21,6 +22,7 @@ export const GameResultModal: React.FC<GameResultModalProps> = ({
     players,
     newAchievements = [],
     onPlayAgain,
+    onBackToTitle,
     onClose
 }) => {
     // Calculate scores and determine if anyone achieved perfect game
@@ -165,8 +167,8 @@ export const GameResultModal: React.FC<GameResultModalProps> = ({
                             </motion.div>
                         </div>
 
-                         {/* New Achievements */}
-                         {newAchievements.length > 0 && (
+                        {/* New Achievements */}
+                        {newAchievements.length > 0 && (
                             <div className="bg-yellow-50 p-4 border-b border-yellow-100">
                                 <h3 className="text-sm font-bold text-yellow-800 uppercase tracking-wider mb-2 flex items-center gap-2">
                                     <Sparkles className="w-4 h-4" /> Unlocked Achievements!
@@ -248,6 +250,13 @@ export const GameResultModal: React.FC<GameResultModalProps> = ({
                                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-6 text-lg shadow-lg transition-all hover:scale-[1.02]"
                                 >
                                     Play Again
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={onBackToTitle}
+                                    className="w-full mt-3 border-slate-300 text-slate-600 hover:bg-slate-100 font-semibold py-6"
+                                >
+                                    Back to Title
                                 </Button>
                             </motion.div>
                         </div>

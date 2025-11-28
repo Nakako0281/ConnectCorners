@@ -21,8 +21,6 @@ interface SoundContextType {
     stopLobbyBgm: () => void;
     playGameBgm: () => void;
     stopGameBgm: () => void;
-    isMuted: boolean; // Deprecated
-    toggleMute: () => void; // Deprecated
 }
 
 const SoundContext = createContext<SoundContextType | undefined>(undefined);
@@ -54,13 +52,6 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return 0.5;
     });
 
-    const [isMuted, setIsMuted] = useState(false);
-
-    // Sync isMuted state for backward compatibility UI if ever needed
-    useEffect(() => {
-        setIsMuted(bgmVolume === 0 && seVolume === 0);
-    }, [bgmVolume, seVolume]);
-
     const setBgmVolume = (vol: number) => {
         setBgmVolumeState(vol);
         localStorage.setItem('blocks-bgm-volume', vol.toString());
@@ -69,17 +60,6 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const setSeVolume = (vol: number) => {
         setSeVolumeState(vol);
         localStorage.setItem('blocks-se-volume', vol.toString());
-    };
-
-    // Legacy toggle mute
-    const toggleMute = () => {
-        if (bgmVolume > 0 || seVolume > 0) {
-            setBgmVolume(0);
-            setSeVolume(0);
-        } else {
-            setBgmVolume(0.3);
-            setSeVolume(0.5);
-        }
     };
 
     // SE Sounds
@@ -121,8 +101,6 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             seVolume,
             setBgmVolume,
             setSeVolume,
-            isMuted,
-            toggleMute,
             playClick,
             playHover,
             playOpen,

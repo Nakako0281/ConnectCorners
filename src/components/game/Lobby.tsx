@@ -16,11 +16,12 @@ import { VolumeControl } from './VolumeControl';
 interface LobbyProps {
     peerId: string;
     isHost: boolean;
-    connectedPlayers: string[]; // List of connected peer IDs or names
+    connectedPlayers: { id: string, color: PlayerColor, name: string }[];
     onHost: (color: PlayerColor) => void;
     onJoin: (hostId: string, color: PlayerColor) => void;
     onStart: () => void;
     onSinglePlayer: (color: PlayerColor) => void;
+    onBack: () => void;
 }
 
 export const Lobby: React.FC<LobbyProps> = ({
@@ -30,7 +31,8 @@ export const Lobby: React.FC<LobbyProps> = ({
     onHost,
     onJoin,
     onStart,
-    onSinglePlayer
+    onSinglePlayer,
+    onBack
 }) => {
     const [joinId, setJoinId] = useState('');
     const [copied, setCopied] = useState(false);
@@ -75,6 +77,11 @@ export const Lobby: React.FC<LobbyProps> = ({
         onStart();
     };
 
+    const handleBack = () => {
+        playClick();
+        onBack();
+    };
+
     const handleOpenHowToPlay = () => {
         playOpen();
         setIsHowToPlayOpen(true);
@@ -96,7 +103,6 @@ export const Lobby: React.FC<LobbyProps> = ({
                 </div>
             )}
 
-            {/* Top Right Controls */}
             {/* Top Right Controls - Styled Toolbar */}
             <div className="absolute top-4 right-4 z-50">
                 <div className="flex items-center gap-1 p-1.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-full shadow-xl">
@@ -144,7 +150,7 @@ export const Lobby: React.FC<LobbyProps> = ({
             >
                 <Card className="glass-panel border-0 bg-black/40 text-slate-100">
                     <CardContent className="flex flex-col gap-6 p-8">
-                        {!isHost && !connectedPlayers.length ? (
+                        {!isHost && !connectedPlayers.length && !joinId ? (
                             <>
                                 {/* Character Selection */}
                                 <div className="space-y-4">
@@ -260,7 +266,7 @@ export const Lobby: React.FC<LobbyProps> = ({
                                 <div className="text-center space-y-2">
                                     <h3 className="text-xl font-bold text-slate-200">Lobby</h3>
                                     <div className="flex items-center justify-center gap-2 bg-slate-900/50 p-3 rounded-lg border border-slate-700/50">
-                                        <code className="text-blue-400 font-mono text-lg tracking-wider">{peerId}</code>
+                                        <code className="text-blue-400 font-mono text-lg tracking-wider">{peerId || joinId}</code>
                                         <Button
                                             size="icon"
                                             variant="ghost"
@@ -279,14 +285,18 @@ export const Lobby: React.FC<LobbyProps> = ({
                                         <span>{connectedPlayers.length + 1}/4</span>
                                     </div>
                                     <div className="space-y-2">
+                                        {/* Host (Me if hosting, or Host if joining) */}
                                         <div className="flex items-center gap-3 p-3 bg-slate-800/40 rounded-lg border border-slate-700/30">
-                                            <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-                                            <span className="font-medium text-slate-200">You (Host)</span>
+                                            <div className={`w-3 h-3 rounded-full bg-${isHost ? selectedColor.toLowerCase() : 'slate'}-500 shadow-[0_0_10px_currentColor]`} style={{ color: isHost ? `var(--color-${selectedColor.toLowerCase()}-500)` : undefined }} />
+                                            <span className="font-medium text-slate-200">{isHost ? "You (Host)" : "Host"}</span>
+                                            {isHost && <span className="text-xs text-slate-500 ml-auto">{CHARACTERS[selectedColor].japaneseName}</span>}
                                         </div>
-                                        {connectedPlayers.map((pid, idx) => (
-                                            <div key={pid} className="flex items-center gap-3 p-3 bg-slate-800/40 rounded-lg border border-slate-700/30">
-                                                <div className="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
-                                                <span className="font-medium text-slate-200">Player {idx + 2}</span>
+
+                                        {connectedPlayers.map((p, idx) => (
+                                            <div key={p.id} className="flex items-center gap-3 p-3 bg-slate-800/40 rounded-lg border border-slate-700/30">
+                                                <div className={`w-3 h-3 rounded-full bg-${p.color.toLowerCase()}-500 shadow-[0_0_10px_currentColor]`} style={{ color: `var(--color-${p.color.toLowerCase()}-500)` }} />
+                                                <span className="font-medium text-slate-200">{p.name || `Player ${idx + 2}`}</span>
+                                                <span className="text-xs text-slate-500 ml-auto">{CHARACTERS[p.color].japaneseName}</span>
                                             </div>
                                         ))}
                                         {[...Array(3 - connectedPlayers.length)].map((_, i) => (
@@ -298,15 +308,24 @@ export const Lobby: React.FC<LobbyProps> = ({
                                     </div>
                                 </div>
 
-                                {isHost && (
+                                <div className="flex flex-col gap-2 w-full">
+                                    {isHost && (
+                                        <Button
+                                            size="lg"
+                                            onClick={handleStart}
+                                            className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-500 shadow-lg shadow-green-900/20"
+                                        >
+                                            Start Game
+                                        </Button>
+                                    )}
                                     <Button
-                                        size="lg"
-                                        onClick={handleStart}
-                                        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-500 shadow-lg shadow-green-900/20 mt-2"
+                                        variant="outline"
+                                        onClick={handleBack}
+                                        className="w-full border-slate-700 hover:bg-slate-800 text-slate-400"
                                     >
-                                        Start Game
+                                        Back
                                     </Button>
-                                )}
+                                </div>
                             </div>
                         )}
                     </CardContent>

@@ -10,11 +10,11 @@ interface PlayerListProps {
 
 const COLOR_MAP: Record<PlayerColor, string> = {
     BLUE: 'bg-blue-500',
-    YELLOW: 'bg-yellow-400',
+    YELLOW: 'bg-yellow-500',
     RED: 'bg-red-500',
     GREEN: 'bg-green-500',
-    LIGHTBLUE: 'bg-sky-400',
-    PINK: 'bg-pink-400',
+    LIGHTBLUE: 'bg-sky-500',
+    PINK: 'bg-pink-500',
     ORANGE: 'bg-orange-500',
     PURPLE: 'bg-purple-500',
 };

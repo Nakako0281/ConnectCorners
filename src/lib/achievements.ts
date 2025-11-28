@@ -11,9 +11,8 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'win_streak_3', title: '連勝3回', description: '3回連続で勝利を果たす', icon: '🔥' },
   { id: 'win_streak_5', title: '連勝5回', description: '5回連続で勝利を果たす', icon: '🚀' },
   { id: 'perfect_game', title: 'パーフェクト', description: '盤面を全て埋める', icon: '💎' },
-  { id: 'veteran', title: 'Veteran', description: '10回プレイ', icon: '🛡️' },
-  { id: 'master', title: 'Master', description: '50回プレイ', icon: '👑' },
-  { id: 'multiplayer_debut', title: 'マルチプレイ', description: 'マルチプレイを果たす', icon: '🌍' },
+  { id: 'veteran', title: 'ベテラン', description: '10回プレイ', icon: '🛡️' },
+  { id: 'master', title: 'マスター', description: '50回プレイ', icon: '👑' },
 ];
 
 export interface PlayerStats {
@@ -22,7 +21,6 @@ export interface PlayerStats {
   currentWinStreak: number;
   maxWinStreak: number;
   perfectGames: number;
-  multiplayerGames: number;
   unlockedAchievements: string[];
 }
 
@@ -32,7 +30,6 @@ const initialStats: PlayerStats = {
   currentWinStreak: 0,
   maxWinStreak: 0,
   perfectGames: 0,
-  multiplayerGames: 0,
   unlockedAchievements: [],
 };
 
@@ -70,9 +67,6 @@ export const updateStats = (result: GameResult): { newStats: PlayerStats, newAch
 
   // Update basic stats
   newStats.gamesPlayed += 1;
-  if (result.isMultiplayer) {
-    newStats.multiplayerGames += 1;
-  }
 
   if (result.isWin) {
     newStats.wins += 1;
@@ -105,7 +99,6 @@ export const updateStats = (result: GameResult): { newStats: PlayerStats, newAch
   check('perfect_game', newStats.perfectGames >= 1);
   check('veteran', newStats.gamesPlayed >= 10);
   check('master', newStats.gamesPlayed >= 50);
-  check('multiplayer_debut', newStats.multiplayerGames >= 1);
 
   saveStats(newStats);
 
