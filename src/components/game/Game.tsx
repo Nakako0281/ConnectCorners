@@ -54,10 +54,11 @@ export const Game: React.FC = () => {
     const { playClick, playTurnStart, playPlace, playError, playGameBgm, stopGameBgm } = useSoundContext();
 
     // P2P State
-    const { peerId, isHost, hostGame, joinGame, sendData, setOnData, setOnConnect, disconnect, connections } = usePeer();
+    const { peerId, isHost, hostGame, joinGame, sendData, setOnData, setOnConnect, setOnDisconnect, disconnect, connections } = usePeer();
     const [isMultiplayer, setIsMultiplayer] = useState(false);
     const [connectedPlayers, setConnectedPlayers] = useState<{ id: string, color: PlayerColor, name: string }[]>([]);
     const [myPlayerColor, setMyPlayerColor] = useState<PlayerColor>('BLUE'); // Default for single player
+    const [isHostDisconnected, setIsHostDisconnected] = useState(false);
 
     // Game State
     const [board, setBoard] = useState(createInitialBoard());
@@ -373,7 +374,103 @@ export const Game: React.FC = () => {
         });
     }, [isHost, players, board, currentPlayerIndex, peerId, setOnConnect, setOnData, sendData]);
 
-    // Guest: Send JOIN message when connected
+    // Handle Disconnection
+    useEffect(() => {
+        setOnDisconnect((conn) => {
+            if (isHost) {
+                // Host handling guest disconnection
+                console.log(`Player ${conn.peer} disconnected`);
+
+                setPlayers(prevPlayers => {
+                    const disconnectedPlayerIndex = prevPlayers.findIndex(p => p.id === conn.peer);
+                    if (disconnectedPlayerIndex === -1) return prevPlayers;
+
+                    const newPlayers = [...prevPlayers];
+                    const disconnectedPlayer = newPlayers[disconnectedPlayerIndex];
+
+                    // Convert to AI
+                    newPlayers[disconnectedPlayerIndex] = {
+                        ...disconnectedPlayer,
+                        id: `AI-${disconnectedPlayer.color}`, // Change ID to AI format
+                        isHuman: false
+                    };
+
+                    // Broadcast the update to remaining players
+                    // We need to use the NEW players list for broadcast
+                    // Note: We can't easily access the latest 'board' or 'currentPlayerIndex' here inside the callback 
+                    // without adding them to dependency array, which might be okay.
+                    // However, setPlayers functional update is safer for state, but we need the value for broadcast.
+                    // Let's use a ref or just rely on the fact that if we update state, we should trigger a broadcast effect?
+                    // Or just use the current state from closure if we add dependencies.
+
+                    return newPlayers;
+                });
+
+                setConnectedPlayers(prev => prev.filter(p => p.id !== conn.peer));
+
+                // We need to broadcast this change. 
+                // Since we are inside a callback, we might not have the absolute latest board/turnIndex if we don't add them to deps.
+                // But we can try to broadcast with current state.
+                // To be safe, let's trigger a broadcast in a separate effect or just use the values we have.
+                // Actually, the simplest way is to force a re-render and let an effect handle it, 
+                // OR just use the values from the closure (adding them to deps).
+            } else {
+                // Guest handling host disconnection
+                console.log("Host disconnected");
+                setIsHostDisconnected(true);
+            }
+        });
+    }, [isHost, setOnDisconnect, setPlayers, setConnectedPlayers, setIsHostDisconnected]);
+
+    // Effect to broadcast player changes when a player disconnects (Host only)
+    // This is a bit tricky because setPlayers is async. 
+    // Let's just do it inside the callback but we need access to 'board' and 'currentPlayerIndex'.
+    // We can add them to the dependency array of the useEffect above.
+    useEffect(() => {
+        setOnDisconnect((conn) => {
+            if (isHost) {
+                console.log(`Player ${conn.peer} disconnected`);
+
+                // 1. Update Connected Players
+                setConnectedPlayers(prev => prev.filter(p => p.id !== conn.peer));
+
+                // 2. Update Game Players (Convert to AI)
+                let newPlayers: Player[] = [];
+                let updated = false;
+
+                setPlayers(currentPlayers => {
+                    const idx = currentPlayers.findIndex(p => p.id === conn.peer);
+                    if (idx === -1) {
+                        newPlayers = currentPlayers;
+                        return currentPlayers;
+                    }
+
+                    updated = true;
+                    newPlayers = [...currentPlayers];
+                    newPlayers[idx] = {
+                        ...newPlayers[idx],
+                        id: `AI-${newPlayers[idx].color}`,
+                        isHuman: false
+                    };
+                    return newPlayers;
+                });
+
+                // 3. Broadcast if updated
+                if (updated) {
+                    // We need to wait for the state update to reflect? 
+                    // Actually, we calculated 'newPlayers' locally, so we can broadcast that.
+                    // We use the current 'board' and 'currentPlayerIndex' from closure.
+                    broadcastUpdate(board, newPlayers, currentPlayerIndex);
+
+                    // Optional: Show a toast or log
+                    // alert(`Player disconnected. Switched to AI.`); // Too intrusive?
+                }
+            } else {
+                console.log("Host disconnected");
+                setIsHostDisconnected(true);
+            }
+        });
+    }, [isHost, board, currentPlayerIndex, broadcastUpdate, setOnDisconnect]);
     const [hasSentJoin, setHasSentJoin] = useState(false);
 
     useEffect(() => {
@@ -785,6 +882,24 @@ export const Game: React.FC = () => {
                     onComplete={() => setScorePopups(prev => prev.filter(p => p.id !== popup.id))}
                 />
             ))}
+
+            {/* Host Disconnected Modal */}
+            {isHostDisconnected && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                    <div className="bg-slate-900 border border-slate-700 p-8 rounded-xl max-w-md w-full text-center shadow-2xl">
+                        <h2 className="text-2xl font-bold text-red-500 mb-4">Connection Lost</h2>
+                        <p className="text-slate-300 mb-8">
+                            The host has disconnected. The game session has ended.
+                        </p>
+                        <Button
+                            onClick={handleBack}
+                            className="w-full bg-slate-700 hover:bg-slate-600 text-white"
+                        >
+                            Return to Lobby
+                        </Button>
+                    </div>
+                </div>
+            )}
 
         </div>
     );

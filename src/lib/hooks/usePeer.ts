@@ -20,6 +20,8 @@ export const usePeer = () => {
     const onDataRef = useRef<((data: NetworkMessage, conn: DataConnection) => void) | null>(null);
     const onConnectRef = useRef<((conn: DataConnection) => void) | null>(null);
 
+    const onDisconnectRef = useRef<((conn: DataConnection) => void) | null>(null);
+
     const initializePeer = useCallback(async () => {
         if (peerRef.current) return;
 
@@ -47,7 +49,9 @@ export const usePeer = () => {
                 });
 
                 conn.on('close', () => {
+                    console.log('Connection closed:', conn.peer);
                     setConnections(prev => prev.filter(c => c.peer !== conn.peer));
+                    onDisconnectRef.current?.(conn);
                 });
             });
 
@@ -83,6 +87,12 @@ export const usePeer = () => {
                         onDataRef.current?.(data as NetworkMessage, conn);
                     });
 
+                    conn.on('close', () => {
+                        console.log('Connection to host closed');
+                        setConnections([]);
+                        onDisconnectRef.current?.(conn);
+                    });
+
                     peerRef.current = peer;
                 });
             } catch (error) {
@@ -107,6 +117,10 @@ export const usePeer = () => {
         onConnectRef.current = fn;
     }, []);
 
+    const setOnDisconnect = useCallback((fn: (conn: DataConnection) => void) => {
+        onDisconnectRef.current = fn;
+    }, []);
+
     const disconnect = useCallback(() => {
         if (peerRef.current) {
             peerRef.current.destroy();
@@ -126,6 +140,7 @@ export const usePeer = () => {
         sendData,
         setOnData,
         setOnConnect,
+        setOnDisconnect,
         disconnect
     };
 };
