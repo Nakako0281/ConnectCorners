@@ -214,6 +214,7 @@ export const Game: React.FC = () => {
 
         setPlayers(gamePlayers);
         setGameStatus('playing');
+        setIsMultiplayer(true);
 
         // Broadcast Start
         const gameState = {
