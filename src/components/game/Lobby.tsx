@@ -45,15 +45,15 @@ interface LobbyProps {
 export const Lobby: React.FC<LobbyProps> = ({
     peerId,
     isHost,
-    connectedPlayers, // This will now be LobbyPlayer[]
+    connectedPlayers,
     onHost,
     onJoin,
     onStart,
     onSinglePlayer,
     onBack,
-    onSelectCharacter, // New prop
-    onSetReady, // New prop
-    myLobbyPlayer // New prop: current user's lobby state
+    onSelectCharacter,
+    onSetReady,
+    myLobbyPlayer
 }) => {
     const [joinId, setJoinId] = useState('');
     const [copied, setCopied] = useState(false);
@@ -65,6 +65,11 @@ export const Lobby: React.FC<LobbyProps> = ({
     // User Name State
     const [userName, setUserNameState] = useState('');
     const [isNameSet, setIsNameSet] = useState(false);
+
+
+    // View Mode for Single Player Setup
+    const [viewMode, setViewMode] = useState<'menu' | 'single_player_setup'>('menu');
+    const [singlePlayerColor, setSinglePlayerColor] = useState<PlayerColor>('BLUE');
 
     const { playClick, playOpen, playLobbyBgm, stopLobbyBgm } = useSoundContext();
 
@@ -104,8 +109,12 @@ export const Lobby: React.FC<LobbyProps> = ({
 
     const handleSinglePlayer = () => {
         playClick();
-        // Default to BLUE for single player if not selected (though logic might need update)
-        onSinglePlayer('BLUE');
+        setViewMode('single_player_setup');
+    };
+
+    const handleStartSinglePlayer = () => {
+        playClick();
+        onSinglePlayer(singlePlayerColor);
     };
 
     const handleHost = () => {
@@ -339,7 +348,103 @@ export const Lobby: React.FC<LobbyProps> = ({
         );
     }
 
-    // 3. Initial Entry (Host/Join/Single)
+
+
+    // 3. Single Player Setup
+    if (viewMode === 'single_player_setup') {
+        return (
+            <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10 p-4">
+                <div className="w-full max-w-3xl glass-panel p-6 rounded-xl mb-8">
+                    <h2 className="text-3xl font-bold text-center text-white mb-2">Select Your Character</h2>
+                    <p className="text-center text-slate-400 mb-8">Choose your hero for the single player campaign</p>
+
+                    <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
+                        {ALL_COLORS.map((color) => {
+                            const unlockCondition = UNLOCK_CONDITIONS[color];
+                            const isLocked = !!(unlockCondition && !unlockedAchievements.includes(unlockCondition));
+                            const isSelected = singlePlayerColor === color;
+
+                            return (
+                                <button
+                                    key={color}
+                                    onClick={() => {
+                                        if (!isLocked) {
+                                            playClick();
+                                            setSinglePlayerColor(color);
+                                        }
+                                    }}
+                                    disabled={isLocked}
+                                    className={`
+                                        relative group aspect-square rounded-xl overflow-hidden transition-all duration-200
+                                        ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-black/50 scale-105 z-10' : ''}
+                                        ${isLocked ? 'opacity-40 grayscale cursor-not-allowed' : 'hover:scale-105 opacity-90 hover:opacity-100'}
+                                    `}
+                                    style={{
+                                        boxShadow: isSelected ? `0 0 15px var(--color-${color.toLowerCase()}-500, ${color.toLowerCase()})` : 'none'
+                                    }}
+                                >
+                                    <div className={`absolute inset-0 opacity-20 bg-${color.toLowerCase()}-500 mix-blend-overlay`} />
+                                    <img
+                                        src={CHARACTERS[color].imagePath}
+                                        alt={CHARACTERS[color].name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                    {isLocked && (
+                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                            <Lock className="w-4 h-4 text-white/50" />
+                                        </div>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Selected Character Preview & Actions */}
+                <div className="flex flex-col items-center gap-8 w-full max-w-md">
+                    <div className="text-center">
+                        <h3 className="text-2xl font-bold text-white mb-1">{CHARACTERS[singlePlayerColor].japaneseName}</h3>
+                        <p className="text-slate-400 text-sm mb-6">{CHARACTERS[singlePlayerColor].name}</p>
+
+                        <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 flex flex-col items-center gap-2">
+                            <span className="text-xs font-mono text-slate-500 uppercase tracking-widest">Special Piece</span>
+                            <div className="p-2 h-[140px] flex items-center justify-center">
+                                <PieceView
+                                    shape={CHARACTERS[singlePlayerColor].specialPieceShape}
+                                    color={singlePlayerColor}
+                                    cellSize={24}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4 w-full">
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            onClick={() => {
+                                playClick();
+                                setViewMode('menu');
+                            }}
+                            className="flex-1 h-14 border-slate-700 hover:bg-slate-800 text-slate-400"
+                        >
+                            Back
+                        </Button>
+
+                        <Button
+                            size="lg"
+                            onClick={handleStartSinglePlayer}
+                            className="flex-[2] h-14 text-lg font-bold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-lg shadow-blue-900/20"
+                        >
+                            Start Game
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // 4. Initial Entry (Host/Join/Single)
     return (
         <div className="relative w-full max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10">
             {/* ... (Keep existing background elements and title) ... */}

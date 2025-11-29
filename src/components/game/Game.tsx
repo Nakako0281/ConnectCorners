@@ -63,6 +63,21 @@ export const Game: React.FC = () => {
     const [myPlayerColor, setMyPlayerColor] = useState<PlayerColor>('BLUE'); // Default for single player
     const [isHostDisconnected, setIsHostDisconnected] = useState(false);
 
+    // Update Host ID in connectedPlayers when PeerID is generated
+    useEffect(() => {
+        if (isHost && peerId) {
+            setConnectedPlayers(prev => {
+                const hostIndex = prev.findIndex(p => p.isHost);
+                if (hostIndex !== -1 && prev[hostIndex].id !== peerId) {
+                    const newPlayers = [...prev];
+                    newPlayers[hostIndex] = { ...newPlayers[hostIndex], id: peerId };
+                    return newPlayers;
+                }
+                return prev;
+            });
+        }
+    }, [isHost, peerId]);
+
     // Game State
     const [board, setBoard] = useState(createInitialBoard());
     const [players, setPlayers] = useState<Player[]>([]);
@@ -782,7 +797,7 @@ export const Game: React.FC = () => {
                     setConnectedPlayers([{
                         id: peerId,
                         name: myName,
-                        color: null,
+                        color: color,
                         isReady: false,
                         isHost: true
                     }]);
