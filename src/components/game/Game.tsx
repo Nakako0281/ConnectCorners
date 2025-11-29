@@ -14,7 +14,8 @@ import {
     Coordinate,
     Player,
     BoardState,
-    Move
+    Move,
+    LobbyPlayer
 } from '@/lib/game/types';
 import {
     createInitialBoard,
@@ -39,6 +40,7 @@ import { SelectedPiecePanel } from './SelectedPiecePanel';
 import { useSoundContext } from '@/contexts/SoundContext';
 import { VolumeControl } from './VolumeControl';
 import { getStats, updateStats, Achievement } from '@/lib/achievements';
+import { getUserName } from '@/lib/utils/storage';
 
 const createPlayer = (id: string, color: PlayerColor, isHuman: boolean): Player => ({
     id,
@@ -56,7 +58,8 @@ export const Game: React.FC = () => {
     // P2P State
     const { peerId, isHost, hostGame, joinGame, sendData, setOnData, setOnConnect, setOnDisconnect, disconnect, connections } = usePeer();
     const [isMultiplayer, setIsMultiplayer] = useState(false);
-    const [connectedPlayers, setConnectedPlayers] = useState<{ id: string, color: PlayerColor, name: string }[]>([]);
+
+    const [connectedPlayers, setConnectedPlayers] = useState<LobbyPlayer[]>([]);
     const [myPlayerColor, setMyPlayerColor] = useState<PlayerColor>('BLUE'); // Default for single player
     const [isHostDisconnected, setIsHostDisconnected] = useState(false);
 
@@ -173,9 +176,9 @@ export const Game: React.FC = () => {
         const usedColors = new Set<PlayerColor>([hostColor]);
 
         guests.forEach(guest => {
-            let guestColor = guest.color;
+            let guestColor = guest.color || 'BLUE'; // Fallback if null (shouldn't happen if ready)
 
-            // If color is taken, find first available
+            // If color is taken, find first available (Safety check)
             if (usedColors.has(guestColor)) {
                 const available = ALL_COLORS.find(c => !usedColors.has(c));
                 if (available) {
@@ -297,10 +300,27 @@ export const Game: React.FC = () => {
     // Handle Incoming Data
     useEffect(() => {
         setOnConnect((conn) => {
-            setConnectedPlayers(prev => {
-                if (prev.some(p => p.id === conn.peer)) return prev;
-                return [...prev, { id: conn.peer, color: 'BLUE', name: `Guest-${conn.peer.substring(0, 4)}` }];
-            });
+            if (isHost) {
+                setConnectedPlayers(prev => {
+                    if (prev.some(p => p.id === conn.peer)) return prev;
+                    // Add new guest
+                    const newGuest: LobbyPlayer = {
+                        id: conn.peer,
+                        color: null,
+                        name: `Guest-${conn.peer.substring(0, 4)}`, // Temp name until JOIN
+                        isReady: false,
+                        isHost: false
+                    };
+                    const newPlayers = [...prev, newGuest];
+
+                    // Broadcast new lobby state
+                    setTimeout(() => {
+                        sendData({ type: 'LOBBY_UPDATE', payload: { players: newPlayers } });
+                    }, 500); // Small delay to ensure connection is ready
+
+                    return newPlayers;
+                });
+            }
         });
 
         setOnData((data, conn) => {
@@ -319,7 +339,42 @@ export const Game: React.FC = () => {
             }
             else if (data.type === 'JOIN') {
                 const { name, color } = data.payload;
-                setConnectedPlayers(prev => prev.map(p => p.id === conn.peer ? { ...p, name, color } : p));
+                if (isHost) {
+                    setConnectedPlayers(prev => {
+                        const newPlayers = prev.map(p => p.id === conn.peer ? { ...p, name } : p); // Don't set color yet
+                        sendData({ type: 'LOBBY_UPDATE', payload: { players: newPlayers } });
+                        return newPlayers;
+                    });
+                }
+            }
+            else if (data.type === 'LOBBY_UPDATE') {
+                // Guest receiving lobby update
+                setConnectedPlayers(data.payload.players);
+            }
+            else if (data.type === 'SELECT_CHARACTER') {
+                // Host receiving character selection request
+                if (isHost) {
+                    const { color } = data.payload;
+                    // Check if taken
+                    const isTaken = connectedPlayers.some(p => p.color === color && p.id !== conn.peer);
+                    if (!isTaken) {
+                        setConnectedPlayers(prev => {
+                            const newPlayers = prev.map(p => p.id === conn.peer ? { ...p, color, isReady: false } : p);
+                            sendData({ type: 'LOBBY_UPDATE', payload: { players: newPlayers } });
+                            return newPlayers;
+                        });
+                    }
+                }
+            }
+            else if (data.type === 'SET_READY') {
+                if (isHost) {
+                    const { isReady } = data.payload;
+                    setConnectedPlayers(prev => {
+                        const newPlayers = prev.map(p => p.id === conn.peer ? { ...p, isReady } : p);
+                        sendData({ type: 'LOBBY_UPDATE', payload: { players: newPlayers } });
+                        return newPlayers;
+                    });
+                }
             }
             else if (data.type === 'UPDATE') {
                 // Guest receiving update
@@ -351,23 +406,7 @@ export const Game: React.FC = () => {
                     const startPos = CORNER_POSITIONS[playerIndex];
 
                     if (isValidMove(board, shape, position, player.color, isFirst, startPos)) {
-                        // Apply move
-                        const newBoard = placePiece(board, shape, position, player.color);
-                        const newPlayers = [...players];
-                        newPlayers[playerIndex] = {
-                            ...player,
-                            pieces: player.pieces.filter(p => p.id !== pieceId)
-                        };
-
-                        setBoard(newBoard);
-                        setPlayers(newPlayers);
-
-                        // Next turn
-                        const nextIdx = nextTurnIndex(newPlayers, playerIndex);
-                        setCurrentPlayerIndex(nextIdx);
-
-                        // Broadcast
-                        broadcastUpdate(newBoard, newPlayers, nextIdx);
+                        handlePlacePiece(piece, shape, position); // Use common handler
                     }
                 }
             }
@@ -479,8 +518,8 @@ export const Game: React.FC = () => {
             sendData({
                 type: 'JOIN',
                 payload: {
-                    name: `Guest-${peerId.substring(0, 4)}`,
-                    color: myPlayerColor
+                    name: getUserName() || `Guest-${peerId.substring(0, 4)}`,
+                    color: 'BLUE' // Dummy color, will select in lobby
                 }
             });
             setHasSentJoin(true);
@@ -738,11 +777,18 @@ export const Game: React.FC = () => {
                 isHost={isHost}
                 connectedPlayers={connectedPlayers}
                 onHost={(color) => {
-                    setMyPlayerColor(color);
+                    // Initialize Host in Lobby
+                    const myName = getUserName() || 'Host';
+                    setConnectedPlayers([{
+                        id: peerId,
+                        name: myName,
+                        color: null,
+                        isReady: false,
+                        isHost: true
+                    }]);
                     hostGame();
                 }}
                 onJoin={(hostId, color) => {
-                    setMyPlayerColor(color);
                     joinGame(hostId);
                 }}
                 onStart={startMultiplayerGame}
@@ -751,6 +797,29 @@ export const Game: React.FC = () => {
                     initSinglePlayer(color);
                 }}
                 onBack={handleBack}
+                onSelectCharacter={(color) => {
+                    if (isHost) {
+                        setConnectedPlayers(prev => {
+                            const newPlayers = prev.map(p => p.id === peerId ? { ...p, color, isReady: false } : p);
+                            sendData({ type: 'LOBBY_UPDATE', payload: { players: newPlayers } });
+                            return newPlayers;
+                        });
+                    } else {
+                        sendData({ type: 'SELECT_CHARACTER', payload: { color } });
+                    }
+                }}
+                onSetReady={(isReady) => {
+                    if (isHost) {
+                        setConnectedPlayers(prev => {
+                            const newPlayers = prev.map(p => p.id === peerId ? { ...p, isReady } : p);
+                            sendData({ type: 'LOBBY_UPDATE', payload: { players: newPlayers } });
+                            return newPlayers;
+                        });
+                    } else {
+                        sendData({ type: 'SET_READY', payload: { isReady } });
+                    }
+                }}
+                myLobbyPlayer={connectedPlayers.find(p => p.id === peerId) || null}
             />
         );
     }

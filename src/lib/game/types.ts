@@ -38,3 +38,15 @@ export interface Move {
   isFlipped: boolean;
   timestamp: number;
 }
+
+export interface LobbyPlayer {
+  id: string;
+  name: string;
+  color: PlayerColor | null; // Null if not selected yet
+  isReady: boolean;
+  isHost: boolean;
+}
+
+export interface LobbyState {
+  players: LobbyPlayer[];
+}

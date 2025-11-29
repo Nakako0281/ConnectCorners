@@ -8,7 +8,10 @@ export type NetworkMessage =
     | { type: 'START_GAME', payload: { gameState?: any, players?: any[], turnIndex?: number } }
     | { type: 'UPDATE', payload: { gameState: any, players: any[], turnIndex: number } }
     | { type: 'MOVE', payload: { pieceId: string, shape: number[][], position: Coordinate } }
-    | { type: 'JOIN', payload: { name: string, color: PlayerColor } };
+    | { type: 'JOIN', payload: { name: string, color: PlayerColor } }
+    | { type: 'LOBBY_UPDATE', payload: { players: any[] } }
+    | { type: 'SELECT_CHARACTER', payload: { color: PlayerColor } }
+    | { type: 'SET_READY', payload: { isReady: boolean } };
 
 export const usePeer = () => {
     const [peerId, setPeerId] = useState<string>('');

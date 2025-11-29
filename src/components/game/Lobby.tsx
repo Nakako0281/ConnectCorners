@@ -14,6 +14,8 @@ import { AchievementModal } from './AchievementModal';
 import { VolumeControl } from './VolumeControl';
 import { getStats, ACHIEVEMENTS } from '@/lib/achievements';
 import { Lock } from 'lucide-react';
+import { getUserName, setUserName } from '@/lib/utils/storage';
+import { LobbyPlayer } from '@/lib/game/types';
 
 const UNLOCK_CONDITIONS: Record<PlayerColor, string | null> = {
     BLUE: null,
@@ -29,37 +31,53 @@ const UNLOCK_CONDITIONS: Record<PlayerColor, string | null> = {
 interface LobbyProps {
     peerId: string;
     isHost: boolean;
-    connectedPlayers: { id: string, color: PlayerColor, name: string }[];
+    connectedPlayers: LobbyPlayer[];
     onHost: (color: PlayerColor) => void;
     onJoin: (hostId: string, color: PlayerColor) => void;
     onStart: () => void;
     onSinglePlayer: (color: PlayerColor) => void;
     onBack: () => void;
+    onSelectCharacter: (color: PlayerColor) => void;
+    onSetReady: (isReady: boolean) => void;
+    myLobbyPlayer: LobbyPlayer | null;
 }
 
 export const Lobby: React.FC<LobbyProps> = ({
     peerId,
     isHost,
-    connectedPlayers,
+    connectedPlayers, // This will now be LobbyPlayer[]
     onHost,
     onJoin,
     onStart,
     onSinglePlayer,
-    onBack
+    onBack,
+    onSelectCharacter, // New prop
+    onSetReady, // New prop
+    myLobbyPlayer // New prop: current user's lobby state
 }) => {
     const [joinId, setJoinId] = useState('');
     const [copied, setCopied] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
     const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
-    const [selectedColor, setSelectedColor] = useState<PlayerColor>('BLUE');
     const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>([]);
-    const [isJoining, setIsJoining] = useState(false);
+
+    // User Name State
+    const [userName, setUserNameState] = useState('');
+    const [isNameSet, setIsNameSet] = useState(false);
+
     const { playClick, playOpen, playLobbyBgm, stopLobbyBgm } = useSoundContext();
 
     React.useEffect(() => {
         const stats = getStats();
         setUnlockedAchievements(stats.unlockedAchievements);
+
+        // Load saved name
+        const savedName = getUserName();
+        if (savedName) {
+            setUserNameState(savedName);
+            setIsNameSet(true);
+        }
     }, []);
 
     React.useEffect(() => {
@@ -70,6 +88,13 @@ export const Lobby: React.FC<LobbyProps> = ({
         };
     }, [playLobbyBgm, stopLobbyBgm]);
 
+    const handleSetUserName = () => {
+        if (!userName.trim()) return;
+        playClick();
+        setUserName(userName.trim());
+        setIsNameSet(true);
+    };
+
     const copyToClipboard = () => {
         playClick();
         navigator.clipboard.writeText(peerId);
@@ -79,18 +104,18 @@ export const Lobby: React.FC<LobbyProps> = ({
 
     const handleSinglePlayer = () => {
         playClick();
-        onSinglePlayer(selectedColor);
+        // Default to BLUE for single player if not selected (though logic might need update)
+        onSinglePlayer('BLUE');
     };
 
     const handleHost = () => {
         playClick();
-        onHost(selectedColor);
+        onHost('BLUE'); // Initial color, will be changeable in lobby
     };
 
     const handleJoin = () => {
         playClick();
-        setIsJoining(true);
-        onJoin(joinId, selectedColor);
+        onJoin(joinId, 'BLUE'); // Initial color
     };
 
     const handleStart = () => {
@@ -100,7 +125,6 @@ export const Lobby: React.FC<LobbyProps> = ({
 
     const handleBack = () => {
         playClick();
-        setIsJoining(false);
         onBack();
     };
 
@@ -114,9 +138,211 @@ export const Lobby: React.FC<LobbyProps> = ({
         setIsAchievementsOpen(true);
     };
 
+    // --- Render Helpers ---
+
+    // 1. Name Entry Screen
+    if (!isNameSet) {
+        return (
+            <div className="relative w-full max-w-md mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10">
+                <Card className="glass-panel border-0 bg-black/40 text-slate-100 w-full">
+                    <CardContent className="flex flex-col gap-6 p-8">
+                        <div className="text-center space-y-2">
+                            <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                                Welcome
+                            </h2>
+                            <p className="text-slate-400">Enter your name to start</p>
+                        </div>
+                        <Input
+                            placeholder="Your Name"
+                            value={userName}
+                            onChange={(e) => setUserNameState(e.target.value)}
+                            className="h-12 bg-slate-900/50 border-slate-700 text-center text-lg"
+                            maxLength={12}
+                        />
+                        <Button
+                            size="lg"
+                            onClick={handleSetUserName}
+                            disabled={!userName.trim()}
+                            className="w-full h-12 bg-blue-600 hover:bg-blue-500"
+                        >
+                            Continue
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    // 2. Main Lobby (Connected)
+    if (peerId && (isHost || connectedPlayers.length > 0)) {
+        const allReady = connectedPlayers.length > 0 && connectedPlayers.every(p => p.isReady);
+        const canStart = isHost && allReady && connectedPlayers.length >= 1; // At least 1 other player? Or just host?
+
+        return (
+            <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10 p-4">
+                {/* Header: Room ID */}
+                <div className="absolute top-4 left-4 z-50 flex items-center gap-2 bg-black/40 backdrop-blur-md p-2 rounded-lg border border-white/10">
+                    <span className="text-slate-400 text-sm font-mono">ROOM ID:</span>
+                    <code className="text-blue-400 font-mono font-bold">{peerId || joinId}</code>
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6 text-slate-400 hover:text-white"
+                        onClick={copyToClipboard}
+                    >
+                        {copied ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
+                    </Button>
+                </div>
+
+                {/* Player Slots */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mb-8 mt-16">
+                    {[0, 1, 2, 3].map(index => {
+                        const player = connectedPlayers[index];
+                        return (
+                            <div key={index} className={`
+                                relative aspect-[3/4] rounded-xl border-2 overflow-hidden transition-all
+                                ${player ? 'border-slate-600 bg-slate-800/50' : 'border-dashed border-slate-800 bg-black/20'}
+                                ${player?.isReady ? 'ring-2 ring-green-500 ring-offset-2 ring-offset-black' : ''}
+                            `}>
+                                {player ? (
+                                    <>
+                                        {/* Character Image */}
+                                        {player.color ? (
+                                            <img
+                                                src={CHARACTERS[player.color].imagePath}
+                                                alt={player.color}
+                                                className="absolute inset-0 w-full h-full object-cover opacity-80"
+                                            />
+                                        ) : (
+                                            <div className="absolute inset-0 flex items-center justify-center text-slate-600">
+                                                <HelpCircle className="w-12 h-12" />
+                                            </div>
+                                        )}
+
+                                        {/* Info Overlay */}
+                                        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 to-transparent p-4 pt-12 flex flex-col items-center">
+                                            <span className="font-bold text-white text-lg truncate max-w-full">{player.name}</span>
+                                            {player.isHost && <span className="text-xs text-yellow-400 font-mono mb-1">HOST</span>}
+                                            {player.isReady ? (
+                                                <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded-full font-bold tracking-wider">READY</span>
+                                            ) : (
+                                                <span className="text-xs text-slate-400 animate-pulse">Selecting...</span>
+                                            )}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center text-slate-600">
+                                        <span className="text-sm font-mono">Waiting...</span>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* Character Selection Grid */}
+                <div className="w-full max-w-3xl glass-panel p-6 rounded-xl mb-8">
+                    <h3 className="text-center text-slate-400 mb-4 uppercase tracking-widest text-sm font-semibold">Select Character</h3>
+                    <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
+                        {ALL_COLORS.map((color) => {
+                            const unlockCondition = UNLOCK_CONDITIONS[color];
+                            const isLocked = !!(unlockCondition && !unlockedAchievements.includes(unlockCondition));
+
+                            // Check if taken by OTHER players
+                            const takenBy = connectedPlayers.find(p => p.color === color && p.id !== myLobbyPlayer?.id);
+                            const isTaken = !!takenBy;
+                            const isSelected = myLobbyPlayer?.color === color;
+
+                            return (
+                                <button
+                                    key={color}
+                                    onClick={() => {
+                                        if (!isLocked && !isTaken && !myLobbyPlayer?.isReady) {
+                                            playClick();
+                                            onSelectCharacter(color);
+                                        }
+                                    }}
+                                    disabled={isLocked || isTaken || myLobbyPlayer?.isReady}
+                                    className={`
+                                        relative group aspect-square rounded-xl overflow-hidden transition-all duration-200
+                                        ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-black/50 scale-105 z-10' : ''}
+                                        ${(isLocked || isTaken) ? 'opacity-40 grayscale cursor-not-allowed' : 'hover:scale-105 opacity-90 hover:opacity-100'}
+                                        ${myLobbyPlayer?.isReady ? 'cursor-default' : ''}
+                                    `}
+                                    style={{
+                                        boxShadow: isSelected ? `0 0 15px var(--color-${color.toLowerCase()}-500, ${color.toLowerCase()})` : 'none'
+                                    }}
+                                >
+                                    <div className={`absolute inset-0 opacity-20 bg-${color.toLowerCase()}-500 mix-blend-overlay`} />
+                                    <img
+                                        src={CHARACTERS[color].imagePath}
+                                        alt={CHARACTERS[color].name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                    {isTaken && (
+                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                            <span className="text-xs font-bold text-white bg-black/50 px-1 rounded">{takenBy?.name.substring(0, 3)}</span>
+                                        </div>
+                                    )}
+                                    {isLocked && (
+                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                            <Lock className="w-4 h-4 text-white/50" />
+                                        </div>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-4">
+                    <Button
+                        variant="outline"
+                        size="lg"
+                        onClick={handleBack}
+                        className="h-14 px-8 border-slate-700 hover:bg-slate-800 text-slate-400"
+                    >
+                        Leave
+                    </Button>
+
+                    <Button
+                        size="lg"
+                        onClick={() => {
+                            playClick();
+                            onSetReady(!myLobbyPlayer?.isReady);
+                        }}
+                        disabled={!myLobbyPlayer?.color}
+                        className={`h-14 px-12 text-lg font-bold transition-all ${myLobbyPlayer?.isReady
+                            ? 'bg-yellow-600 hover:bg-yellow-500 text-white'
+                            : 'bg-slate-700 hover:bg-slate-600 text-slate-200'
+                            }`}
+                    >
+                        {myLobbyPlayer?.isReady ? 'Cancel Ready' : 'Ready!'}
+                    </Button>
+
+                    {isHost && (
+                        <Button
+                            size="lg"
+                            onClick={handleStart}
+                            disabled={!canStart} // Needs logic: at least 2 players? or just host ready?
+                            className={`h-14 px-12 text-lg font-bold transition-all ${canStart
+                                ? 'bg-green-600 hover:bg-green-500 shadow-lg shadow-green-900/20 animate-pulse'
+                                : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                                }`}
+                        >
+                            Start Game
+                        </Button>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    // 3. Initial Entry (Host/Join/Single)
     return (
         <div className="relative w-full max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10">
-            {/* Animated Background Elements (Floating Pieces) - Client Only */}
+            {/* ... (Keep existing background elements and title) ... */}
             {mounted && (
                 <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
                     {[...Array(15)].map((_, i) => (
@@ -125,32 +351,7 @@ export const Lobby: React.FC<LobbyProps> = ({
                 </div>
             )}
 
-            {/* Top Right Controls - Styled Toolbar */}
-            <div className="absolute top-4 right-4 z-50">
-                <div className="flex items-center gap-1 p-1.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-full shadow-xl">
-                    <VolumeControl />
-                    <div className="w-px h-4 bg-white/10 mx-1" />
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleOpenAchievements}
-                        className="rounded-full text-slate-400 hover:text-white hover:bg-white/10 w-9 h-9"
-                        title="Trophies"
-                    >
-                        <Trophy className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleOpenHowToPlay}
-                        className="rounded-full text-slate-400 hover:text-white hover:bg-white/10 w-9 h-9"
-                        title="How to Play"
-                    >
-                        <HelpCircle className="w-4 h-4" />
-                    </Button>
-                </div>
-            </div>
-
+            {/* Title */}
             <motion.div
                 initial={{ opacity: 0, y: -50 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -162,6 +363,7 @@ export const Lobby: React.FC<LobbyProps> = ({
                     <br />
                     CORNERS
                 </h1>
+                <p className="text-slate-400 mt-4 text-xl">Welcome, <span className="text-white font-bold">{userName}</span></p>
             </motion.div>
 
             <motion.div
@@ -172,209 +374,53 @@ export const Lobby: React.FC<LobbyProps> = ({
             >
                 <Card className="glass-panel border-0 bg-black/40 text-slate-100">
                     <CardContent className="flex flex-col gap-6 p-8">
-                        {!isHost && !connectedPlayers.length && !isJoining ? (
-                            <>
-                                {/* Character Selection */}
-                                <div className="space-y-4">
-                                    <label className="text-sm font-medium text-slate-400 uppercase tracking-wider">Select Your Character</label>
+                        <Button
+                            size="lg"
+                            onClick={handleSinglePlayer}
+                            className="w-full h-16 text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 border-0 shadow-lg shadow-blue-900/20 transition-all hover:scale-[1.02]"
+                        >
+                            <Gamepad2 className="w-6 h-6 mr-3" />
+                            Single Player
+                        </Button>
 
-                                    {/* Selected Character Preview */}
-                                    <div className="flex items-start gap-4 p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
-                                        <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden border-2 border-white/10">
-                                            <img
-                                                src={CHARACTERS[selectedColor].imagePath}
-                                                alt={CHARACTERS[selectedColor].name}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-                                        <div className="flex-1 space-y-2">
-                                            <div className="flex items-center gap-2">
-                                                <h3 className="text-xl font-bold text-white">{CHARACTERS[selectedColor].japaneseName}</h3>
-                                                <span className="text-xs font-mono text-slate-400 px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700">
-                                                    {CHARACTERS[selectedColor].name}
-                                                </span>
-                                            </div>
+                        <div className="relative flex items-center py-2">
+                            <div className="flex-grow border-t border-slate-700"></div>
+                            <span className="flex-shrink-0 mx-4 text-slate-500 text-sm font-mono">MULTIPLAYER</span>
+                            <div className="flex-grow border-t border-slate-700"></div>
+                        </div>
 
-                                            <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700/50">
-                                                <div className="text-xs text-slate-400 mb-2 uppercase tracking-wider font-semibold">Special Piece</div>
-                                                <div className="flex justify-center h-[80px] items-center">
-                                                    <PieceView
-                                                        shape={CHARACTERS[selectedColor].specialPieceShape}
-                                                        color={selectedColor}
-                                                        cellSize={16}
-                                                        className="drop-shadow-lg"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Character Grid */}
-                                    <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-                                        {ALL_COLORS.map((color) => {
-                                            const unlockCondition = UNLOCK_CONDITIONS[color];
-                                            const isLocked = !!(unlockCondition && !unlockedAchievements.includes(unlockCondition));
-                                            const achievement = isLocked && unlockCondition ? ACHIEVEMENTS.find(a => a.id === unlockCondition) : null;
-
-                                            return (
-                                                <button
-                                                    key={color}
-                                                    onClick={() => {
-                                                        if (!isLocked) {
-                                                            playClick();
-                                                            setSelectedColor(color);
-                                                        } else {
-                                                            // Optional: Play error sound or show tooltip
-                                                        }
-                                                    }}
-                                                    disabled={isLocked}
-                                                    className={`
-                                                        relative group aspect-square rounded-xl overflow-hidden transition-all duration-300
-                                                        ${selectedColor === color ? 'ring-2 ring-white ring-offset-2 ring-offset-black/50 scale-105 z-10' : ''}
-                                                        ${isLocked ? 'opacity-50 grayscale cursor-not-allowed' : 'hover:scale-105 opacity-80 hover:opacity-100'}
-                                                    `}
-                                                    style={{
-                                                        boxShadow: selectedColor === color ? `0 0 15px var(--color-${color.toLowerCase()}-500, ${color.toLowerCase()})` : 'none'
-                                                    }}
-                                                    title={isLocked ? `Unlock: ${achievement?.title || 'Unknown'}` : CHARACTERS[color].japaneseName}
-                                                >
-                                                    <div className={`absolute inset-0 opacity-20 bg-${color.toLowerCase()}-500 mix-blend-overlay`} />
-                                                    <img
-                                                        src={CHARACTERS[color].imagePath}
-                                                        alt={CHARACTERS[color].name}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                    {selectedColor === color && (
-                                                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                                                            <CheckCircle2 className="w-5 h-5 text-white drop-shadow-md" />
-                                                        </div>
-                                                    )}
-                                                    {isLocked && (
-                                                        <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white p-1">
-                                                            <Lock className="w-4 h-4 mb-1" />
-                                                        </div>
-                                                    )}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                <div className="h-px bg-slate-800/50 w-full" />
+                        <div className="grid grid-cols-2 gap-4">
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                onClick={handleHost}
+                                className="h-14 border-slate-700 bg-slate-800/50 hover:bg-slate-700 hover:text-white transition-all"
+                            >
+                                <Users className="w-5 h-5 mr-2" />
+                                Host Game
+                            </Button>
+                            <div className="flex gap-2">
+                                <Input
+                                    placeholder="Room ID"
+                                    value={joinId}
+                                    onChange={(e) => setJoinId(e.target.value)}
+                                    className="h-14 bg-slate-900/50 border-slate-700 text-slate-100 placeholder:text-slate-600"
+                                />
                                 <Button
                                     size="lg"
-                                    onClick={handleSinglePlayer}
-                                    className="w-full h-16 text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 border-0 shadow-lg shadow-blue-900/20 transition-all hover:scale-[1.02]"
+                                    onClick={handleJoin}
+                                    disabled={!joinId}
+                                    className="h-14 px-4 bg-slate-700 hover:bg-slate-600"
                                 >
-                                    <Gamepad2 className="w-6 h-6 mr-3" />
-                                    Single Player
+                                    Join
                                 </Button>
-
-                                <div className="relative flex items-center py-2">
-                                    <div className="flex-grow border-t border-slate-700"></div>
-                                    <span className="flex-shrink-0 mx-4 text-slate-500 text-sm font-mono">MULTIPLAYER</span>
-                                    <div className="flex-grow border-t border-slate-700"></div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <Button
-                                        variant="outline"
-                                        size="lg"
-                                        onClick={handleHost}
-                                        className="h-14 border-slate-700 bg-slate-800/50 hover:bg-slate-700 hover:text-white transition-all"
-                                    >
-                                        <Users className="w-5 h-5 mr-2" />
-                                        Host Game
-                                    </Button>
-                                    <div className="flex gap-2">
-                                        <Input
-                                            placeholder="Room ID"
-                                            value={joinId}
-                                            onChange={(e) => setJoinId(e.target.value)}
-                                            className="h-14 bg-slate-900/50 border-slate-700 text-slate-100 placeholder:text-slate-600"
-                                        />
-                                        <Button
-                                            size="lg"
-                                            onClick={handleJoin}
-                                            disabled={!joinId}
-                                            className="h-14 px-4 bg-slate-700 hover:bg-slate-600"
-                                        >
-                                            Join
-                                        </Button>
-                                    </div>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="flex flex-col gap-6 items-center py-4">
-                                <div className="text-center space-y-2">
-                                    <h3 className="text-xl font-bold text-slate-200">Lobby</h3>
-                                    <div className="flex items-center justify-center gap-2 bg-slate-900/50 p-3 rounded-lg border border-slate-700/50">
-                                        <code className="text-blue-400 font-mono text-lg tracking-wider">{peerId || joinId}</code>
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            className="h-8 w-8 text-slate-400 hover:text-white"
-                                            onClick={copyToClipboard}
-                                        >
-                                            {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-                                        </Button>
-                                    </div>
-                                    <p className="text-sm text-slate-500">Share this ID with your friends</p>
-                                </div>
-
-                                <div className="w-full space-y-3">
-                                    <div className="flex justify-between items-center text-sm text-slate-400 px-1">
-                                        <span>Players</span>
-                                        <span>{connectedPlayers.length + 1}/4</span>
-                                    </div>
-                                    <div className="space-y-2">
-                                        {/* Host (Me if hosting, or Host if joining) */}
-                                        <div className="flex items-center gap-3 p-3 bg-slate-800/40 rounded-lg border border-slate-700/30">
-                                            <div className={`w-3 h-3 rounded-full bg-${isHost ? selectedColor.toLowerCase() : 'slate'}-500 shadow-[0_0_10px_currentColor]`} style={{ color: isHost ? `var(--color-${selectedColor.toLowerCase()}-500)` : undefined }} />
-                                            <span className="font-medium text-slate-200">{isHost ? "You (Host)" : "Host"}</span>
-                                            {isHost && <span className="text-xs text-slate-500 ml-auto">{CHARACTERS[selectedColor].japaneseName}</span>}
-                                        </div>
-
-                                        {connectedPlayers.map((p, idx) => (
-                                            <div key={p.id} className="flex items-center gap-3 p-3 bg-slate-800/40 rounded-lg border border-slate-700/30">
-                                                <div className={`w-3 h-3 rounded-full bg-${p.color.toLowerCase()}-500 shadow-[0_0_10px_currentColor]`} style={{ color: `var(--color-${p.color.toLowerCase()}-500)` }} />
-                                                <span className="font-medium text-slate-200">{p.name || `Player ${idx + 2}`}</span>
-                                                <span className="text-xs text-slate-500 ml-auto">{CHARACTERS[p.color].japaneseName}</span>
-                                            </div>
-                                        ))}
-                                        {[...Array(3 - connectedPlayers.length)].map((_, i) => (
-                                            <div key={i} className="flex items-center gap-3 p-3 border border-dashed border-slate-800 rounded-lg opacity-50">
-                                                <div className="w-3 h-3 rounded-full bg-slate-700" />
-                                                <span className="text-slate-500 italic">Waiting...</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-col gap-2 w-full">
-                                    {isHost && (
-                                        <Button
-                                            size="lg"
-                                            onClick={handleStart}
-                                            className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-500 shadow-lg shadow-green-900/20"
-                                        >
-                                            Start Game
-                                        </Button>
-                                    )}
-                                    <Button
-                                        variant="outline"
-                                        onClick={handleBack}
-                                        className="w-full border-slate-700 hover:bg-slate-800 text-slate-400"
-                                    >
-                                        Back
-                                    </Button>
-                                </div>
                             </div>
-                        )}
+                        </div>
                     </CardContent>
                 </Card>
             </motion.div>
 
+            {/* ... (Keep existing modals) ... */}
             <HowToPlayModal isOpen={isHowToPlayOpen} onClose={() => setIsHowToPlayOpen(false)} />
             <AchievementModal isOpen={isAchievementsOpen} onClose={() => setIsAchievementsOpen(false)} />
         </div>
