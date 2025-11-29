@@ -465,6 +465,50 @@ export const Game: React.FC = () => {
     }, [currentPlayerIndex, gameStatus, board, currentPlayer, isMyTurn]);
 
     const handlePlacePiece = (piece: Piece, shape: number[][], position: Coordinate) => {
+        playPlace();
+
+        // Calculate Score & Show Popup (Common for both)
+        const bonusPoints = calculateBonusPoints(shape, position);
+        const totalScore = piece.value + bonusPoints;
+
+        const boardElement = document.getElementById('game-board');
+        if (boardElement) {
+            const boardRect = boardElement.getBoundingClientRect();
+            const cellSize = boardRect.width / 20; // BOARD_SIZE = 20
+
+            // Find center of placed piece
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            shape.forEach((row, dy) => {
+                row.forEach((cell, dx) => {
+                    if (cell) {
+                        minX = Math.min(minX, dx);
+                        maxX = Math.max(maxX, dx);
+                        minY = Math.min(minY, dy);
+                        maxY = Math.max(maxY, dy);
+                    }
+                });
+            });
+
+            const centerX = position.x + (minX + maxX) / 2;
+            const centerY = position.y + (minY + maxY) / 2;
+            const screenX = boardRect.left + centerX * cellSize;
+            const screenY = boardRect.top + centerY * cellSize;
+
+            const popupId = `${Date.now()}-${Math.random()}`;
+            setScorePopups(prev => [...prev, {
+                id: popupId,
+                score: totalScore,
+                x: screenX,
+                y: screenY,
+                hasBonus: bonusPoints > 0
+            }]);
+        }
+
+        // Reset selection (Common)
+        setSelectedPieceId(null);
+        setRotation(0);
+        setIsFlipped(false);
+
         if (isMultiplayer && !isHost) {
             // Guest: Send move to Host
             sendData({
@@ -475,15 +519,9 @@ export const Game: React.FC = () => {
                     position
                 }
             });
-            playPlace();
-            // Optimistic update? No, wait for update.
-            setSelectedPieceId(null);
         } else {
             // Host or Single Player: Apply locally
-            playPlace();
             const newBoard = placePiece(board, shape, position, currentPlayer.color);
-            const bonusPoints = calculateBonusPoints(shape, position);
-            const totalScore = piece.value + bonusPoints;
 
             setBoard(newBoard);
 
@@ -494,44 +532,6 @@ export const Game: React.FC = () => {
                 bonusScore: currentPlayer.bonusScore + bonusPoints
             };
             setPlayers(newPlayers);
-            setSelectedPieceId(null);
-            setRotation(0);
-            setIsFlipped(false);
-
-            // Create score popup animation
-            // Calculate center position of the placed piece in screen coordinates
-            const boardElement = document.getElementById('game-board');
-            if (boardElement) {
-                const boardRect = boardElement.getBoundingClientRect();
-                const cellSize = boardRect.width / 20; // BOARD_SIZE = 20
-
-                // Find center of placed piece
-                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-                shape.forEach((row, dy) => {
-                    row.forEach((cell, dx) => {
-                        if (cell) {
-                            minX = Math.min(minX, dx);
-                            maxX = Math.max(maxX, dx);
-                            minY = Math.min(minY, dy);
-                            maxY = Math.max(maxY, dy);
-                        }
-                    });
-                });
-
-                const centerX = position.x + (minX + maxX) / 2;
-                const centerY = position.y + (minY + maxY) / 2;
-                const screenX = boardRect.left + centerX * cellSize;
-                const screenY = boardRect.top + centerY * cellSize;
-
-                const popupId = `${Date.now()}-${Math.random()}`;
-                setScorePopups(prev => [...prev, {
-                    id: popupId,
-                    score: totalScore,
-                    x: screenX,
-                    y: screenY,
-                    hasBonus: bonusPoints > 0
-                }]);
-            }
 
             const nextIdx = nextTurnIndex(newPlayers, currentPlayerIndex);
             setCurrentPlayerIndex(nextIdx);
