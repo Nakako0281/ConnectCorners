@@ -223,7 +223,15 @@ export const Game: React.FC = () => {
             turnIndex: 0
         };
 
-        sendData({ type: 'START_GAME', payload: {} });
+        sendData({
+            type: 'START_GAME',
+            payload: {
+                gameState: gameState.board,
+                players: gamePlayers,
+                turnIndex: 0
+            }
+        });
+        // We still broadcast update for good measure, or we can skip it if we trust START_GAME
         broadcastUpdate(gameState.board, gamePlayers, 0);
     };
 
@@ -296,6 +304,15 @@ export const Game: React.FC = () => {
 
         setOnData((data, conn) => {
             if (data.type === 'START_GAME') {
+                if (data.payload.players && data.payload.gameState) {
+                    setBoard(data.payload.gameState as BoardState);
+                    setPlayers(data.payload.players);
+                    setCurrentPlayerIndex(data.payload.turnIndex || 0);
+
+                    // Determine my color immediately if possible
+                    const me = data.payload.players.find((p: Player) => p.id === peerId);
+                    if (me) setMyPlayerColor(me.color);
+                }
                 setGameStatus('playing');
                 setIsMultiplayer(true);
             }
@@ -638,6 +655,18 @@ export const Game: React.FC = () => {
                 }}
                 onBack={handleBack}
             />
+        );
+    }
+
+    // Loading state check
+    if (gameStatus === 'playing' && (!players.length || !currentPlayer)) {
+        return (
+            <div className="flex items-center justify-center h-screen w-full bg-slate-950 text-white">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    <p>Loading game data...</p>
+                </div>
+            </div>
         );
     }
 
