@@ -34,11 +34,13 @@ import {
 import { CHARACTERS } from '@/lib/game/characters';
 import { getAIMove } from '@/lib/game/ai';
 import { usePeer, NetworkMessage } from '@/lib/hooks/usePeer';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Trophy, HelpCircle } from 'lucide-react';
 import { PlayerList } from './PlayerList';
 import { SelectedPiecePanel } from './SelectedPiecePanel';
+
+
 import { useSoundContext } from '@/contexts/SoundContext';
-import { VolumeControl } from './VolumeControl';
+import { GameControls } from './GameControls';
 import { getStats, updateStats, Achievement } from '@/lib/achievements';
 import { getUserName } from '@/lib/utils/storage';
 
@@ -84,6 +86,7 @@ export const Game: React.FC = () => {
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
     const [turnNumber, setTurnNumber] = useState(1);
     const [gameStatus, setGameStatus] = useState<'lobby' | 'playing' | 'finished'>('lobby');
+
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
     const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
     const [gameHistory, setGameHistory] = useState<Move[]>([]);
@@ -855,12 +858,11 @@ export const Game: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-8 items-start justify-center p-8 h-screen w-full overflow-hidden relative">
 
             {/* Top Right Controls */}
-            <div className="absolute top-4 right-4 z-10 flex gap-2">
-                <VolumeControl />
+            <GameControls>
                 <Button variant="ghost" size="sm" onClick={handleReset} className="text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
                     <RefreshCw className="w-4 h-4 mr-2" /> Quit Game
                 </Button>
-            </div>
+            </GameControls>
 
             {/* Left Panel: Game Info & Controls */}
             <div className="flex flex-col gap-6 w-full lg:w-80 h-full overflow-y-auto pr-2">
@@ -948,11 +950,11 @@ export const Game: React.FC = () => {
             {/* Game Result Modal */}
             <GameResultModal
                 isOpen={isResultModalOpen}
-                players={players}
-                newAchievements={newAchievements}
-                onPlayAgain={handleRestart}
-                onBackToTitle={handleBack}
                 onClose={() => setIsResultModalOpen(false)}
+                players={players}
+                onPlayAgain={handleRestart}
+                onBackToTitle={handleReset}
+                newAchievements={newAchievements}
             />
 
             {/* Score Popups */}

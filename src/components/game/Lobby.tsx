@@ -9,9 +9,7 @@ import { ALL_COLORS } from '@/lib/game/constants';
 import { PlayerColor } from '@/lib/game/types';
 import { CHARACTERS } from '@/lib/game/characters';
 import { PieceView } from './Piece';
-import { HowToPlayModal } from './HowToPlayModal';
-import { AchievementModal } from './AchievementModal';
-import { VolumeControl } from './VolumeControl';
+import { GameControls } from './GameControls';
 import { getStats, ACHIEVEMENTS } from '@/lib/achievements';
 import { Lock } from 'lucide-react';
 import { getUserName, setUserName } from '@/lib/utils/storage';
@@ -58,8 +56,6 @@ export const Lobby: React.FC<LobbyProps> = ({
     const [joinId, setJoinId] = useState('');
     const [copied, setCopied] = useState(false);
     const [mounted, setMounted] = useState(false);
-    const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
-    const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
     const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>([]);
 
     // User Name State
@@ -137,15 +133,7 @@ export const Lobby: React.FC<LobbyProps> = ({
         onBack();
     };
 
-    const handleOpenHowToPlay = () => {
-        playOpen();
-        setIsHowToPlayOpen(true);
-    };
 
-    const handleOpenAchievements = () => {
-        playOpen();
-        setIsAchievementsOpen(true);
-    };
 
     // --- Render Helpers ---
 
@@ -153,6 +141,7 @@ export const Lobby: React.FC<LobbyProps> = ({
     if (!isNameSet) {
         return (
             <div className="relative w-full max-w-md mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10">
+                <GameControls />
                 <Card className="glass-panel border-0 bg-black/40 text-slate-100 w-full">
                     <CardContent className="flex flex-col gap-6 p-8">
                         <div className="text-center space-y-2">
@@ -202,6 +191,9 @@ export const Lobby: React.FC<LobbyProps> = ({
                         {copied ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
                     </Button>
                 </div>
+
+                {/* Top Right Controls */}
+                <GameControls />
 
                 {/* Player Slots */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mb-8 mt-16">
@@ -354,6 +346,7 @@ export const Lobby: React.FC<LobbyProps> = ({
     if (viewMode === 'single_player_setup') {
         return (
             <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10 p-4">
+                <GameControls />
                 <div className="w-full max-w-3xl glass-panel p-6 rounded-xl mb-8">
                     <h2 className="text-3xl font-bold text-center text-white mb-2">Select Your Character</h2>
                     <p className="text-center text-slate-400 mb-8">Choose your hero for the single player campaign</p>
@@ -447,6 +440,7 @@ export const Lobby: React.FC<LobbyProps> = ({
     // 4. Initial Entry (Host/Join/Single)
     return (
         <div className="relative w-full max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10">
+            <GameControls />
             {/* ... (Keep existing background elements and title) ... */}
             {mounted && (
                 <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
@@ -526,8 +520,6 @@ export const Lobby: React.FC<LobbyProps> = ({
             </motion.div>
 
             {/* ... (Keep existing modals) ... */}
-            <HowToPlayModal isOpen={isHowToPlayOpen} onClose={() => setIsHowToPlayOpen(false)} />
-            <AchievementModal isOpen={isAchievementsOpen} onClose={() => setIsAchievementsOpen(false)} />
         </div>
     );
 };
