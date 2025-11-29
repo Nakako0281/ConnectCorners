@@ -254,6 +254,8 @@ export const Lobby: React.FC<LobbyProps> = ({
                             const isTaken = !!takenBy;
                             const isSelected = myLobbyPlayer?.color === color;
 
+                            const achievement = unlockCondition ? ACHIEVEMENTS.find(a => a.id === unlockCondition) : null;
+
                             return (
                                 <button
                                     key={color}
@@ -265,7 +267,7 @@ export const Lobby: React.FC<LobbyProps> = ({
                                     }}
                                     disabled={isLocked || isTaken || myLobbyPlayer?.isReady}
                                     className={`
-                                        relative group aspect-square rounded-xl overflow-hidden transition-all duration-200
+                                        relative group aspect-square rounded-xl transition-all duration-200
                                         ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-black/50 scale-105 z-10' : ''}
                                         ${(isLocked || isTaken) ? 'opacity-40 grayscale cursor-not-allowed' : 'hover:scale-105 opacity-90 hover:opacity-100'}
                                         ${myLobbyPlayer?.isReady ? 'cursor-default' : ''}
@@ -274,20 +276,41 @@ export const Lobby: React.FC<LobbyProps> = ({
                                         boxShadow: isSelected ? `0 0 15px var(--color-${color.toLowerCase()}-500, ${color.toLowerCase()})` : 'none'
                                     }}
                                 >
-                                    <div className={`absolute inset-0 opacity-20 bg-${color.toLowerCase()}-500 mix-blend-overlay`} />
-                                    <img
-                                        src={CHARACTERS[color].imagePath}
-                                        alt={CHARACTERS[color].name}
-                                        className="w-full h-full object-cover"
-                                    />
-                                    {isTaken && (
-                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                            <span className="text-xs font-bold text-white bg-black/50 px-1 rounded">{takenBy?.name.substring(0, 3)}</span>
-                                        </div>
-                                    )}
+                                    <div className="absolute inset-0 rounded-xl overflow-hidden">
+                                        <div className={`absolute inset-0 opacity-20 bg-${color.toLowerCase()}-500 mix-blend-overlay`} />
+                                        <img
+                                            src={CHARACTERS[color].imagePath}
+                                            alt={CHARACTERS[color].name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                        {isTaken && (
+                                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                                <span className="text-xs font-bold text-white bg-black/50 px-1 rounded">{takenBy?.name.substring(0, 3)}</span>
+                                            </div>
+                                        )}
+                                        {isLocked && (
+                                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                                <Lock className="w-4 h-4 text-white/50" />
+                                            </div>
+                                        )}
+                                    </div>
+
                                     {isLocked && (
-                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                            <Lock className="w-4 h-4 text-white/50" />
+                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-black/90 border border-slate-700 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                                            <div className="text-xs font-bold text-yellow-400 mb-1 flex items-center gap-1">
+                                                <Lock className="w-3 h-3" />
+                                                LOCKED
+                                            </div>
+                                            {achievement ? (
+                                                <>
+                                                    <div className="text-xs text-white font-bold">{achievement.title}</div>
+                                                    <div className="text-[10px] text-slate-400">{achievement.description}</div>
+                                                </>
+                                            ) : (
+                                                <div className="text-xs text-slate-400">Unknown condition</div>
+                                            )}
+                                            {/* Arrow */}
+                                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-black/90" />
                                         </div>
                                     )}
                                 </button>
@@ -348,14 +371,16 @@ export const Lobby: React.FC<LobbyProps> = ({
             <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10 p-4">
                 <GameControls />
                 <div className="w-full max-w-3xl glass-panel p-6 rounded-xl mb-8">
-                    <h2 className="text-3xl font-bold text-center text-white mb-2">Select Your Character</h2>
-                    <p className="text-center text-slate-400 mb-8">Choose your hero for the single player campaign</p>
+                    <h2 className="text-3xl font-bold text-center text-white mb-2">キャラクター選択</h2>
+                    <p className="text-center text-slate-400 mb-8">好きなキャラクターを選ぼう</p>
 
                     <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
                         {ALL_COLORS.map((color) => {
                             const unlockCondition = UNLOCK_CONDITIONS[color];
                             const isLocked = !!(unlockCondition && !unlockedAchievements.includes(unlockCondition));
                             const isSelected = singlePlayerColor === color;
+
+                            const achievement = unlockCondition ? ACHIEVEMENTS.find(a => a.id === unlockCondition) : null;
 
                             return (
                                 <button
@@ -368,7 +393,7 @@ export const Lobby: React.FC<LobbyProps> = ({
                                     }}
                                     disabled={isLocked}
                                     className={`
-                                        relative group aspect-square rounded-xl overflow-hidden transition-all duration-200
+                                        relative group aspect-square rounded-xl transition-all duration-200
                                         ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-black/50 scale-105 z-10' : ''}
                                         ${isLocked ? 'opacity-40 grayscale cursor-not-allowed' : 'hover:scale-105 opacity-90 hover:opacity-100'}
                                     `}
@@ -376,15 +401,36 @@ export const Lobby: React.FC<LobbyProps> = ({
                                         boxShadow: isSelected ? `0 0 15px var(--color-${color.toLowerCase()}-500, ${color.toLowerCase()})` : 'none'
                                     }}
                                 >
-                                    <div className={`absolute inset-0 opacity-20 bg-${color.toLowerCase()}-500 mix-blend-overlay`} />
-                                    <img
-                                        src={CHARACTERS[color].imagePath}
-                                        alt={CHARACTERS[color].name}
-                                        className="w-full h-full object-cover"
-                                    />
+                                    <div className="absolute inset-0 rounded-xl overflow-hidden">
+                                        <div className={`absolute inset-0 opacity-20 bg-${color.toLowerCase()}-500 mix-blend-overlay`} />
+                                        <img
+                                            src={CHARACTERS[color].imagePath}
+                                            alt={CHARACTERS[color].name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                        {isLocked && (
+                                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                                <Lock className="w-4 h-4 text-white/50" />
+                                            </div>
+                                        )}
+                                    </div>
+
                                     {isLocked && (
-                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                            <Lock className="w-4 h-4 text-white/50" />
+                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-black border border-slate-700 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                                            <div className="text-xs font-bold text-yellow-400 mb-1 flex items-center gap-1">
+                                                <Lock className="w-3 h-3" />
+                                                LOCKED
+                                            </div>
+                                            {achievement ? (
+                                                <>
+                                                    <div className="text-xs text-white font-bold">{achievement.title}</div>
+                                                    <div className="text-[10px] text-slate-400">{achievement.description}</div>
+                                                </>
+                                            ) : (
+                                                <div className="text-xs text-slate-400">Unknown condition</div>
+                                            )}
+                                            {/* Arrow */}
+                                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-black/90" />
                                         </div>
                                     )}
                                 </button>
