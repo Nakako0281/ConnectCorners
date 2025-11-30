@@ -49,8 +49,9 @@ import { GameEndOverlay } from './GameEndOverlay';
 import { TurnNotification } from './TurnNotification';
 import { SpecialPieceCutIn } from './SpecialPieceCutIn';
 
-const createPlayer = (id: string, color: PlayerColor, isHuman: boolean): Player => ({
+const createPlayer = (id: string, name: string, color: PlayerColor, isHuman: boolean): Player => ({
     id,
+    name,
     color,
     pieces: getInitialPieces(color),
     isHuman,
@@ -169,11 +170,13 @@ export const Game: React.FC = () => {
         const shuffled = [...availableColors].sort(() => 0.5 - Math.random());
         opponents.push(...shuffled.slice(0, 3));
 
+        const myName = getUserName() || 'Player';
+
         const newPlayers: Player[] = [
-            createPlayer('p1', playerColor, true),
-            createPlayer('cpu1', opponents[0], false),
-            createPlayer('cpu2', opponents[1], false),
-            createPlayer('cpu3', opponents[2], false),
+            createPlayer('p1', myName, playerColor, true),
+            createPlayer('cpu1', 'CPU 1', opponents[0], false),
+            createPlayer('cpu2', 'CPU 2', opponents[1], false),
+            createPlayer('cpu3', 'CPU 3', opponents[2], false),
         ];
 
         setPlayers(newPlayers);
@@ -201,8 +204,10 @@ export const Game: React.FC = () => {
         const gamePlayers: Player[] = [];
 
         // 1. Host
+        // 1. Host
         gamePlayers.push({
             id: peerId,
+            name: hostLobbyPlayer?.name || 'Host',
             color: hostColor,
             pieces: getInitialPieces(hostColor),
             isHuman: true,
@@ -230,6 +235,7 @@ export const Game: React.FC = () => {
 
             gamePlayers.push({
                 id: guest.id,
+                name: guest.name,
                 color: guestColor,
                 pieces: getInitialPieces(guestColor),
                 isHuman: true,
@@ -247,6 +253,7 @@ export const Game: React.FC = () => {
                 const color = remainingColors[i];
                 gamePlayers.push({
                     id: `AI-${color}`,
+                    name: `CPU (${CHARACTERS[color].name})`,
                     color: color,
                     pieces: getInitialPieces(color),
                     isHuman: false,
@@ -508,6 +515,7 @@ export const Game: React.FC = () => {
                     newPlayers[disconnectedPlayerIndex] = {
                         ...disconnectedPlayer,
                         id: `AI-${disconnectedPlayer.color}`, // Change ID to AI format
+                        name: `${disconnectedPlayer.name} (AI)`,
                         isHuman: false
                     };
 
@@ -566,6 +574,7 @@ export const Game: React.FC = () => {
                     newPlayers[idx] = {
                         ...newPlayers[idx],
                         id: `AI-${newPlayers[idx].color}`,
+                        name: `${newPlayers[idx].name} (AI)`,
                         isHuman: false
                     };
                     return newPlayers;
@@ -1097,6 +1106,20 @@ export const Game: React.FC = () => {
                             Return to Lobby
                         </Button>
                     </div>
+                </div>
+            )}
+
+            {/* Debug: Force End Game Button */}
+            {gameStatus === 'playing' && (
+                <div className="absolute bottom-4 left-4 z-50">
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleGameEnd(players)}
+                        className="opacity-50 hover:opacity-100 transition-opacity"
+                    >
+                        Debug: Force End
+                    </Button>
                 </div>
             )}
 

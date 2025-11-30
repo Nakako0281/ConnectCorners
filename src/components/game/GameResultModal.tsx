@@ -218,8 +218,14 @@ export const GameResultModal: React.FC<GameResultModalProps> = ({
                                             <div className="flex flex-col">
                                                 <span
                                                     className="font-bold text-lg"
-                                                    style={{ color: player.color }}
+                                                    style={{
+                                                        color: player.color,
+                                                        textShadow: '1px 1px 0 #6a6a6aff, -1px -1px 0 #6a6a6aff, 1px -1px 0 #6a6a6aff, -1px 1px 0 #6a6a6aff, 0 2px 4px #6a6a6aff'
+                                                    }}
                                                 >
+                                                    {player.name}
+                                                </span>
+                                                <span className="text-xs text-slate-500 font-medium">
                                                     {CHARACTERS[player.color].japaneseName}
                                                 </span>
                                                 {player.isPerfect && (

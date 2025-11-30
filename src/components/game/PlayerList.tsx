@@ -42,10 +42,10 @@ const PlayerListComponent = ({ players, currentPlayerId }: PlayerListProps) => {
                                 </div>
                                 <div className="flex flex-col leading-none">
                                     <span className={`font-bold text-base ${p.hasPassed ? 'line-through text-slate-500' : 'text-slate-200'}`}>
-                                        {CHARACTERS[p.color].japaneseName}
+                                        {p.name}
                                     </span>
                                     <span className="text-[10px] text-slate-400 font-mono uppercase tracking-wider">
-                                        {CHARACTERS[p.color].name}
+                                        {CHARACTERS[p.color].japaneseName}
                                     </span>
                                 </div>
                                 {p.hasPassed && <span className="text-xs text-red-400 font-bold ml-1">OUT</span>}

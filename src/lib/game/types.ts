@@ -13,6 +13,7 @@ export interface Piece {
 
 export interface Player {
   id: string;
+  name: string;
   color: PlayerColor;
   pieces: Piece[];
   isHuman: boolean;
