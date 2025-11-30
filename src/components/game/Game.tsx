@@ -43,6 +43,9 @@ import { useSoundContext } from '@/contexts/SoundContext';
 import { GameControls } from './GameControls';
 import { getStats, updateStats, Achievement } from '@/lib/achievements';
 import { getUserName } from '@/lib/utils/storage';
+import { GameStartOverlay } from './GameStartOverlay';
+import { GameEndOverlay } from './GameEndOverlay';
+import { TurnNotification } from './TurnNotification';
 
 const createPlayer = (id: string, color: PlayerColor, isHuman: boolean): Player => ({
     id,
@@ -96,6 +99,10 @@ export const Game: React.FC = () => {
     const [rotation, setRotation] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
     const [hoverPos, setHoverPos] = useState<Coordinate | null>(null);
+
+    // Visual Effects State
+    const [isStarting, setIsStarting] = useState(false);
+    const [isFinishing, setIsFinishing] = useState(false);
 
     // Score Animation State
     interface ScorePopupData {
@@ -161,6 +168,7 @@ export const Game: React.FC = () => {
         setPlayers(newPlayers);
         setCurrentPlayerIndex(0);
         setGameStatus('playing');
+        setIsStarting(true); // Start animation
         setIsMultiplayer(false);
         setMyPlayerColor(playerColor);
         setTurnNumber(1);
@@ -236,6 +244,7 @@ export const Game: React.FC = () => {
 
         setPlayers(gamePlayers);
         setGameStatus('playing');
+        setIsStarting(true); // Start animation
         setIsMultiplayer(true);
 
         // Broadcast Start
@@ -312,7 +321,8 @@ export const Game: React.FC = () => {
             }
         }
 
-        setIsResultModalOpen(true);
+        setIsFinishing(true); // Start finish animation
+        // setIsResultModalOpen(true); // Will be called after animation
     };
 
     // Handle Incoming Data
@@ -353,6 +363,7 @@ export const Game: React.FC = () => {
                     if (me) setMyPlayerColor(me.color);
                 }
                 setGameStatus('playing');
+                setIsStarting(true); // Start animation
                 setIsMultiplayer(true);
             }
             else if (data.type === 'JOIN') {
@@ -763,7 +774,7 @@ export const Game: React.FC = () => {
     };
 
     const onBoardClick = useCallback((pos: Coordinate) => {
-        if (!isMyTurn || !selectedPiece) return;
+        if (!isMyTurn || !selectedPiece || isStarting || isFinishing) return;
 
         const shape = getTransformedPiece(selectedPiece, rotation, isFlipped);
         const isFirstMove = currentPlayer.pieces.length === TOTAL_PIECES_COUNT;
@@ -946,6 +957,14 @@ export const Game: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* Visual Effects */}
+            {isStarting && <GameStartOverlay onComplete={() => setIsStarting(false)} />}
+            {isFinishing && <GameEndOverlay onComplete={() => {
+                setIsFinishing(false);
+                setIsResultModalOpen(true);
+            }} />}
+            <TurnNotification isMyTurn={isMyTurn && !isStarting && !isFinishing} />
 
             {/* Game Result Modal */}
             <GameResultModal
