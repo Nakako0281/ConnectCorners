@@ -98,7 +98,7 @@ export const Lobby: React.FC<LobbyProps> = ({
 
     const copyToClipboard = () => {
         playClick();
-        navigator.clipboard.writeText(peerId);
+        navigator.clipboard.writeText(isHost ? peerId : joinId);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -193,7 +193,7 @@ export const Lobby: React.FC<LobbyProps> = ({
                 {/* Header: Room ID */}
                 <div className="absolute top-4 left-4 z-50 flex items-center gap-2 bg-black/40 backdrop-blur-md p-2 rounded-lg border border-white/10">
                     <span className="text-slate-400 text-sm font-mono">ROOM ID:</span>
-                    <code className="text-blue-400 font-mono font-bold">{peerId || joinId}</code>
+                    <code className="text-blue-400 font-mono font-bold">{isHost ? peerId : joinId}</code>
                     <Button
                         size="icon"
                         variant="ghost"

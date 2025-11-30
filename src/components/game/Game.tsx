@@ -1057,7 +1057,7 @@ export const Game: React.FC = () => {
                 onClose={() => setIsResultModalOpen(false)}
                 players={players}
                 onPlayAgain={handleRestart}
-                onBackToTitle={handleReset}
+                onBackToTitle={handleBack}
                 newAchievements={newAchievements}
             />
 
