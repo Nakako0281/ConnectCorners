@@ -39,13 +39,9 @@ export const GameEndOverlay: React.FC<GameEndOverlayProps> = ({ onComplete }) =>
                             stiffness: 300,
                             damping: 20
                         }}
-                        className="text-7xl md:text-9xl font-black text-white tracking-widest uppercase drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]"
+                        className="text-7xl md:text-9xl font-black text-yellow-400 tracking-widest uppercase drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]"
                         style={{
-                            textShadow: '0 0 30px rgba(255,0,0,0.8), 4px 4px 0 #000',
-                            background: 'linear-gradient(to bottom, #fff 0%, #ffcccc 100%)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            WebkitTextStroke: '2px white'
+                            textShadow: '0 0 30px rgba(255,200,0,0.8), 4px 4px 0 #000'
                         }}
                     >
                         FINISH!
