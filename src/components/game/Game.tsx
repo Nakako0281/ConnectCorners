@@ -191,7 +191,10 @@ export const Game: React.FC = () => {
         playClick();
         if (!isHost) return;
 
-        const hostColor = myPlayerColor;
+        // Get Host Color from Lobby State
+        const hostLobbyPlayer = connectedPlayers.find(p => p.id === peerId);
+        const hostColor = hostLobbyPlayer?.color || 'BLUE';
+        setMyPlayerColor(hostColor);
 
         // Map connected players to game players
         const gamePlayers: Player[] = [];
@@ -333,6 +336,13 @@ export const Game: React.FC = () => {
 
         setIsFinishing(true); // Start finish animation
         // setIsResultModalOpen(true); // Will be called after animation
+
+        if (isMultiplayer && isHost) {
+            sendData({
+                type: 'GAME_OVER',
+                payload: { players: finalPlayers }
+            });
+        }
     };
 
     // Handle Incoming Data
@@ -448,6 +458,28 @@ export const Game: React.FC = () => {
                         handlePlacePiece(piece, shape, position); // Use common handler
                     }
                 }
+            }
+            else if (data.type === 'PASS') {
+                // Host receiving pass notification
+                if (!isHost) return;
+
+                const { playerId } = data.payload;
+                const playerIndex = players.findIndex(p => p.id === playerId);
+
+                if (playerIndex !== currentPlayerIndex) return; // Not their turn
+
+                // Execute Pass
+                const newPlayers = [...players];
+                newPlayers[playerIndex].hasPassed = true;
+                setPlayers(newPlayers);
+
+                const nextIdx = nextTurnIndex(newPlayers, currentPlayerIndex);
+                setCurrentPlayerIndex(nextIdx);
+
+                broadcastUpdate(board, newPlayers, nextIdx);
+            }
+            else if (data.type === 'GAME_OVER') {
+                handleGameEnd(data.payload.players);
             }
         });
     }, [isHost, players, board, currentPlayerIndex, peerId, setOnConnect, setOnData, sendData]);
@@ -748,7 +780,10 @@ export const Game: React.FC = () => {
     const handlePass = () => {
         playClick();
         if (isMultiplayer && !isHost) {
-            // Send PASS message (TODO)
+            sendData({
+                type: 'PASS',
+                payload: { playerId: peerId }
+            });
         } else {
             const newPlayers = [...players];
             newPlayers[currentPlayerIndex].hasPassed = true;

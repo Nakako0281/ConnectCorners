@@ -11,7 +11,9 @@ export type NetworkMessage =
     | { type: 'JOIN', payload: { name: string, color: PlayerColor } }
     | { type: 'LOBBY_UPDATE', payload: { players: any[] } }
     | { type: 'SELECT_CHARACTER', payload: { color: PlayerColor } }
-    | { type: 'SET_READY', payload: { isReady: boolean } };
+    | { type: 'SET_READY', payload: { isReady: boolean } }
+    | { type: 'PASS', payload: { playerId: string } }
+    | { type: 'GAME_OVER', payload: { players: any[] } };
 
 export const usePeer = () => {
     const [peerId, setPeerId] = useState<string>('');
