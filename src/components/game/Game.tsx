@@ -46,6 +46,7 @@ import { getUserName } from '@/lib/utils/storage';
 import { GameStartOverlay } from './GameStartOverlay';
 import { GameEndOverlay } from './GameEndOverlay';
 import { TurnNotification } from './TurnNotification';
+import { SpecialPieceCutIn } from './SpecialPieceCutIn';
 
 const createPlayer = (id: string, color: PlayerColor, isHuman: boolean): Player => ({
     id,
@@ -103,6 +104,7 @@ export const Game: React.FC = () => {
     // Visual Effects State
     const [isStarting, setIsStarting] = useState(false);
     const [isFinishing, setIsFinishing] = useState(false);
+    const [specialPieceCutIn, setSpecialPieceCutIn] = useState<PlayerColor | null>(null);
 
     // Score Animation State
     interface ScorePopupData {
@@ -632,6 +634,11 @@ export const Game: React.FC = () => {
     const handlePlacePiece = (piece: Piece, shape: number[][], position: Coordinate) => {
         playPlace();
 
+        // Special Piece Cut-in Trigger
+        if (piece.id === 'special') {
+            setSpecialPieceCutIn(currentPlayer.color);
+        }
+
         // Calculate Score & Show Popup (Common for both)
         const bonusPoints = calculateBonusPoints(shape, position);
         const totalScore = piece.value + bonusPoints;
@@ -774,7 +781,7 @@ export const Game: React.FC = () => {
     };
 
     const onBoardClick = useCallback((pos: Coordinate) => {
-        if (!isMyTurn || !selectedPiece || isStarting || isFinishing) return;
+        if (!isMyTurn || !selectedPiece || isStarting || isFinishing || specialPieceCutIn) return;
 
         const shape = getTransformedPiece(selectedPiece, rotation, isFlipped);
         const isFirstMove = currentPlayer.pieces.length === TOTAL_PIECES_COUNT;
@@ -965,6 +972,12 @@ export const Game: React.FC = () => {
                 setIsResultModalOpen(true);
             }} />}
             <TurnNotification isMyTurn={isMyTurn && !isStarting && !isFinishing} />
+            {specialPieceCutIn && (
+                <SpecialPieceCutIn
+                    character={CHARACTERS[specialPieceCutIn]}
+                    onComplete={() => setSpecialPieceCutIn(null)}
+                />
+            )}
 
             {/* Game Result Modal */}
             <GameResultModal
