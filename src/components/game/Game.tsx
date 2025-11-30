@@ -29,7 +29,8 @@ import {
     ALL_COLORS,
     CORNER_POSITIONS,
     BONUS_SQUARES,
-    TOTAL_PIECES_COUNT
+    TOTAL_PIECES_COUNT,
+    TOTAL_SQUARES
 } from '@/lib/game/constants';
 import { CHARACTERS } from '@/lib/game/characters';
 import { getAIMove } from '@/lib/game/ai';
@@ -310,7 +311,7 @@ export const Game: React.FC = () => {
         // Calculate winner and stats
         const playersWithScores = finalPlayers.map(p => {
             const remainingSquares = p.pieces.reduce((acc, piece) => acc + piece.value, 0);
-            const score = 89 - remainingSquares + (p.pieces.length === 0 ? 15 : 0) + (p.bonusScore || 0);
+            const score = TOTAL_SQUARES - remainingSquares + (p.pieces.length === 0 ? 15 : 0) + (p.bonusScore || 0);
             const isPerfect = p.pieces.length === 0;
             return { ...p, score, isPerfect };
         }).sort((a, b) => b.score - a.score);
@@ -1013,7 +1014,7 @@ export const Game: React.FC = () => {
                                         // If special is in the hand, it counts towards remaining.
                                         // Score = (Total Initial Squares - Remaining Squares) + Bonus
                                         // Total Initial = 89 (standard) + 6 (special) = 95.
-                                        const currentScore = 95 - remainingSquares + currentPlayer.bonusScore;
+                                        const currentScore = TOTAL_SQUARES - remainingSquares + currentPlayer.bonusScore;
 
                                         if (currentScore < 20) {
                                             playError();
@@ -1026,7 +1027,7 @@ export const Game: React.FC = () => {
                                     setIsFlipped(false);
                                 }
                             }}
-                            canUseSpecial={(95 - currentPlayer.pieces.reduce((acc, piece) => acc + piece.value, 0) + currentPlayer.bonusScore) >= 20}
+                            canUseSpecial={(TOTAL_SQUARES - currentPlayer.pieces.reduce((acc, piece) => acc + piece.value, 0) + currentPlayer.bonusScore) >= 20}
                         />
                     </div>
                     {!isMyTurn && (

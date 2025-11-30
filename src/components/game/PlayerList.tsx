@@ -2,6 +2,7 @@ import React from 'react';
 import { Player, PlayerColor } from '@/lib/game/types';
 import { PieceView } from './Piece';
 import { CHARACTERS } from '@/lib/game/characters';
+import { TOTAL_SQUARES } from '@/lib/game/constants';
 
 interface PlayerListProps {
     players: Player[];
@@ -25,7 +26,7 @@ const PlayerListComponent = ({ players, currentPlayerId }: PlayerListProps) => {
             <h3 className="font-semibold text-sm text-slate-400 mb-2 uppercase tracking-wider">Players</h3>
             {players.map(p => {
                 const remainingSquares = p.pieces.reduce((acc, piece) => acc + piece.value, 0);
-                const score = 95 - remainingSquares + (p.pieces.length === 0 ? 15 : 0) + (p.bonusScore || 0);
+                const score = TOTAL_SQUARES - remainingSquares + (p.pieces.length === 0 ? 15 : 0) + (p.bonusScore || 0);
                 const isCurrent = p.id === currentPlayerId;
 
                 return (

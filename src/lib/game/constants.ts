@@ -47,6 +47,9 @@ const STANDARD_PIECES: Piece[] = PIECES.map((p, index) => ({
 }));
 
 export const TOTAL_PIECES_COUNT = STANDARD_PIECES.length + 1; // 21 standard + 1 special
+export const STANDARD_SQUARES = 89;
+export const SPECIAL_PIECE_SQUARES = 6;
+export const TOTAL_SQUARES = STANDARD_SQUARES + SPECIAL_PIECE_SQUARES;
 
 export const getInitialPieces = (color: PlayerColor): Piece[] => {
     const character = CHARACTERS[color];
