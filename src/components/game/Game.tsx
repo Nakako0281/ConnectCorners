@@ -123,6 +123,14 @@ export const Game: React.FC = () => {
     const initSinglePlayer = (playerColor: PlayerColor) => {
         playClick();
 
+        // Reset Board and Interaction State
+        setBoard(createInitialBoard());
+        setSelectedPieceId(null);
+        setRotation(0);
+        setIsFlipped(false);
+        setHoverPos(null);
+        setScorePopups([]);
+
         // Get unlocked characters for CPU selection
         const stats = getStats();
         const unlockedAchievements = stats.unlockedAchievements;
