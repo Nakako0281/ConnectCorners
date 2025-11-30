@@ -10,7 +10,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'first_win', title: '初勝利', description: '初の勝利を果たす', icon: '🥇' },
   { id: 'win_streak_3', title: '連勝3回', description: '3回連続で勝利を果たす', icon: '🔥' },
   { id: 'win_streak_5', title: '連勝5回', description: '5回連続で勝利を果たす', icon: '🚀' },
-  { id: 'perfect_game', title: 'パーフェクト', description: '盤面を全て埋める', icon: '💎' },
+  { id: 'perfect_game', title: 'パーフェクト', description: '盤面に自分のブロックを全て置く', icon: '💎' },
   { id: 'veteran', title: 'ベテラン', description: '10回プレイ', icon: '🛡️' },
   { id: 'master', title: 'マスター', description: '50回プレイ', icon: '👑' },
 ];
