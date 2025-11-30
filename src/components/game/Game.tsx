@@ -641,7 +641,14 @@ export const Game: React.FC = () => {
 
         // Calculate Score & Show Popup (Common for both)
         const bonusPoints = calculateBonusPoints(shape, position);
-        const totalScore = piece.value + bonusPoints;
+        let totalScore = piece.value + bonusPoints;
+        let pointsToAdd = bonusPoints;
+
+        // Double score for Special Piece
+        if (piece.id === 'special') {
+            totalScore *= 2;
+            pointsToAdd = piece.value + (bonusPoints * 2);
+        }
 
         const boardElement = document.getElementById('game-board');
         if (boardElement) {
@@ -701,7 +708,7 @@ export const Game: React.FC = () => {
             newPlayers[currentPlayerIndex] = {
                 ...currentPlayer,
                 pieces: currentPlayer.pieces.filter(p => p.id !== piece.id),
-                bonusScore: currentPlayer.bonusScore + bonusPoints
+                bonusScore: currentPlayer.bonusScore + pointsToAdd
             };
             setPlayers(newPlayers);
 
@@ -950,11 +957,33 @@ export const Game: React.FC = () => {
                             selectedPieceId={selectedPieceId}
                             onSelectPiece={(p) => {
                                 if (isMyTurn) {
+                                    // Special Piece Restriction: Score >= 20
+                                    if (p.id === 'special') {
+                                        const remainingSquares = currentPlayer.pieces.reduce((acc, piece) => acc + piece.value, 0);
+                                        // Note: Total squares is 89 + 6 (special) = 95? Or is special included in pieces?
+                                        // Assuming pieces includes special.
+                                        // Let's calculate score dynamically.
+                                        // Actually, we can just calculate the score the same way as handleGameEnd
+                                        // But we don't know the exact total squares if we don't hardcode or sum initial.
+                                        // Let's assume 89 is standard + special (6) = 95 total?
+                                        // Wait, standard pieces = 89 squares. Special = 6 squares.
+                                        // If special is in the hand, it counts towards remaining.
+                                        // Score = (Total Initial Squares - Remaining Squares) + Bonus
+                                        // Total Initial = 89 (standard) + 6 (special) = 95.
+                                        const currentScore = 95 - remainingSquares + currentPlayer.bonusScore;
+
+                                        if (currentScore < 20) {
+                                            playError();
+                                            return;
+                                        }
+                                    }
+
                                     setSelectedPieceId(p.id);
                                     setRotation(0);
                                     setIsFlipped(false);
                                 }
                             }}
+                            canUseSpecial={(95 - currentPlayer.pieces.reduce((acc, piece) => acc + piece.value, 0) + currentPlayer.bonusScore) >= 20}
                         />
                     </div>
                     {!isMyTurn && (

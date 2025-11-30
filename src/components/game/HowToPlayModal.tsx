@@ -95,8 +95,10 @@ export const HowToPlayModal: React.FC<HowToPlayModalProps> = ({ isOpen, onClose 
                             <span className="text-xl">🧩</span> キャラクター固有ピース
                         </h3>
                         <p className="text-sm text-slate-300 leading-relaxed">
-                            各キャラクターは、通常の21個のピースに加えて、<span className="font-bold text-white">1個の「固有ピース」</span>を持っています。
-                            この強力な6マス分のピースをいつ使うかが勝負の鍵を握ります！
+                            各キャラクターは、通常の21個のピースに加えて、<span className="font-bold text-white">1個の「スペシャルピース」</span>を持っています。<br />
+                            このスペシャルピースは配置した際に獲得できるポイントが<span className="font-bold text-white">通常の2倍</span>になります。<br />
+                            スペシャルピースを上手にボーナスマスに配置できるかが勝利の鍵を握るかも？！<br />
+                            <span className="text-xs text-slate-400">※スペシャルピースを置くにはスコアを20ポイント以上獲得している必要があります。</span>
                         </p>
                     </div>
                 </div>
