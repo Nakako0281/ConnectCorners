@@ -6,9 +6,15 @@ export function getAIMove(
     pieces: Piece[],
     playerColor: PlayerColor,
     isFirstMove: boolean,
-    startPosition?: import('./types').Coordinate
+    startPosition?: import('./types').Coordinate,
+    canUseSpecial: boolean = true
 ) {
-    const validMoves = getAllValidMoves(board, pieces, playerColor, isFirstMove, startPosition);
+    // Filter out special piece if not allowed
+    const availablePieces = canUseSpecial
+        ? pieces
+        : pieces.filter(p => p.id !== 'special');
+
+    const validMoves = getAllValidMoves(board, availablePieces, playerColor, isFirstMove, startPosition);
 
     if (validMoves.length === 0) {
         return null;

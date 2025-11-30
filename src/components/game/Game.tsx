@@ -59,6 +59,17 @@ const createPlayer = (id: string, name: string, color: PlayerColor, isHuman: boo
     bonusScore: 0
 });
 
+const TAILWIND_COLOR_MAP: Record<PlayerColor, string> = {
+    BLUE: 'blue',
+    YELLOW: 'yellow',
+    RED: 'red',
+    GREEN: 'green',
+    LIGHTBLUE: 'sky',
+    PINK: 'pink',
+    ORANGE: 'orange',
+    PURPLE: 'purple',
+};
+
 export const Game: React.FC = () => {
     // Sound Context
     const { playClick, playTurnStart, playPlace, playError, playGameBgm, stopGameBgm } = useSoundContext();
@@ -628,7 +639,13 @@ export const Game: React.FC = () => {
             const timer = setTimeout(() => {
                 const isFirstMove = currentPlayer.pieces.length === TOTAL_PIECES_COUNT;
                 const startPos = CORNER_POSITIONS[currentPlayerIndex];
-                const move = getAIMove(board, currentPlayer.pieces, currentPlayer.color, isFirstMove, startPos);
+
+                // Calculate Score for AI Special Piece Check
+                const remainingSquares = currentPlayer.pieces.reduce((acc, piece) => acc + piece.value, 0);
+                const currentScore = TOTAL_SQUARES - remainingSquares + currentPlayer.bonusScore;
+                const canUseSpecial = currentScore >= 20;
+
+                const move = getAIMove(board, currentPlayer.pieces, currentPlayer.color, isFirstMove, startPos, canUseSpecial);
 
                 if (move) {
                     // Apply AI move locally then broadcast if host
@@ -957,7 +974,7 @@ export const Game: React.FC = () => {
                         CONNECT CORNERS
                     </h1>
                     <div className="flex items-center gap-2 mb-4">
-                        <div className={`w-4 h-4 rounded-full bg-${currentPlayer.color.toLowerCase()}-500 shadow-[0_0_10px_currentColor]`} style={{ color: `var(--color-${currentPlayer.color.toLowerCase()}-500)` }} />
+                        <div className={`w-4 h-4 rounded-full bg-${TAILWIND_COLOR_MAP[currentPlayer.color]}-500 shadow-[0_0_10px_currentColor]`} style={{ color: `var(--color-${TAILWIND_COLOR_MAP[currentPlayer.color]}-500)` }} />
                         <span className="font-medium text-slate-300">
                             Turn {turnNumber}: <span style={{ color: currentPlayer.color }} className="font-bold">{CHARACTERS[currentPlayer.color].japaneseName}</span>
                             {isMyTurn ? " (You)" : " (Waiting...)"}
