@@ -264,6 +264,11 @@ export const Lobby: React.FC<LobbyProps> = ({
                             // Check if taken by OTHER players
                             const takenBy = connectedPlayers.find(p => p.color === color && p.id !== myLobbyPlayer?.id);
                             const isTaken = !!takenBy;
+                            if (color === 'BLUE') {
+                                console.log(`[Lobby] Checking BLUE. MyID: ${myLobbyPlayer?.id}`);
+                                console.log(`[Lobby] ConnectedPlayers:`, connectedPlayers);
+                                console.log(`[Lobby] TakenBy:`, takenBy);
+                            }
                             const isSelected = myLobbyPlayer?.color === color;
 
                             const achievement = unlockCondition ? ACHIEVEMENTS.find(a => a.id === unlockCondition) : null;

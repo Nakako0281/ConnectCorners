@@ -399,17 +399,22 @@ export const Game: React.FC = () => {
             }
             else if (data.type === 'LOBBY_UPDATE') {
                 // Guest receiving lobby update
+                console.log(`[GUEST] Received LOBBY_UPDATE:`, data.payload.players);
                 setConnectedPlayers(data.payload.players);
             }
             else if (data.type === 'SELECT_CHARACTER') {
                 // Host receiving character selection request
                 if (isHost) {
                     const { color } = data.payload;
+                    console.log(`[HOST] Received SELECT_CHARACTER from ${conn.peer}: ${color}`);
                     // Check if taken
                     const isTaken = connectedPlayers.some(p => p.color === color && p.id !== conn.peer);
+                    console.log(`[HOST] isTaken: ${isTaken}`, connectedPlayers);
+
                     if (!isTaken) {
                         setConnectedPlayers(prev => {
                             const newPlayers = prev.map(p => p.id === conn.peer ? { ...p, color, isReady: false } : p);
+                            console.log(`[HOST] Updating connectedPlayers:`, newPlayers);
                             sendData({ type: 'LOBBY_UPDATE', payload: { players: newPlayers } });
                             return newPlayers;
                         });
@@ -483,7 +488,7 @@ export const Game: React.FC = () => {
                 handleGameEnd(data.payload.players);
             }
         });
-    }, [isHost, players, board, currentPlayerIndex, peerId, setOnConnect, setOnData, sendData]);
+    }, [isHost, players, board, currentPlayerIndex, peerId, setOnConnect, setOnData, sendData, connectedPlayers]);
 
     // Handle Disconnection
     useEffect(() => {
@@ -886,12 +891,15 @@ export const Game: React.FC = () => {
                 onBack={handleBack}
                 onSelectCharacter={(color) => {
                     if (isHost) {
+                        console.log(`[HOST] Selecting character locally: ${color}`);
                         setConnectedPlayers(prev => {
                             const newPlayers = prev.map(p => p.id === peerId ? { ...p, color, isReady: false } : p);
+                            console.log(`[HOST] New players list:`, newPlayers);
                             sendData({ type: 'LOBBY_UPDATE', payload: { players: newPlayers } });
                             return newPlayers;
                         });
                     } else {
+                        console.log(`[GUEST] Sending SELECT_CHARACTER: ${color}`);
                         sendData({ type: 'SELECT_CHARACTER', payload: { color } });
                     }
                 }}
