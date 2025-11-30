@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, Copy, Gamepad2, Check, HelpCircle, CheckCircle2, Trophy } from 'lucide-react';
+import { Users, Copy, Gamepad2, Check, HelpCircle, CheckCircle2, Trophy, Edit2, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSoundContext } from '@/contexts/SoundContext';
 import { ALL_COLORS } from '@/lib/game/constants';
@@ -139,14 +139,26 @@ export const Lobby: React.FC<LobbyProps> = ({
 
     // 1. Name Entry Screen
     if (!isNameSet) {
+        const hasSavedName = !!getUserName();
+
         return (
             <div className="relative w-full max-w-md mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10">
                 <GameControls />
                 <Card className="glass-panel border-0 bg-black/40 text-slate-100 w-full">
                     <CardContent className="flex flex-col gap-6 p-8">
-                        <div className="text-center space-y-2">
+                        <div className="text-center space-y-2 relative">
+                            {hasSavedName && (
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="absolute -top-2 -right-2 text-slate-400 hover:text-white hover:bg-white/10"
+                                    onClick={() => setIsNameSet(true)}
+                                >
+                                    <X className="w-5 h-5" />
+                                </Button>
+                            )}
                             <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                                Welcome
+                                {hasSavedName ? 'Edit Name' : 'Welcome'}
                             </h2>
                             <p className="text-slate-400">Enter your name to start</p>
                         </div>
@@ -508,7 +520,20 @@ export const Lobby: React.FC<LobbyProps> = ({
                     <br />
                     CORNERS
                 </h1>
-                <p className="text-slate-400 mt-4 text-xl">Welcome, <span className="text-white font-bold">{userName}</span></p>
+                <p className="text-slate-400 mt-4 text-xl flex items-center justify-center gap-3">
+                    <span>Welcome, <span className="text-white font-bold">{userName}</span></span>
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                        onClick={() => {
+                            playClick();
+                            setIsNameSet(false);
+                        }}
+                    >
+                        <Edit2 className="w-4 h-4" />
+                    </Button>
+                </p>
             </motion.div>
 
             <motion.div
