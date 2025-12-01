@@ -26,6 +26,28 @@ const UNLOCK_CONDITIONS: Record<PlayerColor, string | null> = {
     PURPLE: 'win_streak_5',
 };
 
+const BG_COLOR_MAP: Record<PlayerColor, string> = {
+    BLUE: 'bg-blue-500',
+    RED: 'bg-red-500',
+    GREEN: 'bg-green-500',
+    YELLOW: 'bg-yellow-500',
+    LIGHTBLUE: 'bg-sky-500',
+    PINK: 'bg-pink-500',
+    ORANGE: 'bg-orange-500',
+    PURPLE: 'bg-purple-500',
+};
+
+const SHADOW_COLOR_MAP: Record<PlayerColor, string> = {
+    BLUE: '#3b82f6',
+    RED: '#ef4444',
+    GREEN: '#22c55e',
+    YELLOW: '#eab308',
+    LIGHTBLUE: '#0ea5e9',
+    PINK: '#ec4899',
+    ORANGE: '#f97316',
+    PURPLE: '#a855f7',
+};
+
 interface LobbyProps {
     peerId: string;
     isHost: boolean;
@@ -329,11 +351,11 @@ export const Lobby: React.FC<LobbyProps> = ({
                                         ${myLobbyPlayer?.isReady ? 'cursor-default' : ''}
                                     `}
                                     style={{
-                                        boxShadow: isSelected ? `0 0 15px var(--color-${color.toLowerCase()}-500, ${color.toLowerCase()})` : 'none'
+                                        boxShadow: isSelected ? `0 0 15px ${SHADOW_COLOR_MAP[color]}` : 'none'
                                     }}
                                 >
                                     <div className="absolute inset-0 rounded-xl overflow-hidden">
-                                        <div className={`absolute inset-0 opacity-20 bg-${color.toLowerCase()}-500 mix-blend-overlay`} />
+                                        <div className={`absolute inset-0 opacity-20 ${BG_COLOR_MAP[color]} mix-blend-overlay`} />
                                         <img
                                             src={CHARACTERS[color].imagePath}
                                             alt={CHARACTERS[color].name}
@@ -454,11 +476,11 @@ export const Lobby: React.FC<LobbyProps> = ({
                                         ${isLocked ? 'opacity-40 grayscale cursor-not-allowed' : 'hover:scale-105 opacity-90 hover:opacity-100'}
                                     `}
                                     style={{
-                                        boxShadow: isSelected ? `0 0 15px var(--color-${color.toLowerCase()}-500, ${color.toLowerCase()})` : 'none'
+                                        boxShadow: isSelected ? `0 0 15px ${SHADOW_COLOR_MAP[color]}` : 'none'
                                     }}
                                 >
                                     <div className="absolute inset-0 rounded-xl overflow-hidden">
-                                        <div className={`absolute inset-0 opacity-20 bg-${color.toLowerCase()}-500 mix-blend-overlay`} />
+                                        <div className={`absolute inset-0 opacity-20 ${BG_COLOR_MAP[color]} mix-blend-overlay`} />
                                         <img
                                             src={CHARACTERS[color].imagePath}
                                             alt={CHARACTERS[color].name}

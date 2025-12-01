@@ -109,6 +109,19 @@ export const GameResultModal: React.FC<GameResultModalProps> = ({
             }
         })
     };
+    const getColorHex = (color: string) => {
+        const colors: Record<string, string> = {
+            BLUE: '#3b82f6',
+            YELLOW: '#eab308',
+            RED: '#ef4444',
+            GREEN: '#22c55e',
+            LIGHTBLUE: '#0ea5e9',
+            PINK: '#ec4899',
+            ORANGE: '#f97316',
+            PURPLE: '#a855f7',
+        };
+        return colors[color] || '#94a3b8';
+    };
 
     return (
         <AnimatePresence>
@@ -229,10 +242,7 @@ export const GameResultModal: React.FC<GameResultModalProps> = ({
                                             <div className="flex flex-col">
                                                 <span
                                                     className="font-bold text-lg"
-                                                    style={{
-                                                        color: player.color,
-                                                        textShadow: '1px 1px 0 #6a6a6aff, -1px -1px 0 #6a6a6aff, 1px -1px 0 #6a6a6aff, -1px 1px 0 #6a6a6aff, 0 2px 4px #6a6a6aff'
-                                                    }}
+                                                    style={{ color: getColorHex(player.color) }}
                                                 >
                                                     {player.name}
                                                 </span>
