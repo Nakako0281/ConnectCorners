@@ -156,6 +156,7 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({ isOpen, onCl
                             <div>Total Wins: <span className="font-semibold text-slate-700">{stats.wins}</span></div>
                             <div>Current Streak: <span className="font-semibold text-slate-700">{stats.currentWinStreak}</span></div>
                             <div>Best Streak: <span className="font-semibold text-slate-700">{stats.maxWinStreak}</span></div>
+                            <div className="col-span-2">Perfect Games: <span className="font-semibold text-slate-700">{stats.perfectGames}</span></div>
                         </div>
 
                     </motion.div>
