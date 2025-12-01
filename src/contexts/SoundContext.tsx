@@ -17,10 +17,14 @@ interface SoundContextType {
     playError: () => void;
     playTurnStart: () => void;
     playGameOver: () => void;
+    playPieceSpecial: () => void;
+    playGameFinish: () => void;
     playLobbyBgm: () => void;
     stopLobbyBgm: () => void;
     playGameBgm: () => void;
     stopGameBgm: () => void;
+    playResultBgm: () => void;
+    stopResultBgm: () => void;
 }
 
 const SoundContext = createContext<SoundContextType | undefined>(undefined);
@@ -73,6 +77,8 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [playError] = useSound('/sounds/piece_error.mp3', { volume: seVolume * 0.6 });
     const [playTurnStart] = useSound('/sounds/turn_start.mp3', { volume: seVolume });
     const [playGameOver] = useSound('/sounds/game_over.mp3', { volume: seVolume });
+    const [playPieceSpecial] = useSound('/sounds/piece_special.mp3', { volume: seVolume });
+    const [playGameFinish] = useSound('/sounds/game_finish.mp3', { volume: seVolume });
 
     // BGM
     const [playLobbyBgm, { stop: stopLobbyBgm, sound: lobbyBgmSound }] = useSound('/sounds/bgm_lobby.mp3', {
@@ -85,6 +91,11 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         volume: bgmVolume
     });
 
+    const [playResultBgm, { stop: stopResultBgm, sound: resultBgmSound }] = useSound('/sounds/bgm_result.mp3', {
+        loop: true,
+        volume: bgmVolume
+    });
+
     // Update running BGM volume when state changes
     useEffect(() => {
         if (lobbyBgmSound) {
@@ -93,7 +104,10 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (gameBgmSound) {
             gameBgmSound.volume(bgmVolume);
         }
-    }, [bgmVolume, lobbyBgmSound, gameBgmSound]);
+        if (resultBgmSound) {
+            resultBgmSound.volume(bgmVolume);
+        }
+    }, [bgmVolume, lobbyBgmSound, gameBgmSound, resultBgmSound]);
 
     return (
         <SoundContext.Provider value={{
@@ -110,10 +124,14 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             playError,
             playTurnStart,
             playGameOver,
+            playPieceSpecial,
+            playGameFinish,
             playLobbyBgm,
             stopLobbyBgm,
             playGameBgm,
             stopGameBgm,
+            playResultBgm,
+            stopResultBgm,
         }}>
             {children}
         </SoundContext.Provider>

@@ -72,7 +72,7 @@ const TAILWIND_COLOR_MAP: Record<PlayerColor, string> = {
 
 export const Game: React.FC = () => {
     // Sound Context
-    const { playClick, playTurnStart, playPlace, playError, playGameBgm, stopGameBgm } = useSoundContext();
+    const { playClick, playTurnStart, playPlace, playError, playGameBgm, stopGameBgm, playPieceSpecial, playGameFinish, playResultBgm, stopResultBgm } = useSoundContext();
 
     // P2P State
     const { peerId, isHost, hostGame, joinGame, sendData, setOnData, setOnConnect, setOnDisconnect, disconnect, connections } = usePeer();
@@ -140,6 +140,18 @@ export const Game: React.FC = () => {
             stopGameBgm();
         };
     }, [gameStatus, playGameBgm, stopGameBgm]);
+
+    // Result BGM Control
+    useEffect(() => {
+        if (isResultModalOpen) {
+            playResultBgm();
+        } else {
+            stopResultBgm();
+        }
+        return () => {
+            stopResultBgm();
+        };
+    }, [isResultModalOpen, playResultBgm, stopResultBgm]);
 
     // Initialize Single Player Game
     const initSinglePlayer = (playerColor: PlayerColor) => {
@@ -354,6 +366,7 @@ export const Game: React.FC = () => {
         }
 
         setIsFinishing(true); // Start finish animation
+        playGameFinish();
         // setIsResultModalOpen(true); // Will be called after animation
 
         if (isMultiplayer && isHost) {
@@ -649,7 +662,11 @@ export const Game: React.FC = () => {
 
                 if (move) {
                     // Apply AI move locally then broadcast if host
-                    playPlace();
+                    if (move.piece.id === 'special') {
+                        playPieceSpecial();
+                    } else {
+                        playPlace();
+                    }
                     const newBoard = placePiece(board, move.shape, move.position, currentPlayer.color);
                     const newPlayers = [...players];
                     newPlayers[currentPlayerIndex] = {
@@ -704,7 +721,11 @@ export const Game: React.FC = () => {
     }, [currentPlayerIndex, gameStatus, board, currentPlayer, isMyTurn]);
 
     const handlePlacePiece = (piece: Piece, shape: number[][], position: Coordinate) => {
-        playPlace();
+        if (piece.id === 'special') {
+            playPieceSpecial();
+        } else {
+            playPlace();
+        }
 
         // Special Piece Cut-in Trigger
         if (piece.id === 'special') {
