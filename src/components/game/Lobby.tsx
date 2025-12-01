@@ -545,7 +545,7 @@ export const Lobby: React.FC<LobbyProps> = ({
             <GameControls />
             {/* ... (Keep existing background elements and title) ... */}
             {mounted && (
-                <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+                <div className="inset-0 overflow-hidden pointer-events-none -z-10">
                     {[...Array(15)].map((_, i) => (
                         <BackgroundPiece key={i} index={i} />
                     ))}

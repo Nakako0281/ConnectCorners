@@ -1202,15 +1202,16 @@ export const Game: React.FC = () => {
             {isHostDisconnected && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
                     <div className="bg-slate-900 border border-slate-700 p-8 rounded-xl max-w-md w-full text-center shadow-2xl">
-                        <h2 className="text-2xl font-bold text-red-500 mb-4">Connection Lost</h2>
+                        <h2 className="text-2xl font-bold text-red-500 mb-4">接続エラー</h2>
                         <p className="text-slate-300 mb-8">
-                            The host has disconnected. The game session has ended.
+                            接続が切れました。<br />
+                            接続がうまくいかない場合はブラウザをリロードしてみてください。
                         </p>
                         <Button
                             onClick={handleBack}
                             className="w-full bg-slate-700 hover:bg-slate-600 text-white"
                         >
-                            Return to Lobby
+                            戻る
                         </Button>
                     </div>
                 </div>

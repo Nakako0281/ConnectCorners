@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Player } from '@/lib/game/types';
+import { CHARACTERS } from '@/lib/game/characters';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSoundContext } from '@/contexts/SoundContext';
 
@@ -106,10 +107,13 @@ export const TurnRoulette: React.FC<TurnRouletteProps> = ({ players, targetPlaye
                                     ${isTarget ? 'z-10' : ''}
                                 `}
                             >
-                                <div
-                                    className="w-12 h-12 rounded-full shadow-inner"
-                                    style={{ backgroundColor: getColorHex(player.color) }}
-                                />
+                                <div className="w-12 h-12 rounded-full overflow-hidden shadow-inner bg-white/10">
+                                    <img
+                                        src={CHARACTERS[player.color].imagePath}
+                                        alt={CHARACTERS[player.color].name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
                                 <span className="font-bold text-lg truncate w-full"
                                     style={{ color: getColorHex(player.color) }}>
                                     {player.name}
