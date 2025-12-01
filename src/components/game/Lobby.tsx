@@ -359,10 +359,10 @@ export const Lobby: React.FC<LobbyProps> = ({
                 {/* Actions */}
                 <div className="flex gap-4">
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         size="lg"
                         onClick={handleBack}
-                        className="h-14 px-8 border-slate-700 hover:bg-slate-800 text-slate-400"
+                        className="h-14 px-8 border-slate-800 bg-slate-800 hover:bg-slate-600 text-slate-200"
                     >
                         Leave
                     </Button>
@@ -496,13 +496,13 @@ export const Lobby: React.FC<LobbyProps> = ({
 
                     <div className="flex gap-4 w-full">
                         <Button
-                            variant="outline"
+                            variant="ghost"
                             size="lg"
                             onClick={() => {
                                 playClick();
                                 setViewMode('menu');
                             }}
-                            className="flex-1 h-14 border-slate-700 hover:bg-slate-800 text-slate-400"
+                            className="flex-1 h-14 px-8 border-slate-800 bg-slate-800 hover:bg-slate-600 text-slate-200"
                         >
                             Back
                         </Button>

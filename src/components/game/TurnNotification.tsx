@@ -32,7 +32,7 @@ export const TurnNotification: React.FC<TurnNotificationProps> = ({ isMyTurn }) 
                 >
                     <div className="bg-gradient-to-r from-blue-600/80 via-purple-600/80 to-blue-600/80 backdrop-blur-md text-white py-3 px-12 rounded-full shadow-lg border border-white/20">
                         <span className="text-2xl font-bold tracking-wider uppercase drop-shadow-md">
-                            Your Turn
+                            あなたのターン
                         </span>
                     </div>
                 </motion.div>

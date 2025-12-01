@@ -256,14 +256,14 @@ export const GameResultModal: React.FC<GameResultModalProps> = ({
                                     onClick={onPlayAgain}
                                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-6 text-lg shadow-lg transition-all hover:scale-[1.02]"
                                 >
-                                    Play Again
+                                    再戦
                                 </Button>
                                 <Button
                                     variant="outline"
                                     onClick={onBackToTitle}
                                     className="w-full mt-3 border-slate-300 text-slate-600 hover:bg-slate-100 font-semibold py-6"
                                 >
-                                    Back to Title
+                                    タイトルに戻る
                                 </Button>
                             </motion.div>
                         </div>

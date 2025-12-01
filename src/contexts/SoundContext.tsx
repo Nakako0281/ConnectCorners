@@ -25,6 +25,8 @@ interface SoundContextType {
     stopGameBgm: () => void;
     playResultBgm: () => void;
     stopResultBgm: () => void;
+    playRouletteTick: () => void;
+    playDecidedFirst: () => void;
 }
 
 const SoundContext = createContext<SoundContextType | undefined>(undefined);
@@ -79,6 +81,8 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [playGameOver] = useSound('/sounds/game_over.mp3', { volume: seVolume });
     const [playPieceSpecial] = useSound('/sounds/piece_special.mp3', { volume: seVolume });
     const [playGameFinish] = useSound('/sounds/game_finish.mp3', { volume: seVolume });
+    const [playRouletteTick] = useSound('/sounds/roulette_tick.mp3', { volume: seVolume });
+    const [playDecidedFirst] = useSound('/sounds/decided_first.mp3', { volume: seVolume });
 
     // BGM
     const [playLobbyBgm, { stop: stopLobbyBgm, sound: lobbyBgmSound }] = useSound('/sounds/bgm_lobby.mp3', {
@@ -132,6 +136,8 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             stopGameBgm,
             playResultBgm,
             stopResultBgm,
+            playRouletteTick,
+            playDecidedFirst,
         }}>
             {children}
         </SoundContext.Provider>

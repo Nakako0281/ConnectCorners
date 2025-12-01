@@ -48,6 +48,7 @@ import { GameStartOverlay } from './GameStartOverlay';
 import { GameEndOverlay } from './GameEndOverlay';
 import { TurnNotification } from './TurnNotification';
 import { SpecialPieceCutIn } from './SpecialPieceCutIn';
+import { TurnRoulette } from './TurnRoulette';
 
 const createPlayer = (id: string, name: string, color: PlayerColor, isHuman: boolean): Player => ({
     id,
@@ -118,6 +119,8 @@ export const Game: React.FC = () => {
     const [isStarting, setIsStarting] = useState(false);
     const [isFinishing, setIsFinishing] = useState(false);
     const [specialPieceCutIn, setSpecialPieceCutIn] = useState<PlayerColor | null>(null);
+    const [isRouletteActive, setIsRouletteActive] = useState(false);
+    const [rouletteTargetIndex, setRouletteTargetIndex] = useState<number | null>(null);
 
     // Score Animation State
     interface ScorePopupData {
@@ -203,14 +206,19 @@ export const Game: React.FC = () => {
         ];
 
         setPlayers(newPlayers);
-        setCurrentPlayerIndex(0);
+
+        // Randomize Turn
+        const randomTurnIndex = Math.floor(Math.random() * newPlayers.length);
+        setRouletteTargetIndex(randomTurnIndex);
+        setIsRouletteActive(true);
+
         setGameStatus('playing');
-        setIsStarting(true); // Start animation
+        // setIsStarting(true); // Will be set after roulette
         setIsMultiplayer(false);
         setMyPlayerColor(playerColor);
         setTurnNumber(1);
         setGameHistory([]);
-        playTurnStart();
+        // playTurnStart(); // Will be set after roulette
     };
 
     // Initialize Multiplayer Game (Host)
@@ -288,14 +296,19 @@ export const Game: React.FC = () => {
 
         setPlayers(gamePlayers);
         setGameStatus('playing');
-        setIsStarting(true); // Start animation
+        // setIsStarting(true); // Start animation AFTER roulette
         setIsMultiplayer(true);
+
+        // Randomize Turn
+        const randomTurnIndex = Math.floor(Math.random() * gamePlayers.length);
+        setRouletteTargetIndex(randomTurnIndex);
+        setIsRouletteActive(true);
 
         // Broadcast Start
         const gameState = {
             board: createInitialBoard(),
             players: gamePlayers,
-            turnIndex: 0
+            turnIndex: randomTurnIndex
         };
 
         sendData({
@@ -303,11 +316,11 @@ export const Game: React.FC = () => {
             payload: {
                 gameState: gameState.board,
                 players: gamePlayers,
-                turnIndex: 0
+                turnIndex: randomTurnIndex
             }
         });
         // We still broadcast update for good measure, or we can skip it if we trust START_GAME
-        broadcastUpdate(gameState.board, gamePlayers, 0);
+        broadcastUpdate(gameState.board, gamePlayers, randomTurnIndex);
     };
 
     // Broadcast Update (Host only)
@@ -408,14 +421,20 @@ export const Game: React.FC = () => {
                 if (data.payload.players && data.payload.gameState) {
                     setBoard(data.payload.gameState as BoardState);
                     setPlayers(data.payload.players);
-                    setCurrentPlayerIndex(data.payload.turnIndex || 0);
+                    // setCurrentPlayerIndex(data.payload.turnIndex || 0); // Will be set after roulette
 
                     // Determine my color immediately if possible
                     const me = data.payload.players.find((p: Player) => p.id === peerId);
                     if (me) setMyPlayerColor(me.color);
+
+                    // Start Roulette
+                    if (typeof data.payload.turnIndex === 'number') {
+                        setRouletteTargetIndex(data.payload.turnIndex);
+                        setIsRouletteActive(true);
+                    }
                 }
                 setGameStatus('playing');
-                setIsStarting(true); // Start animation
+                // setIsStarting(true); // Start animation AFTER roulette
                 setIsMultiplayer(true);
             }
             else if (data.type === 'JOIN') {
@@ -660,6 +679,8 @@ export const Game: React.FC = () => {
     // AI Turn Handler (Host only or Single Player)
     useEffect(() => {
         if (gameStatus !== 'playing') return;
+        if (isStarting) return; // Wait for "Ready? Go!" to finish
+        if (isRouletteActive) return; // Wait for Roulette to finish
 
         // If Multiplayer: Host handles AI turns
         // If Singleplayer: We handle AI turns (we are effectively host)
@@ -715,11 +736,12 @@ export const Game: React.FC = () => {
             }, 500);
             return () => clearTimeout(timer);
         }
-    }, [currentPlayerIndex, gameStatus, board, players, isHost, isMultiplayer, currentPlayer]);
+    }, [currentPlayerIndex, gameStatus, board, players, isHost, isMultiplayer, currentPlayer, isStarting, isRouletteActive]);
 
     // Auto-pass for human players with no valid moves
     useEffect(() => {
         if (gameStatus !== 'playing') return;
+        if (isStarting || isRouletteActive) return;
         if (!currentPlayer || currentPlayer.hasPassed) return;
         if (!isMyTurn) return; // Only check for my turn
 
@@ -736,6 +758,15 @@ export const Game: React.FC = () => {
             }, 1000); // 1 second delay so user can see what happened
         }
     }, [currentPlayerIndex, gameStatus, board, currentPlayer, isMyTurn]);
+
+    const handleRouletteComplete = useCallback(() => {
+        setIsRouletteActive(false);
+        if (rouletteTargetIndex !== null) {
+            setCurrentPlayerIndex(rouletteTargetIndex);
+        }
+        setIsStarting(true);
+        playTurnStart();
+    }, [rouletteTargetIndex, playTurnStart]);
 
     const handlePlacePiece = (piece: Piece, shape: number[][], position: Coordinate) => {
         if (piece.id === 'special') {
@@ -1112,12 +1143,19 @@ export const Game: React.FC = () => {
             </div>
 
             {/* Visual Effects */}
+            {isRouletteActive && rouletteTargetIndex !== null && (
+                <TurnRoulette
+                    players={players}
+                    targetPlayerIndex={rouletteTargetIndex}
+                    onComplete={handleRouletteComplete}
+                />
+            )}
             {isStarting && <GameStartOverlay onComplete={() => setIsStarting(false)} />}
             {isFinishing && <GameEndOverlay onComplete={() => {
                 setIsFinishing(false);
                 setIsResultModalOpen(true);
             }} />}
-            <TurnNotification isMyTurn={isMyTurn && !isStarting && !isFinishing} />
+            <TurnNotification isMyTurn={isMyTurn && !isStarting && !isFinishing && !isRouletteActive} />
             {specialPieceCutIn && (
                 <SpecialPieceCutIn
                     character={CHARACTERS[specialPieceCutIn]}
