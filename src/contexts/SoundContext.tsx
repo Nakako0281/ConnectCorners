@@ -36,11 +36,11 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Initialize from LocalStorage if available, otherwise default
     const [bgmVolume, setBgmVolumeState] = useState(() => {
         if (typeof window === 'undefined') return 0.3;
-        const saved = localStorage.getItem('blocks-bgm-volume');
+        const saved = localStorage.getItem('connect-corners-bgm-volume');
         if (saved !== null) return parseFloat(saved);
 
         // Legacy migration
-        const savedMute = localStorage.getItem('blocks-sound-muted');
+        const savedMute = localStorage.getItem('connect-corners-sound-muted');
         if (savedMute && JSON.parse(savedMute)) return 0;
 
         return 0.3;
@@ -48,11 +48,11 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const [seVolume, setSeVolumeState] = useState(() => {
         if (typeof window === 'undefined') return 0.5;
-        const saved = localStorage.getItem('blocks-se-volume');
+        const saved = localStorage.getItem('connect-corners-se-volume');
         if (saved !== null) return parseFloat(saved);
 
         // Legacy migration
-        const savedMute = localStorage.getItem('blocks-sound-muted');
+        const savedMute = localStorage.getItem('connect-corners-sound-muted');
         if (savedMute && JSON.parse(savedMute)) return 0;
 
         return 0.5;
@@ -60,12 +60,12 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const setBgmVolume = (vol: number) => {
         setBgmVolumeState(vol);
-        localStorage.setItem('blocks-bgm-volume', vol.toString());
+        localStorage.setItem('connect-corners-bgm-volume', vol.toString());
     };
 
     const setSeVolume = (vol: number) => {
         setSeVolumeState(vol);
-        localStorage.setItem('blocks-se-volume', vol.toString());
+        localStorage.setItem('connect-corners-se-volume', vol.toString());
     };
 
     // SE Sounds

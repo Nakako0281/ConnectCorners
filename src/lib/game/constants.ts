@@ -7,23 +7,23 @@ export const ALL_COLORS: PlayerColor[] = [
     'LIGHTBLUE', 'PINK', 'ORANGE', 'PURPLE'
 ];
 
-// Standard Blokus Pieces (21 pieces per player)
+// Standard Pieces (21 pieces per player)
 // Represented as binary grids
 export const PIECES: Omit<Piece, 'id'>[] = [
-    // 1 block (1)
+    // 1 square (1)
     { value: 1, shape: [[1]] }, // I1
-    // 2 blocks (1)
+    // 2 squares (1)
     { value: 2, shape: [[1, 1]] }, // I2
-    // 3 blocks (2)
+    // 3 squares (2)
     { value: 3, shape: [[1, 1, 1]] }, // I3
     { value: 3, shape: [[1, 0], [1, 1]] }, // V3 (L3)
-    // 4 blocks (5)
+    // 4 squares (5)
     { value: 4, shape: [[1, 1, 1, 1]] }, // I4
     { value: 4, shape: [[1, 1], [1, 1]] }, // O4
     { value: 4, shape: [[1, 1, 1], [0, 1, 0]] }, // T4
     { value: 4, shape: [[1, 1, 1], [1, 0, 0]] }, // L4
     { value: 4, shape: [[1, 1, 0], [0, 1, 1]] }, // Z4
-    // 5 blocks (12)
+    // 5 squares (12)
     { value: 5, shape: [[1, 1, 1, 1, 1]] }, // I5
     { value: 5, shape: [[1, 1, 1, 1], [1, 0, 0, 0]] }, // L5
     { value: 5, shape: [[1, 1, 1, 1], [0, 1, 0, 0]] }, // Y5

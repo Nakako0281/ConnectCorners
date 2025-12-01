@@ -8,7 +8,7 @@ export interface Coordinate {
 export interface Piece {
   id: string;
   shape: number[][]; // 0 or 1 grid
-  value: number; // Number of blocks (1-5)
+  value: number; // Number of squares (1-5)
 }
 
 export interface Player {

@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Connect Corners
 
-## Getting Started
+Connect Corners（コネクト・コーナーズ）は、ポリオミノを使った陣取りパズルゲームです。プレイヤーは配置ルールに従って、できるだけ多くのピースを盤面に配置することを競います。個性豊かなキャラクター、スペシャルピース、オンラインマルチプレイ、そして洗練されたUIが特徴です。
 
-First, run the development server:
+## 特徴
+
+-   **戦略的なゲームプレイ**: 角と角をつなぐクラシックな配置メカニクス。
+-   **オンラインマルチプレイ**: PeerJSを使用したリアルタイム対戦（P2P）。
+-   **シングルプレイ vs CPU**: AI対戦モード（現在はシンプルなロジック）。
+-   **ユニークなキャラクター**: 8人の個性的なキャラクター。それぞれが独自の「スペシャルピース」と性格を持っています。
+-   **スペシャルピース**:
+    -   各キャラクターは1つの固有の形状を持っています。
+    -   スペシャルピースを配置すると、その手で獲得できるスコアが **2倍** になります。
+    -   **制限**: スコアが20ポイント以上にならないと使用できません。
+-   **アチーブメントシステム**: 「初勝利」や「パーフェクトゲーム」などの実績解除機能。
+-   **レスポンシブデザイン**: Framer Motionを使用したスムーズなアニメーションと、様々な画面サイズへの最適化。
+-   **サウンドエフェクト**: アクションやゲームの状態に合わせた没入感のあるサウンド。
+
+## 遊び方
+
+### 目的
+手持ちの21個のピース（＋1個のスペシャルピース）を、できるだけ多く盤面に配置することを目指します。全員がピースを置けなくなったらゲーム終了です。
+
+### ルール
+1.  **最初の手**: 自分の色のマークがある角（コーナー）を埋めるように配置します。
+2.  **2手目以降**:
+    -   自分のピースの **「角（コーナー）」** 同士が接するように配置します。
+    -   自分のピースの **「辺（エッジ）」** 同士が接してはいけません。
+    -   相手のピースとは、辺や角が接しても構いません。
+3.  **スコア**:
+    -   1マス配置ごとに +1 ポイント。
+    -   通常の21ピースを全て配置すると +15 ポイントのボーナス。
+    -   「ボーナスマス（★）」に配置すると +1 ポイント。
+    -   **スペシャルピース**: このピースで獲得するポイントは2倍になります。
+
+### 操作方法
+-   **左クリック**: ピースの選択と配置。
+-   **右クリック / 回転ボタン**: 選択したピースを90度回転。
+-   **反転ボタン**: 選択したピースを左右反転。
+
+## キャラクター
+
+| 色 | 名前 | 説明 | スペシャルピース |
+| :--- | :--- | :--- | :--- |
+| 🔵 青 | **リズ (Riz)** | 冷静沈着なリーダー格。 | 長い棒 (1x6) |
+| 🔴 赤 | **ロッカ (Rocca)** | 猪突猛進のエースアタッカー。 | ハート型 |
+| 🟢 緑 | **マロ (Mallo)** | 癒やし系の守護神。 | 大きなL字 |
+| 🟡 黄 | **ピコ (Pico)** | 神出鬼没のトリックスター。 | 十字型 |
+| 💠 水色| **ミズキ (Mizuki)** | 理知的なクールビューティー。 | 階段型 |
+| 🩷 ピンク | **アムール (Amour)** | 愛と芸術のロマンチスト。 | ピラミッド型 |
+| 🟠 オレンジ | **ソレイユ (Soleil)** | 天真爛漫なムードメーカー。 | 星型っぽい形 |
+| 🟣 紫 | **ノワール (Noir)** | 孤高のミステリアスな魔女。 | フック型 |
+
+## 技術スタック
+
+-   **フレームワーク**: [Next.js 15](https://nextjs.org/) (App Router)
+-   **言語**: [TypeScript](https://www.typescriptlang.org/)
+-   **スタイリング**: [Tailwind CSS](https://tailwindcss.com/)
+-   **アニメーション**: [Framer Motion](https://www.framer.com/motion/)
+-   **P2P通信**: [PeerJS](https://peerjs.com/)
+-   **アイコン**: [Lucide React](https://lucide.dev/)
+-   **状態管理**: React Context & Hooks
+
+## 始め方
+
+開発サーバーを起動します：
 
 ```bash
 npm run dev
-# or
+# または
 yarn dev
-# or
+# または
 pnpm dev
-# or
+# または
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ブラウザで [http://localhost:3000](http://localhost:3000) を開いて確認してください。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## もっと詳しく
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Next.jsについてさらに詳しく知りたい場合は、以下のリソースを参照してください：
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+-   [Next.js ドキュメント](https://nextjs.org/docs) - Next.jsの機能とAPIについて。
+-   [Learn Next.js](https://nextjs.org/learn) - インタラクティブなNext.jsチュートリアル。

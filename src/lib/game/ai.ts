@@ -20,7 +20,7 @@ export function getAIMove(
         return null;
     }
 
-    // Simple AI: Prioritize pieces with higher value (more blocks) to clear hand
+    // Simple AI: Prioritize pieces with higher value (more squares) to clear hand
     // Then pick random
     validMoves.sort((a, b) => b.piece.value - a.piece.value);
 

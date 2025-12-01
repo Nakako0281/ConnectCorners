@@ -581,11 +581,7 @@ export const Lobby: React.FC<LobbyProps> = ({
                 transition={{ duration: 0.8, type: "spring" }}
                 className="text-center mb-12 mt-20 md:mt-0"
             >
-                <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 drop-shadow-2xl filter">
-                    CONNECT
-                    <br />
-                    CORNERS
-                </h1>
+                <img src="title_logo.png" alt="Title Logo" />
                 <p className="text-slate-400 mt-4 text-xl flex items-center justify-center gap-3">
                     <span>Welcome, <span className="text-white font-bold">{userName}</span></span>
                     <Button
