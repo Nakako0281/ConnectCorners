@@ -1127,7 +1127,7 @@ export const Game: React.FC = () => {
             )}
 
             {/* Debug: Force End Game Button */}
-            {gameStatus === 'playing' && (
+            {gameStatus === 'playing' && process.env.NODE_ENV === 'development' && (
                 <div className="absolute bottom-4 left-4 z-50">
                     <Button
                         variant="destructive"
