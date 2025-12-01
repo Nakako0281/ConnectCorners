@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, Copy, Gamepad2, Check, HelpCircle, CheckCircle2, Trophy, Edit2, X } from 'lucide-react';
+import { Users, Copy, Gamepad2, Check, HelpCircle, CheckCircle2, Trophy, Edit2, X, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSoundContext } from '@/contexts/SoundContext';
 import { ALL_COLORS } from '@/lib/game/constants';
@@ -63,6 +63,9 @@ export const Lobby: React.FC<LobbyProps> = ({
     // User Name State
     const [userName, setUserNameState] = useState('');
     const [isNameSet, setIsNameSet] = useState(false);
+
+    // Streamer Mode: Room ID Visibility
+    const [isRoomIdVisible, setIsRoomIdVisible] = useState(false);
 
 
     // View Mode for Single Player Setup
@@ -213,12 +216,28 @@ export const Lobby: React.FC<LobbyProps> = ({
                 {/* Header: Room ID */}
                 <div className="absolute top-4 left-4 z-50 flex items-center gap-2 bg-black/40 backdrop-blur-md p-2 rounded-lg border border-white/10">
                     <span className="text-slate-400 text-sm font-mono">ROOM ID:</span>
-                    <code className="text-blue-400 font-mono font-bold">{isHost ? peerId : joinId}</code>
+                    <code className="text-blue-400 font-mono font-bold min-w-[6ch] text-center">
+                        {isRoomIdVisible ? (isHost ? peerId : joinId) : '******'}
+                    </code>
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6 text-slate-400 hover:text-white"
+                        onClick={() => {
+                            playClick();
+                            setIsRoomIdVisible(!isRoomIdVisible);
+                        }}
+                        title={isRoomIdVisible ? "Hide Room ID" : "Show Room ID"}
+                    >
+                        {isRoomIdVisible ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                    </Button>
+                    <div className="w-px h-4 bg-white/10" />
                     <Button
                         size="icon"
                         variant="ghost"
                         className="h-6 w-6 text-slate-400 hover:text-white"
                         onClick={copyToClipboard}
+                        title="Copy Room ID"
                     >
                         {copied ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
                     </Button>
