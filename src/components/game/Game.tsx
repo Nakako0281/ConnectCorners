@@ -909,6 +909,19 @@ export const Game: React.FC = () => {
 
     const handleReset = () => {
         playClick();
+
+        if (isMultiplayer) {
+            if (isHost) {
+                setConnectedPlayers(prev => {
+                    const newPlayers = prev.map(p => ({ ...p, isReady: false }));
+                    sendData({ type: 'LOBBY_UPDATE', payload: { players: newPlayers } });
+                    return newPlayers;
+                });
+            } else {
+                sendData({ type: 'SET_READY', payload: { isReady: false } });
+            }
+        }
+
         resetGameState();
     };
 
