@@ -1,6 +1,7 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, FileText, Lightbulb, Hammer, Palette, Music } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { FileText, Lightbulb, Hammer, Palette, Music } from 'lucide-react';
 
 interface CreditModalProps {
     isOpen: boolean;
@@ -8,109 +9,58 @@ interface CreditModalProps {
 }
 
 const CREDITS = [
-    { role: '企画', name: 'TBD', icon: Lightbulb },
-    { role: '制作', name: 'TBD', icon: Hammer },
-    { role: '絵', name: 'TBD', icon: Palette },
-    { role: 'BGM素材/使用楽曲', name: 'TBD', icon: Music },
+    { role: '企画', name: 'nakako, Gemini(3Pro)', icon: Lightbulb, color: 'text-yellow-400' },
+    { role: '制作', name: 'nakako, Gemini(3Pro), Claude(sonnet4.5)', icon: Hammer, color: 'text-blue-400' },
+    { role: '絵', name: 'NanoBanana(Pro)', icon: Palette, color: 'text-pink-400' },
+    { role: 'BGM素材/使用楽曲', name: '効果音ラボ様, 甘茶の音楽工房様', icon: Music, color: 'text-green-400' },
 ];
 
 export const CreditModal: React.FC<CreditModalProps> = ({ isOpen, onClose }) => {
-    const backdropVariants = {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1 }
-    } as const;
-
-    const modalVariants = {
-        hidden: {
-            opacity: 0,
-            scale: 0.9,
-            y: 20
-        },
-        visible: {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            transition: {
-                type: "spring" as const,
-                stiffness: 300,
-                damping: 30
-            }
-        },
-        exit: {
-            opacity: 0,
-            scale: 0.9,
-            transition: { duration: 0.2 }
-        }
-    } as const;
-
     return (
-        <AnimatePresence>
-            {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <motion.div
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                        variants={backdropVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="hidden"
-                        onClick={onClose}
-                    />
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-xl border-slate-700 text-slate-100">
+                <DialogHeader>
+                    <DialogTitle className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 flex items-center gap-2">
+                        <FileText className="w-8 h-8 text-blue-400" /> クレジット
+                    </DialogTitle>
+                    <DialogDescription className="text-slate-400">
+                        Project Contributors
+                    </DialogDescription>
+                </DialogHeader>
 
-                    <motion.div
-                        className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col"
-                        variants={modalVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                    >
-                        {/* Header */}
-                        <div className="bg-gradient-to-r from-blue-500 to-indigo-500 p-6 text-white shrink-0">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                                        <FileText className="w-6 h-6" /> Credits
-                                    </h2>
-                                    <p className="text-white/80 text-sm mt-1">Project Contributors</p>
+                <div className="grid gap-4 py-4">
+                    {CREDITS.map((item, index) => {
+                        const Icon = item.icon;
+                        return (
+                            <div key={index} className="flex items-center gap-4 p-3 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-800 transition-colors">
+                                <div className={`p-2 rounded-lg bg-slate-900 border border-slate-700 ${item.color}`}>
+                                    <Icon className="w-5 h-5" />
                                 </div>
-                                <button
-                                    onClick={onClose}
-                                    className="text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 p-2 rounded-full"
-                                >
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-6 space-y-4">
-                            {CREDITS.map((item, index) => {
-                                const Icon = item.icon;
-                                return (
-                                    <div key={index} className="flex items-center gap-4 p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                        <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
-                                            <Icon className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-                                                {item.role}
-                                            </div>
-                                            <div className="font-medium text-slate-800">
-                                                {item.name}
-                                            </div>
-                                        </div>
+                                <div>
+                                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">
+                                        {item.role}
                                     </div>
-                                );
-                            })}
-                        </div>
-
-                        <div className="p-4 bg-slate-50 border-t border-slate-100 text-center">
-                            <p className="text-xs text-slate-400">
-                                Thank you for playing!
-                            </p>
-                        </div>
-                    </motion.div>
+                                    <div className="font-medium text-slate-200">
+                                        {item.name}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
-            )}
-        </AnimatePresence>
+
+                <div className="p-4 bg-slate-800/30 rounded-lg border border-slate-700/30 text-center">
+                    <p className="text-sm text-slate-400">
+                        Thank you for playing!
+                    </p>
+                </div>
+
+                <DialogFooter>
+                    <Button onClick={onClose} className="w-full sm:w-auto bg-slate-700 hover:bg-slate-600">
+                        閉じる
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 };
