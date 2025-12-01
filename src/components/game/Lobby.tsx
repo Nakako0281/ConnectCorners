@@ -88,6 +88,7 @@ export const Lobby: React.FC<LobbyProps> = ({
 
     // Streamer Mode: Room ID Visibility
     const [isRoomIdVisible, setIsRoomIdVisible] = useState(false);
+    const [isJoinIdVisible, setIsJoinIdVisible] = useState(false);
 
 
     // View Mode for Single Player Setup
@@ -234,7 +235,7 @@ export const Lobby: React.FC<LobbyProps> = ({
         const canStart = isHost && allReady && connectedPlayers.length >= 1; // At least 1 other player? Or just host?
 
         return (
-            <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10 p-4">
+            <div className="relative w-full max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10 p-4">
                 {/* Header: Room ID */}
                 <div className="absolute top-4 left-4 z-50 flex items-center gap-2 bg-black/40 backdrop-blur-md p-2 rounded-lg border border-white/10">
                     <span className="text-slate-400 text-sm font-mono">ROOM ID:</span>
@@ -315,9 +316,9 @@ export const Lobby: React.FC<LobbyProps> = ({
                 </div>
 
                 {/* Character Selection Grid */}
-                <div className="w-full max-w-3xl glass-panel p-6 rounded-xl mb-8">
+                <div className="w-full max-w-xl glass-panel p-6 rounded-xl mb-8">
                     <h3 className="text-center text-slate-400 mb-4 uppercase tracking-widest text-sm font-semibold">Select Character</h3>
-                    <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
+                    <div className="grid grid-cols-4 gap-3">
                         {ALL_COLORS.map((color) => {
                             const unlockCondition = UNLOCK_CONDITIONS[color];
                             const isLocked = !!(unlockCondition && !unlockedAchievements.includes(unlockCondition));
@@ -448,11 +449,11 @@ export const Lobby: React.FC<LobbyProps> = ({
         return (
             <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10 p-4">
                 <GameControls />
-                <div className="w-full max-w-3xl glass-panel p-6 rounded-xl mb-8">
+                <div className="w-full max-w-xl glass-panel p-6 rounded-xl mb-8">
                     <h2 className="text-3xl font-bold text-center text-white mb-2">キャラクター選択</h2>
                     <p className="text-center text-slate-400 mb-8">好きなキャラクターを選ぼう</p>
 
-                    <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
+                    <div className="grid grid-cols-4 gap-3">
                         {ALL_COLORS.map((color) => {
                             const unlockCondition = UNLOCK_CONDITIONS[color];
                             const isLocked = !!(unlockCondition && !unlockedAchievements.includes(unlockCondition));
@@ -632,12 +633,27 @@ export const Lobby: React.FC<LobbyProps> = ({
                                 Host Game
                             </Button>
                             <div className="flex gap-2">
-                                <Input
-                                    placeholder="Room ID"
-                                    value={joinId}
-                                    onChange={(e) => setJoinId(e.target.value)}
-                                    className="h-14 bg-slate-900/50 border-slate-700 text-slate-100 placeholder:text-slate-600"
-                                />
+                                <div className="relative flex-1">
+                                    <Input
+                                        type={isJoinIdVisible ? "text" : "password"}
+                                        placeholder="Room ID"
+                                        value={joinId}
+                                        onChange={(e) => setJoinId(e.target.value)}
+                                        className="h-14 bg-slate-900/50 border-slate-700 text-slate-100 placeholder:text-slate-600 pr-10"
+                                    />
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-slate-400 hover:text-white hover:bg-white/10"
+                                        onClick={() => {
+                                            playClick();
+                                            setIsJoinIdVisible(!isJoinIdVisible);
+                                        }}
+                                        title={isJoinIdVisible ? "Hide Room ID" : "Show Room ID"}
+                                    >
+                                        {isJoinIdVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </Button>
+                                </div>
                                 <Button
                                     size="lg"
                                     onClick={handleJoin}
