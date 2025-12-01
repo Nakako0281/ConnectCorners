@@ -148,6 +148,10 @@ const getColorHex = (color: string) => {
         PINK: '#ec4899',
         ORANGE: '#f97316',
         PURPLE: '#a855f7',
+        BROWN: '#b45309',
+        SILVER: '#94a3b8',
+        GOLD: '#facc15',
+        BLACK: '#0f172a',
     };
     return colors[color] || '#94a3b8';
 };

@@ -17,6 +17,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'hidden_high_scorer', title: 'ハイスコアラー', description: '125点以上で勝利', icon: '🏆', isHidden: true },
   { id: 'hidden_connect_master', title: 'The ConnectCorners Master', description: '対戦を100回行う', icon: '👑', isHidden: true },
   { id: 'hidden_perfect_master', title: 'Perfect Master', description: 'パーフェクトを50回達成', icon: '🌟', isHidden: true },
+  { id: 'complete_all', title: 'コンプリート', description: 'すべてのアチーブメントを解放する', icon: '⚜️', isHidden: true },
 ];
 
 export interface PlayerStats {
@@ -115,6 +116,11 @@ export const updateStats = (result: GameResult): { newStats: PlayerStats, newAch
     check('hidden_connect_master', newStats.gamesPlayed >= 100);
     check('hidden_perfect_master', newStats.perfectGames >= 50);
   }
+
+  // Check for Complete All
+  const allOtherAchievementIds = ACHIEVEMENTS.filter(a => a.id !== 'complete_all').map(a => a.id);
+  const allOthersUnlocked = allOtherAchievementIds.every(id => newStats.unlockedAchievements.includes(id));
+  check('complete_all', allOthersUnlocked);
 
   saveStats(newStats);
 

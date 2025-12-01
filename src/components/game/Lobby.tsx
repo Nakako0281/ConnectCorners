@@ -24,6 +24,10 @@ const UNLOCK_CONDITIONS: Record<PlayerColor, string | null> = {
     PINK: 'perfect_game',
     ORANGE: 'veteran',
     PURPLE: 'win_streak_5',
+    BROWN: 'hidden_high_scorer',
+    SILVER: 'hidden_connect_master',
+    GOLD: 'hidden_perfect_master',
+    BLACK: 'complete_all',
 };
 
 const BG_COLOR_MAP: Record<PlayerColor, string> = {
@@ -35,6 +39,10 @@ const BG_COLOR_MAP: Record<PlayerColor, string> = {
     PINK: 'bg-pink-500',
     ORANGE: 'bg-orange-500',
     PURPLE: 'bg-purple-500',
+    BROWN: 'bg-amber-700',
+    SILVER: 'bg-slate-400',
+    GOLD: 'bg-yellow-400',
+    BLACK: 'bg-slate-900',
 };
 
 const SHADOW_COLOR_MAP: Record<PlayerColor, string> = {
@@ -46,6 +54,10 @@ const SHADOW_COLOR_MAP: Record<PlayerColor, string> = {
     PINK: '#ec4899',
     ORANGE: '#f97316',
     PURPLE: '#a855f7',
+    BROWN: '#b45309',
+    SILVER: '#94a3b8',
+    GOLD: '#facc15',
+    BLACK: '#0f172a',
 };
 
 interface LobbyProps {
@@ -85,6 +97,13 @@ export const Lobby: React.FC<LobbyProps> = ({
     // User Name State
     const [userName, setUserNameState] = useState('');
     const [isNameSet, setIsNameSet] = useState(false);
+
+    // Calculate allBaseUnlocked
+
+
+    // Calculate allBaseUnlocked
+    const baseAchievementIds = ACHIEVEMENTS.filter(a => !a.isHidden).map(a => a.id);
+    const allBaseUnlocked = baseAchievementIds.every(id => unlockedAchievements.includes(id));
 
     // Streamer Mode: Room ID Visibility
     const [isRoomIdVisible, setIsRoomIdVisible] = useState(false);
@@ -316,9 +335,9 @@ export const Lobby: React.FC<LobbyProps> = ({
                 </div>
 
                 {/* Character Selection Grid */}
-                <div className="w-full max-w-xl glass-panel p-6 rounded-xl mb-8">
+                <div className="w-full max-w-3xl glass-panel p-6 rounded-xl mb-8">
                     <h3 className="text-center text-slate-400 mb-4 uppercase tracking-widest text-sm font-semibold">Select Character</h3>
-                    <div className="grid grid-cols-4 gap-3">
+                    <div className="grid grid-cols-6 gap-3">
                         {ALL_COLORS.map((color) => {
                             const unlockCondition = UNLOCK_CONDITIONS[color];
                             const isLocked = !!(unlockCondition && !unlockedAchievements.includes(unlockCondition));
@@ -334,6 +353,11 @@ export const Lobby: React.FC<LobbyProps> = ({
                             const isSelected = myLobbyPlayer?.color === color;
 
                             const achievement = unlockCondition ? ACHIEVEMENTS.find(a => a.id === unlockCondition) : null;
+
+                            // Hide if hidden achievement and not unlocked (unless all base achievements are unlocked)
+                            if (achievement?.isHidden && !allBaseUnlocked && isLocked) {
+                                return null;
+                            }
 
                             return (
                                 <button
@@ -383,7 +407,7 @@ export const Lobby: React.FC<LobbyProps> = ({
                                             {achievement ? (
                                                 <>
                                                     <div className="text-xs text-white font-bold">{achievement.title}</div>
-                                                    <div className="text-[10px] text-slate-400">{achievement.description}</div>
+                                                    <div className="text-[10px] text-slate-200">{achievement.description}</div>
                                                 </>
                                             ) : (
                                                 <div className="text-xs text-slate-400">Unknown condition</div>
@@ -449,17 +473,22 @@ export const Lobby: React.FC<LobbyProps> = ({
         return (
             <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10 p-4">
                 <GameControls />
-                <div className="w-full max-w-xl glass-panel p-6 rounded-xl mb-8">
+                <div className="w-full max-w-3xl glass-panel p-6 rounded-xl mb-8">
                     <h2 className="text-3xl font-bold text-center text-white mb-2">キャラクター選択</h2>
                     <p className="text-center text-slate-400 mb-8">好きなキャラクターを選ぼう</p>
 
-                    <div className="grid grid-cols-4 gap-3">
+                    <div className="grid grid-cols-6 gap-3">
                         {ALL_COLORS.map((color) => {
                             const unlockCondition = UNLOCK_CONDITIONS[color];
                             const isLocked = !!(unlockCondition && !unlockedAchievements.includes(unlockCondition));
                             const isSelected = singlePlayerColor === color;
 
                             const achievement = unlockCondition ? ACHIEVEMENTS.find(a => a.id === unlockCondition) : null;
+
+                            // Hide if hidden achievement and not unlocked (unless all base achievements are unlocked)
+                            if (achievement?.isHidden && !allBaseUnlocked && isLocked) {
+                                return null;
+                            }
 
                             return (
                                 <button
@@ -503,7 +532,7 @@ export const Lobby: React.FC<LobbyProps> = ({
                                             {achievement ? (
                                                 <>
                                                     <div className="text-xs text-white font-bold">{achievement.title}</div>
-                                                    <div className="text-[10px] text-slate-400">{achievement.description}</div>
+                                                    <div className="text-[10px] text-slate-200">{achievement.description}</div>
                                                 </>
                                             ) : (
                                                 <div className="text-xs text-slate-400">Unknown condition</div>

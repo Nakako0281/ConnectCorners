@@ -91,5 +91,45 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         imagePath: '/Character/Noir.png',
         personality: '無口で物静か。ミニマリスト戦略家。',
         specialPieceShape: [[1, 1, 1], [1, 0, 0], [1, 0, 0], [1, 0, 0]] // Hook
+    },
+    BROWN: {
+        id: 'terra',
+        name: 'Terra',
+        japaneseName: 'テラ',
+        color: 'BROWN',
+        description: '大地を司る巨人。圧倒的なパワーで盤面を制圧する。',
+        imagePath: '/Character/Terra.png',
+        personality: '豪快で力強い。「大地と共にあれ」が口癖。',
+        specialPieceShape: [[1, 1, 1], [1, 1, 1]] // 2x3 Block (6 squares)
+    },
+    SILVER: {
+        id: 'luna',
+        name: 'Luna',
+        japaneseName: 'ルナ',
+        color: 'SILVER',
+        description: '静寂を愛する月の使者。粘り強い戦いを得意とする。',
+        imagePath: '/Character/Luna.png',
+        personality: '神秘的で物静か。夜空を見上げるのが好き。',
+        specialPieceShape: [[1, 1, 0], [1, 0, 0], [1, 1, 1]] // Crescent-ish (6 squares)
+    },
+    GOLD: {
+        id: 'aura',
+        name: 'Aura',
+        japaneseName: 'オーラ',
+        color: 'GOLD',
+        description: '光り輝く高貴な存在。完璧な配置を求める。',
+        imagePath: '/Character/Aura.png',
+        personality: '気高く、少し高飛車。「美しく勝ちましょう」がモットー。',
+        specialPieceShape: [[0, 1, 0], [1, 1, 1], [0, 1, 0], [0, 1, 0]] // Cross-plus (6 squares)
+    },
+    BLACK: {
+        id: 'unknown',
+        name: '???',
+        japaneseName: '？？？',
+        color: 'BLACK',
+        description: '全てを極めし謎の存在。',
+        imagePath: '/Character/？？？.png',
+        personality: '詳細不明。',
+        specialPieceShape: [[1, 0, 1], [1, 1, 1], [0, 1, 0]] // Mystery Shape (6 squares)
     }
 };

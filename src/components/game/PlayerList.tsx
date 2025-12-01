@@ -18,6 +18,10 @@ const COLOR_MAP: Record<PlayerColor, string> = {
     PINK: 'bg-pink-500',
     ORANGE: 'bg-orange-500',
     PURPLE: 'bg-purple-500',
+    BROWN: 'bg-amber-700',
+    SILVER: 'bg-slate-400',
+    GOLD: 'bg-yellow-400',
+    BLACK: 'bg-slate-900',
 };
 
 const PlayerListComponent = ({ players, currentPlayerId }: PlayerListProps) => {
