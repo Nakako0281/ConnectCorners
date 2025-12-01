@@ -100,26 +100,44 @@ export const AchievementModal: React.FC<AchievementModalProps> = ({ isOpen, onCl
                         <div className="overflow-y-auto p-4 space-y-3 custom-scrollbar">
                             {ACHIEVEMENTS.map((achievement) => {
                                 const isUnlocked = stats.unlockedAchievements.includes(achievement.id);
+
+                                // Check if all base achievements are unlocked
+                                const baseAchievementIds = ACHIEVEMENTS.filter(a => !a.isHidden).map(a => a.id);
+                                const allBaseUnlocked = baseAchievementIds.every(id => stats.unlockedAchievements.includes(id));
+
+                                // Determine display content
+                                let title = achievement.title;
+                                let description = achievement.description;
+                                let icon = achievement.icon;
+                                let isRevealed = true;
+
+                                if (achievement.isHidden && !allBaseUnlocked) {
+                                    title = "???";
+                                    description = "???";
+                                    icon = "?";
+                                    isRevealed = false;
+                                }
+
                                 return (
                                     <div
                                         key={achievement.id}
                                         className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${isUnlocked
-                                                ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 shadow-sm'
-                                                : 'bg-slate-50 border-slate-100 opacity-60 grayscale'
+                                            ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 shadow-sm'
+                                            : 'bg-slate-50 border-slate-100 opacity-60 grayscale'
                                             }`}
                                     >
                                         <div className={`
                                             w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-sm border-2
                                             ${isUnlocked ? 'bg-white border-yellow-200' : 'bg-slate-200 border-slate-300'}
                                         `}>
-                                            {isUnlocked ? achievement.icon : <Lock className="w-5 h-5 text-slate-400" />}
+                                            {isUnlocked ? icon : (isRevealed ? <Lock className="w-5 h-5 text-slate-400" /> : <span className="text-slate-400 font-bold text-lg">?</span>)}
                                         </div>
                                         <div className="flex-1">
                                             <h3 className={`font-bold ${isUnlocked ? 'text-slate-800' : 'text-slate-500'}`}>
-                                                {achievement.title}
+                                                {title}
                                             </h3>
                                             <p className="text-sm text-slate-500">
-                                                {achievement.description}
+                                                {description}
                                             </p>
                                         </div>
                                         {isUnlocked && (

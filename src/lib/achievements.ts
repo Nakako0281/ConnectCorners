@@ -4,6 +4,7 @@ export interface Achievement {
   title: string;
   description: string;
   icon: string;
+  isHidden?: boolean;
 }
 
 export const ACHIEVEMENTS: Achievement[] = [
@@ -12,7 +13,10 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'win_streak_5', title: '連勝5回', description: '5回連続で勝利を果たす', icon: '🚀' },
   { id: 'perfect_game', title: 'パーフェクト', description: '盤面に自分のブロックを全て置く', icon: '💎' },
   { id: 'veteran', title: 'ベテラン', description: '10回プレイ', icon: '🛡️' },
-  { id: 'master', title: 'マスター', description: '50回プレイ', icon: '👑' },
+  // Hidden Achievements
+  { id: 'hidden_high_scorer', title: 'ハイスコアラー', description: '125点以上で勝利', icon: '🏆', isHidden: true },
+  { id: 'hidden_connect_master', title: 'The ConnectCorners Master', description: '対戦を100回行う', icon: '👑', isHidden: true },
+  { id: 'hidden_perfect_master', title: 'Perfect Master', description: 'パーフェクトを50回達成', icon: '🌟', isHidden: true },
 ];
 
 export interface PlayerStats {
@@ -59,6 +63,7 @@ export interface GameResult {
   isWin: boolean;
   isPerfect: boolean;
   isMultiplayer: boolean;
+  score: number;
 }
 
 export const updateStats = (result: GameResult): { newStats: PlayerStats, newAchievements: Achievement[] } => {
@@ -93,12 +98,23 @@ export const updateStats = (result: GameResult): { newStats: PlayerStats, newAch
     }
   };
 
+  // Base Achievements
   check('first_win', newStats.wins >= 1);
   check('win_streak_3', newStats.currentWinStreak >= 3);
   check('win_streak_5', newStats.currentWinStreak >= 5);
   check('perfect_game', newStats.perfectGames >= 1);
   check('veteran', newStats.gamesPlayed >= 10);
-  check('master', newStats.gamesPlayed >= 50);
+
+  // Check if all base achievements are unlocked
+  const baseAchievementIds = ACHIEVEMENTS.filter(a => !a.isHidden).map(a => a.id);
+  const allBaseUnlocked = baseAchievementIds.every(id => newStats.unlockedAchievements.includes(id));
+
+  // Hidden Achievements (Only check if base achievements are complete)
+  if (allBaseUnlocked) {
+    check('hidden_high_scorer', result.isWin && result.score >= 125);
+    check('hidden_connect_master', newStats.gamesPlayed >= 100);
+    check('hidden_perfect_master', newStats.perfectGames >= 50);
+  }
 
   saveStats(newStats);
 

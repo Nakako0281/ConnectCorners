@@ -370,7 +370,8 @@ export const Game: React.FC = () => {
             const { newAchievements } = updateStats({
                 isWin,
                 isPerfect,
-                isMultiplayer
+                isMultiplayer,
+                score: myPlayer.score
             });
 
             if (newAchievements.length > 0) {
