@@ -34,13 +34,24 @@ export const GameResultModal: React.FC<GameResultModalProps> = ({
         return { ...p, score, isPerfect };
     }).sort((a, b) => b.score - a.score);
 
-    const winner = playersWithScores[0];
-    const anyPerfectGame = playersWithScores.some(p => p.isPerfect);
+    // Calculate ranks with ties
+    const rankedPlayers = playersWithScores.map((player, index, array) => {
+        let rank = index + 1;
+        if (index > 0 && player.score === array[index - 1].score) {
+            // Find the first player with this score to determine the rank
+            const firstIndexWithScore = array.findIndex(p => p.score === player.score);
+            rank = firstIndexWithScore + 1;
+        }
+        return { ...player, rank };
+    });
 
-    const getTrophyIcon = (index: number) => {
-        if (index === 0) return '🥇';
-        if (index === 1) return '🥈';
-        if (index === 2) return '🥉';
+    const winner = rankedPlayers[0];
+    const anyPerfectGame = rankedPlayers.some(p => p.isPerfect);
+
+    const getTrophyIcon = (rank: number) => {
+        if (rank === 1) return '🥇';
+        if (rank === 2) return '🥈';
+        if (rank === 3) return '🥉';
         return '';
     };
 
@@ -199,21 +210,21 @@ export const GameResultModal: React.FC<GameResultModalProps> = ({
                                 Final Rankings
                             </h3>
                             <div className="space-y-3">
-                                {playersWithScores.map((player, index) => (
+                                {rankedPlayers.map((player, index) => (
                                     <motion.div
                                         key={player.id}
                                         custom={index}
                                         variants={listItemVariants}
                                         initial="hidden"
                                         animate="visible"
-                                        className={`flex items-center justify-between p-4 rounded-lg ${index === 0
+                                        className={`flex items-center justify-between p-4 rounded-lg ${player.rank === 1
                                             ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-300 shadow-md'
                                             : 'bg-slate-50 border border-slate-200'
                                             }`}
                                     >
                                         <div className="flex items-center gap-3">
-                                            <span className="text-2xl w-8 text-center">
-                                                {getTrophyIcon(index)}
+                                            <span className="text-2xl w-8 text-center font-bold text-slate-400">
+                                                {getTrophyIcon(player.rank) || player.rank}
                                             </span>
                                             <div className="flex flex-col">
                                                 <span
@@ -249,7 +260,7 @@ export const GameResultModal: React.FC<GameResultModalProps> = ({
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: playersWithScores.length * 0.1 + 0.3 }}
+                                transition={{ delay: rankedPlayers.length * 0.1 + 0.3 }}
                                 className="mt-6"
                             >
                                 <Button
