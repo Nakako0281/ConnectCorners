@@ -38,6 +38,7 @@ interface LobbyProps {
     onSelectCharacter: (color: PlayerColor) => void;
     onSetReady: (isReady: boolean) => void;
     myLobbyPlayer: LobbyPlayer | null;
+    isConnectedToHost?: boolean;
 }
 
 export const Lobby: React.FC<LobbyProps> = ({
@@ -51,7 +52,8 @@ export const Lobby: React.FC<LobbyProps> = ({
     onBack,
     onSelectCharacter,
     onSetReady,
-    myLobbyPlayer
+    myLobbyPlayer,
+    isConnectedToHost = false
 }) => {
     const [joinId, setJoinId] = useState('');
     const [copied, setCopied] = useState(false);
@@ -136,6 +138,24 @@ export const Lobby: React.FC<LobbyProps> = ({
 
 
     // --- Render Helpers ---
+
+    // 0. Connecting State
+    if (isConnectedToHost && connectedPlayers.length === 0) {
+        return (
+            <div className="relative w-full max-w-md mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10">
+                <GameControls />
+                <Card className="glass-panel border-0 bg-black/40 text-slate-100 w-full">
+                    <CardContent className="flex flex-col items-center gap-6 p-8">
+                        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                        <div className="text-center space-y-2">
+                            <h2 className="text-2xl font-bold text-white">Connecting to Lobby...</h2>
+                            <p className="text-slate-400">Waiting for host response</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
 
     // 1. Name Entry Screen
     if (!isNameSet) {

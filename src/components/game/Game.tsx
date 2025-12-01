@@ -623,18 +623,35 @@ export const Game: React.FC = () => {
     const [hasSentJoin, setHasSentJoin] = useState(false);
 
     useEffect(() => {
-        if (!isHost && gameStatus === 'lobby' && peerId && !hasSentJoin && connections.length > 0) {
-            console.log("Sending JOIN message to host");
-            sendData({
-                type: 'JOIN',
-                payload: {
-                    name: getUserName() || `Guest-${peerId.substring(0, 4)}`,
-                    color: 'BLUE' // Dummy color, will select in lobby
-                }
-            });
-            setHasSentJoin(true);
+        let intervalId: NodeJS.Timeout;
+
+        if (!isHost && gameStatus === 'lobby' && peerId && connections.length > 0) {
+            // Check if we have successfully joined (received lobby data)
+            // We can check if connectedPlayers is empty or if we are in it.
+            // Initially connectedPlayers is empty for guest.
+            const hasJoined = connectedPlayers.length > 0;
+
+            if (!hasJoined) {
+                console.log("Sending JOIN message to host...");
+                const sendJoin = () => {
+                    sendData({
+                        type: 'JOIN',
+                        payload: {
+                            name: getUserName() || `Guest-${peerId.substring(0, 4)}`,
+                            color: 'BLUE' // Dummy color, will select in lobby
+                        }
+                    });
+                };
+
+                sendJoin(); // Send immediately
+                intervalId = setInterval(sendJoin, 1000); // Retry every 1s
+            }
         }
-    }, [isHost, gameStatus, peerId, hasSentJoin, connections, myPlayerColor, sendData]);
+
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [isHost, gameStatus, peerId, connections, connectedPlayers, sendData]);
 
     const currentPlayer = players[currentPlayerIndex];
     const selectedPiece = currentPlayer?.pieces.find(p => p.id === selectedPieceId);
@@ -962,6 +979,7 @@ export const Game: React.FC = () => {
                     }
                 }}
                 myLobbyPlayer={connectedPlayers.find(p => p.id === peerId) || null}
+                isConnectedToHost={!isHost && connections.length > 0}
             />
         );
     }
