@@ -368,12 +368,13 @@ export const Lobby: React.FC<LobbyProps> = ({
                                             onSelectCharacter(color);
                                         }
                                     }}
-                                    disabled={isLocked || isTaken || myLobbyPlayer?.isReady}
+                                    aria-disabled={isLocked || isTaken || myLobbyPlayer?.isReady}
                                     className={`
                                         relative group aspect-square rounded-xl transition-all duration-200
                                         ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-black/50 scale-105 z-10' : ''}
                                         ${(isLocked || isTaken) ? 'opacity-40 grayscale cursor-not-allowed' : 'hover:scale-105 opacity-90 hover:opacity-100'}
                                         ${myLobbyPlayer?.isReady ? 'cursor-default' : ''}
+                                        hover:z-50
                                     `}
                                     style={{
                                         boxShadow: isSelected ? `0 0 15px ${SHADOW_COLOR_MAP[color]}` : 'none'
@@ -406,8 +407,12 @@ export const Lobby: React.FC<LobbyProps> = ({
                                             </div>
                                             {achievement ? (
                                                 <>
-                                                    <div className="text-xs text-white font-bold">{achievement.title}</div>
-                                                    <div className="text-[10px] text-slate-200">{achievement.description}</div>
+                                                    <div className="text-xs text-white font-bold">
+                                                        {achievement.isHidden && !allBaseUnlocked ? '???' : achievement.title}
+                                                    </div>
+                                                    <div className="text-[10px] text-slate-200">
+                                                        {achievement.isHidden && !allBaseUnlocked ? '???' : achievement.description}
+                                                    </div>
                                                 </>
                                             ) : (
                                                 <div className="text-xs text-slate-400">Unknown condition</div>
@@ -485,11 +490,6 @@ export const Lobby: React.FC<LobbyProps> = ({
 
                             const achievement = unlockCondition ? ACHIEVEMENTS.find(a => a.id === unlockCondition) : null;
 
-                            // Hide if hidden achievement and not unlocked (unless all base achievements are unlocked)
-                            if (achievement?.isHidden && !allBaseUnlocked && isLocked) {
-                                return null;
-                            }
-
                             return (
                                 <button
                                     key={color}
@@ -499,11 +499,12 @@ export const Lobby: React.FC<LobbyProps> = ({
                                             setSinglePlayerColor(color);
                                         }
                                     }}
-                                    disabled={isLocked}
+                                    aria-disabled={isLocked}
                                     className={`
                                         relative group aspect-square rounded-xl transition-all duration-200
                                         ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-black/50 scale-105 z-10' : ''}
                                         ${isLocked ? 'opacity-40 grayscale cursor-not-allowed' : 'hover:scale-105 opacity-90 hover:opacity-100'}
+                                        hover:z-50
                                     `}
                                     style={{
                                         boxShadow: isSelected ? `0 0 15px ${SHADOW_COLOR_MAP[color]}` : 'none'
@@ -531,8 +532,12 @@ export const Lobby: React.FC<LobbyProps> = ({
                                             </div>
                                             {achievement ? (
                                                 <>
-                                                    <div className="text-xs text-white font-bold">{achievement.title}</div>
-                                                    <div className="text-[10px] text-slate-200">{achievement.description}</div>
+                                                    <div className="text-xs text-white font-bold">
+                                                        {achievement.isHidden && !allBaseUnlocked ? '???' : achievement.title}
+                                                    </div>
+                                                    <div className="text-[10px] text-slate-200">
+                                                        {achievement.isHidden && !allBaseUnlocked ? '???' : achievement.description}
+                                                    </div>
                                                 </>
                                             ) : (
                                                 <div className="text-xs text-slate-400">Unknown condition</div>

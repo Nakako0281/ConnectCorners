@@ -20,10 +20,10 @@ const COLOR_MAP: Record<PlayerColor, string> = {
     PINK: 'bg-pink-400/80',
     ORANGE: 'bg-orange-500/80',
     PURPLE: 'bg-purple-500/80',
-    BROWN: 'bg-amber-700/80',
-    SILVER: 'bg-slate-400/80',
-    GOLD: 'bg-yellow-400/80',
-    BLACK: 'bg-slate-900/80',
+    BROWN: 'bg-gradient-to-br from-amber-500 via-amber-700 to-amber-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]',
+    SILVER: 'bg-gradient-to-br from-slate-200 via-slate-400 to-slate-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]',
+    GOLD: 'bg-gradient-to-br from-yellow-200 via-yellow-400 to-yellow-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]',
+    BLACK: 'bg-gradient-to-br from-slate-600 via-slate-800 to-black shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]',
 };
 
 export const PieceView = React.memo(({ shape, color, cellSize = 20, className, onClick }: PieceProps) => {

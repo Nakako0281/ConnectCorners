@@ -44,7 +44,7 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         imagePath: '/Character/Mallo.png',
         personality: '争いごとは苦手だが、守りに入ると鉄壁の強さを誇る。\n「みんなの居場所（陣地）を守りたいの」と言いながら、着実に自分のエリアを広げる。\nマイペースで、対局中に宇宙植物にお水をあげ始めることがある。',
         appearance: 'ふわふわとしたエメラルドグリーンのウェーブヘア。\n大きな丸眼鏡をかけており、制服はロングスカートスタイル。\n常に謎の小さな植物の妖精（ペット）が肩に乗っている。',
-        specialPieceShape: [[1, 0], [1, 0], [1, 0], [1, 0], [1, 1]] // Big L
+        specialPieceShape: [[1, 1], [1, 1], [1, 0], [1, 0]] // tree
     },
     YELLOW: {
         id: 'pico',
@@ -55,7 +55,7 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         imagePath: '/Character/Pico.png',
         personality: 'イタズラ好きで、セオリー無視の変な手を打つのが大好き。\n「ここ繋げたら面白くない？」と、誰も予想しない場所にピースを置いて場を混乱させる天才肌。\n最新のガジェットオタクで、ゲーム盤のホログラム改造を担当している。',
         appearance: '鮮やかなネオンイエローのツインテール。\nヘッドフォンを首にかけ、制服に缶バッジや電脳アクセサリーをジャラジャラつけている「デコラ系」。\n手には常に携帯ゲーム機かタブレットを持っている。',
-        specialPieceShape: [[0, 1, 0], [1, 1, 1], [0, 1, 0], [0, 1, 0]] // Cross
+        specialPieceShape: [[1, 0, 0], [1, 1, 0], [0, 1, 1], [0, 0, 1]] // thunder
     },
     LIGHTBLUE: {
         id: 'mizuki',
@@ -66,7 +66,7 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         imagePath: '/Character/Mizuki.png',
         personality: '頭脳明晰で論理的。データ分析が得意で、リズとは最高の研究パートナー。\n感情を表に出すことは少ないが、勝利への執念は人一倍強い。\n「敗因は必ずデータに現れる」と信じている。',
         appearance: '透明感のある水色のボブヘア。\nフリルやレースの少ない、シンプルでスタイリッシュな制服を着こなしている。\n片目にモノクル（片眼鏡）型の小型ディスプレイを装着しており、常にゲームの勝率データを表示させている。',
-        specialPieceShape: [[1, 0, 0], [1, 1, 0], [0, 1, 1], [0, 0, 1]] // Stairs
+        specialPieceShape: [[0, 1, 0], [1, 0, 1], [1, 1, 1]] // Stairs
     },
     PINK: {
         id: 'amour',
@@ -132,7 +132,7 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         imagePath: '/Character/Aura.png',
         personality: '宇宙一の大富豪の娘で、超セレブな自信家。「勝利も輝きも、全て私のもの！」が口癖。\n高飛車だが、実は努力家で、最高の家庭教師（AI）をつけて戦略を学んでいる。\n使うピースも純金製（という設定）で、置くたびにキラキラしたエフェクトが出るのを好む。',
         appearance: "まばゆく輝くウェーブのかかったブロンド（金色）ヘア。縦ロール気味。\n制服が隠れるほど、金の刺繍や宝石の装飾がジャラジャラついたマントを羽織っている。\n頭には小さなティアラを乗せ、常に扇子（もちろん金色）を優雅に仰いでいる。",
-        specialPieceShape: [[0, 1, 0], [1, 1, 1], [0, 1, 0], [0, 1, 0]] // Cross-plus (6 squares)
+        specialPieceShape: [[0, 1, 1, 0], [1, 1, 1, 1]] // Cross-plus (6 squares)
     },
     BLACK: {
         id: 'unknown',
@@ -143,6 +143,6 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         imagePath: '/Character/？？？.png',
         personality: '不明。',
         appearance: "不明。",
-        specialPieceShape: [[1, 0, 1], [1, 1, 1], [0, 1, 0]] // Mystery Shape (6 squares)
+        specialPieceShape: [[0, 1, 0, 0], [0, 1, 0, 0], [1, 1, 1, 1]] // Mystery Shape (6 squares)
     }
 };
