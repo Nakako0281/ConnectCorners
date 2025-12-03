@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Trophy, HelpCircle, FileText } from 'lucide-react';
+import { Trophy, HelpCircle, FileText, BookOpen } from 'lucide-react';
 import { VolumeControl } from './VolumeControl';
 import { AchievementModal } from './AchievementModal';
 import { HowToPlayModal } from './HowToPlayModal';
 import { CreditModal } from './CreditModal';
+import { CharacterIntroductionModal } from './CharacterIntroductionModal';
 import { useSoundContext } from '@/contexts/SoundContext';
 
 interface GameControlsProps {
@@ -15,6 +16,7 @@ export const GameControls: React.FC<GameControlsProps> = ({ children }) => {
     const [isAchievementModalOpen, setIsAchievementModalOpen] = useState(false);
     const [isHowToPlayModalOpen, setIsHowToPlayModalOpen] = useState(false);
     const [isCreditModalOpen, setIsCreditModalOpen] = useState(false);
+    const [isCharacterModalOpen, setIsCharacterModalOpen] = useState(false);
     const { playClick } = useSoundContext();
 
     const handleOpenAchievements = () => {
@@ -32,6 +34,11 @@ export const GameControls: React.FC<GameControlsProps> = ({ children }) => {
         setIsCreditModalOpen(true);
     };
 
+    const handleOpenCharacter = () => {
+        playClick();
+        setIsCharacterModalOpen(true);
+    };
+
     return (
         <>
             <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
@@ -43,6 +50,14 @@ export const GameControls: React.FC<GameControlsProps> = ({ children }) => {
                     className="text-slate-400 hover:text-white hover:bg-white/10"
                 >
                     <Trophy className="w-5 h-5" />
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleOpenCharacter}
+                    className="text-slate-400 hover:text-white hover:bg-white/10"
+                >
+                    <BookOpen className="w-5 h-5" />
                 </Button>
                 <Button
                     variant="ghost"
@@ -66,6 +81,11 @@ export const GameControls: React.FC<GameControlsProps> = ({ children }) => {
             <AchievementModal
                 isOpen={isAchievementModalOpen}
                 onClose={() => setIsAchievementModalOpen(false)}
+            />
+
+            <CharacterIntroductionModal
+                isOpen={isCharacterModalOpen}
+                onClose={() => setIsCharacterModalOpen(false)}
             />
 
             <HowToPlayModal
