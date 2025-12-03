@@ -1066,7 +1066,17 @@ export const Game: React.FC = () => {
                         CONNECT CORNERS
                     </h1>
                     <div className="flex items-center gap-2 mb-4">
-                        <div className={`w-4 h-4 rounded-full bg-${TAILWIND_COLOR_MAP[currentPlayer.color]}-500 shadow-[0_0_10px_currentColor]`} style={{ color: `var(--color-${TAILWIND_COLOR_MAP[currentPlayer.color]}-500)` }} />
+                        <div
+                            className={`w-4 h-4 rounded-full shadow-[0_0_10px_currentColor] ${currentPlayer.color === 'SILVER' ? 'bg-slate-300' :
+                                    currentPlayer.color === 'BLACK' ? 'bg-slate-900' :
+                                        `bg-${TAILWIND_COLOR_MAP[currentPlayer.color]}-500`
+                                }`}
+                            style={{
+                                color: currentPlayer.color === 'SILVER' ? '#cbd5e1' :
+                                    currentPlayer.color === 'BLACK' ? '#0f172a' :
+                                        `var(--color-${TAILWIND_COLOR_MAP[currentPlayer.color]}-500)`
+                            }}
+                        />
                         <span className="font-medium text-slate-300">
                             Turn {turnNumber}: <span style={{ color: currentPlayer.color }} className="font-bold">{CHARACTERS[currentPlayer.color].japaneseName}</span>
                             {isMyTurn ? " (You)" : " (Waiting...)"}
