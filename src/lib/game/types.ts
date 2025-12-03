@@ -1,4 +1,4 @@
-export type PlayerColor = 'BLUE' | 'YELLOW' | 'RED' | 'GREEN' | 'LIGHTBLUE' | 'PINK' | 'ORANGE' | 'PURPLE';
+export type PlayerColor = 'BLUE' | 'YELLOW' | 'RED' | 'GREEN' | 'LIGHTBLUE' | 'PINK' | 'ORANGE' | 'PURPLE' | 'BROWN' | 'SILVER' | 'GOLD' | 'BLACK';
 
 export interface Coordinate {
   x: number;

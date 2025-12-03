@@ -69,6 +69,10 @@ const TAILWIND_COLOR_MAP: Record<PlayerColor, string> = {
     PINK: 'pink',
     ORANGE: 'orange',
     PURPLE: 'purple',
+    BROWN: 'amber',
+    SILVER: 'slate',
+    GOLD: 'yellow',
+    BLACK: 'slate',
 };
 
 export const Game: React.FC = () => {
@@ -182,6 +186,10 @@ export const Game: React.FC = () => {
             PINK: 'perfect_game',
             ORANGE: 'veteran',
             PURPLE: 'win_streak_5',
+            BROWN: 'hidden_high_scorer',
+            SILVER: 'hidden_connect_master',
+            GOLD: 'hidden_perfect_master',
+            BLACK: 'complete_all',
         };
 
         // Filter available colors for CPU
@@ -370,7 +378,8 @@ export const Game: React.FC = () => {
             const { newAchievements } = updateStats({
                 isWin,
                 isPerfect,
-                isMultiplayer
+                isMultiplayer,
+                score: myPlayer.score
             });
 
             if (newAchievements.length > 0) {

@@ -100,5 +100,49 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         personality: '無口で常に物静か。普段何を考えているか読み取りにくいため、部員からは「魔女」と呼ばれている。\n最も少ないピース数で勝利することを美徳としており、不要なピースは極力置かないミニマリスト戦略家。\nピコのトリッキーな行動にも動じない冷静さを持つ。',
         appearance: '艶やかなディープパープルのグラデーションヘアで、顔の半分ほどが影になっていることが多い。\n制服の上に、星が散りばめられたようなロングカーディガンを羽織っている。\n指には大きな銀の指輪をいくつかはめており、時々フッと微笑むのが魅力的。',
         specialPieceShape: [[1, 1, 1], [1, 0, 0], [1, 0, 0], [1, 0, 0]] // Hook
+    },
+    BROWN: {
+        id: 'terra',
+        name: 'Terra',
+        japaneseName: 'テラ',
+        color: 'BROWN',
+        description: '古代遺跡の守護者（ブロンズ・青銅）\nレリック星人の「テラ（Terra）',
+        imagePath: '/Character/Terra.png',
+        personality: '古代宇宙文明の遺跡を守る一族の末裔。口数は少なく、任務に忠実な仕事人。\n最新機器よりも、先祖代々伝わる古代の道具（レリック）を信頼している。\n「古いものが弱いとは限らない」と静かに語り、堅実で崩しにくい手を打つ。',
+        appearance: "少し赤みがかった、くすんだブロンズ色の髪をきっちりまとめている。\n制服の上に、古代の青銅製アーマーの一部（肩当てや籠手）を装着している。金属部分には古代文字が刻まれている。\n背中には、大きな歯車やゼンマイがついた謎の古代装置を背負っている。",
+        specialPieceShape: [[1, 1, 1], [1, 1, 1]] // 2x3 Block (6 squares)
+    },
+    SILVER: {
+        id: 'luna',
+        name: 'Luna',
+        japaneseName: 'ルナ',
+        color: 'SILVER',
+        description: '未来を見通す眠り姫（シルバー・銀）\nムーン星人の「ルナ（Luna）',
+        imagePath: '/Character/Luna.png',
+        personality: '「……次の手、見えちゃった」が口癖。常に眠そうで、部室のソファで宙に浮きながら寝ている。\n予知能力（直感）が鋭すぎて、逆に考えすぎて動けなくなることもある。\nリズ（青）やミズキ（水色）が計算で導き出す答えを、寝言で言い当てて悔しがらせる。',
+        appearance: "光を反射するシルバーホワイトのロングヘア。重力に逆らって少しフワフワ浮いている。\n制服の上から、サイズの大きい真っ白なパーカー（ウサギ耳付き）を被っている。\n常に抱き枕（星型）を抱えている。",
+        specialPieceShape: [[1, 1, 0], [1, 0, 0], [1, 1, 1]] // Crescent-ish (6 squares)
+    },
+    GOLD: {
+        id: 'aura',
+        name: 'Aura',
+        japaneseName: 'オーラ',
+        color: 'GOLD',
+        description: '輝くゴージャスお嬢様（ゴールド・金）\nジュエル星人の「オーラ（Aura）',
+        imagePath: '/Character/Aura.png',
+        personality: '宇宙一の大富豪の娘で、超セレブな自信家。「勝利も輝きも、全て私のもの！」が口癖。\n高飛車だが、実は努力家で、最高の家庭教師（AI）をつけて戦略を学んでいる。\n使うピースも純金製（という設定）で、置くたびにキラキラしたエフェクトが出るのを好む。',
+        appearance: "まばゆく輝くウェーブのかかったブロンド（金色）ヘア。縦ロール気味。\n制服が隠れるほど、金の刺繍や宝石の装飾がジャラジャラついたマントを羽織っている。\n頭には小さなティアラを乗せ、常に扇子（もちろん金色）を優雅に仰いでいる。",
+        specialPieceShape: [[0, 1, 0], [1, 1, 1], [0, 1, 0], [0, 1, 0]] // Cross-plus (6 squares)
+    },
+    BLACK: {
+        id: 'unknown',
+        name: '???',
+        japaneseName: '？？？',
+        color: 'BLACK',
+        description: '全てを極めし謎の存在（ブラック・黒）',
+        imagePath: '/Character/？？？.png',
+        personality: '不明。',
+        appearance: "不明。",
+        specialPieceShape: [[1, 0, 1], [1, 1, 1], [0, 1, 0]] // Mystery Shape (6 squares)
     }
 };

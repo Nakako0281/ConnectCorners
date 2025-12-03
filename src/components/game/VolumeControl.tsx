@@ -5,6 +5,12 @@ import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { useSoundContext } from '@/contexts/SoundContext';
 import { cn } from '@/lib/utils';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface VolumeControlProps {
     className?: string;
@@ -33,15 +39,24 @@ export const VolumeControl: React.FC<VolumeControlProps> = ({ className }) => {
 
     return (
         <Popover open={isOpen} onOpenChange={handleOpenChange}>
-            <PopoverTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className={cn("text-slate-400 hover:text-white hover:bg-white/10", className)}
-                >
-                    <Icon className="w-5 h-5" />
-                </Button>
-            </PopoverTrigger>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className={cn("text-slate-400 hover:text-white hover:bg-white/10", className)}
+                            >
+                                <Icon className="w-5 h-5" />
+                            </Button>
+                        </PopoverTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>音量設定</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
             <PopoverContent className="w-80 bg-slate-900 border-slate-700 p-4 shadow-xl">
                 <div className="grid gap-4">
                     <div className="grid gap-6 py-2">

@@ -29,6 +29,10 @@ const COLOR_MAP: Record<PlayerColor, string> = {
   PINK: 'bg-pink-400/80',
   ORANGE: 'bg-orange-500/80',
   PURPLE: 'bg-purple-500/80',
+  BROWN: 'bg-amber-700/80',
+  SILVER: 'bg-slate-400/80',
+  GOLD: 'bg-yellow-400/80',
+  BLACK: 'bg-slate-900/80',
 };
 
 const BoardCell = React.memo(({

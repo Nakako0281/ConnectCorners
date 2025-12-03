@@ -4,7 +4,8 @@ export const BOARD_SIZE = 21;
 
 export const ALL_COLORS: PlayerColor[] = [
     'BLUE', 'YELLOW', 'RED', 'GREEN',
-    'LIGHTBLUE', 'PINK', 'ORANGE', 'PURPLE'
+    'LIGHTBLUE', 'PINK', 'ORANGE', 'PURPLE',
+    'BROWN', 'SILVER', 'GOLD', 'BLACK'
 ];
 
 // Standard Pieces (21 pieces per player)
