@@ -13,16 +13,16 @@ interface PieceProps {
 
 const COLOR_MAP: Record<PlayerColor, string> = {
     BLUE: 'bg-blue-500/80',
-    YELLOW: 'bg-yellow-400/80',
+    YELLOW: 'bg-yellow-300/90',
     RED: 'bg-red-500/80',
     GREEN: 'bg-green-500/80',
     LIGHTBLUE: 'bg-sky-400/80',
     PINK: 'bg-pink-400/80',
-    ORANGE: 'bg-orange-500/80',
+    ORANGE: 'bg-orange-500/90',
     PURPLE: 'bg-purple-500/80',
-    BROWN: 'bg-gradient-to-br from-amber-500 via-amber-700 to-amber-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]',
+    BROWN: 'bg-gradient-to-br from-amber-100 via-amber-700 to-amber-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]',
     SILVER: 'bg-gradient-to-br from-slate-200 via-slate-400 to-slate-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]',
-    GOLD: 'bg-gradient-to-br from-yellow-200 via-yellow-400 to-yellow-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]',
+    GOLD: 'bg-gradient-to-br from-yellow-700 via-yellow-400 to-yellow-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]',
     BLACK: 'bg-gradient-to-br from-slate-600 via-slate-800 to-black shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]',
 };
 
