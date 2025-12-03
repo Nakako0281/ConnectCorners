@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Trophy, HelpCircle, FileText, BookOpen } from 'lucide-react';
+import { Trophy, HelpCircle, FileText, User } from 'lucide-react';
 import { VolumeControl } from './VolumeControl';
 import { AchievementModal } from './AchievementModal';
 import { HowToPlayModal } from './HowToPlayModal';
@@ -90,7 +90,7 @@ export const GameControls: React.FC<GameControlsProps> = ({ children }) => {
                                 onClick={handleOpenCharacter}
                                 className="text-slate-400 hover:text-white hover:bg-white/10"
                             >
-                                <BookOpen className="w-5 h-5" />
+                                <User className="w-5 h-5" />
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent>

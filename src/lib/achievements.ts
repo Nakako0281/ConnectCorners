@@ -126,3 +126,18 @@ export const updateStats = (result: GameResult): { newStats: PlayerStats, newAch
 
   return { newStats, newAchievements };
 };
+
+export const UNLOCK_CONDITIONS: Record<string, string | null> = {
+  BLUE: null,
+  RED: null,
+  GREEN: null,
+  YELLOW: null,
+  LIGHTBLUE: 'first_win',
+  PINK: 'perfect_game',
+  ORANGE: 'veteran',
+  PURPLE: 'win_streak_5',
+  BROWN: 'hidden_high_scorer',
+  SILVER: 'hidden_connect_master',
+  GOLD: 'hidden_perfect_master',
+  BLACK: 'complete_all',
+};

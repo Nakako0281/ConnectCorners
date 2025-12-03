@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
 import { CHARACTERS } from '@/lib/game/characters';
+import { getStats, UNLOCK_CONDITIONS } from '@/lib/achievements';
 import Image from 'next/image';
 
 interface CharacterIntroductionModalProps {
@@ -11,8 +12,24 @@ interface CharacterIntroductionModalProps {
 }
 
 export const CharacterIntroductionModal: React.FC<CharacterIntroductionModalProps> = ({ isOpen, onClose }) => {
-    const characterList = Object.values(CHARACTERS);
     const [currentIndex, setCurrentIndex] = useState(0);
+
+    // Filter characters based on unlock status
+    const stats = getStats();
+    const characterList = Object.values(CHARACTERS).filter(char => {
+        const condition = UNLOCK_CONDITIONS[char.color];
+        if (!condition) return true; // Always unlocked
+        return stats.unlockedAchievements.includes(condition);
+    });
+
+    // Reset index if out of bounds (e.g. when list shrinks)
+    React.useEffect(() => {
+        if (currentIndex >= characterList.length) {
+            setCurrentIndex(0);
+        }
+    }, [characterList.length, currentIndex]);
+
+    if (characterList.length === 0) return null;
 
     const currentCharacter = characterList[currentIndex];
 
@@ -32,10 +49,10 @@ export const CharacterIntroductionModal: React.FC<CharacterIntroductionModalProp
                     <div className="w-full md:w-1/2 bg-gradient-to-br from-slate-800 to-slate-900 relative flex items-center justify-center p-8">
                         <div className="relative w-full h-full">
                             <Image
-                                src={currentCharacter.imagePath}
+                                src={currentCharacter.wholeBodyImagePath || currentCharacter.imagePath}
                                 alt={currentCharacter.name}
                                 fill
-                                style={{ objectFit: 'contain' }}
+                                style={{ objectFit: 'cover' }}
                                 className="drop-shadow-2xl"
                             />
                         </div>
@@ -58,7 +75,7 @@ export const CharacterIntroductionModal: React.FC<CharacterIntroductionModalProp
                             </div>
                         </DialogHeader>
 
-                        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6 pr-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-600">
                             <div className="prose prose-invert max-w-none">
                                 <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
                                     <h4 className="text-sm font-bold text-blue-400 mb-2 uppercase tracking-wide">Description</h4>
