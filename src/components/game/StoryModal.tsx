@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, X } from 'lucide-react';
 import Image from 'next/image';
 import { Yomogi } from 'next/font/google';
+import { useSoundContext } from '@/contexts/SoundContext';
 
 const yomogi = Yomogi({
     weight: '400',
@@ -85,12 +86,16 @@ const STORY_PAGES = [
 export const StoryModal: React.FC<StoryModalProps> = ({ isOpen, onClose }) => {
     const [page, setPage] = useState(0);
     const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+    const { playStoryBgm, stopStoryBgm } = useSoundContext();
 
     useEffect(() => {
         if (isOpen) {
             setPage(0);
+            playStoryBgm();
+        } else {
+            stopStoryBgm();
         }
-    }, [isOpen]);
+    }, [isOpen, playStoryBgm, stopStoryBgm]);
 
     useEffect(() => {
         if (scrollContainerRef.current) {

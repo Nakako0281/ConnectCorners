@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { useSoundContext } from '@/contexts/SoundContext';
 import { ALL_COLORS } from '@/lib/game/constants';
 import { PlayerColor } from '@/lib/game/types';
-import { CHARACTERS } from '@/lib/game/characters';
+import { CHARACTERS, UNLOCK_CONDITIONS } from '@/lib/game/characters';
 import { PieceView } from './Piece';
 import { GameControls } from './GameControls';
 import { StoryModal } from './StoryModal';
@@ -16,20 +16,7 @@ import { Lock } from 'lucide-react';
 import { getUserName, setUserName } from '@/lib/utils/storage';
 import { LobbyPlayer } from '@/lib/game/types';
 
-const UNLOCK_CONDITIONS: Record<PlayerColor, string | null> = {
-    BLUE: null,
-    RED: null,
-    GREEN: null,
-    YELLOW: null,
-    LIGHTBLUE: 'first_win',
-    PINK: 'perfect_game',
-    ORANGE: 'veteran',
-    PURPLE: 'win_streak_5',
-    BROWN: 'hidden_high_scorer',
-    SILVER: 'hidden_connect_master',
-    GOLD: 'hidden_perfect_master',
-    BLACK: 'complete_all',
-};
+
 
 const BG_COLOR_MAP: Record<PlayerColor, string> = {
     BLUE: 'bg-blue-500',

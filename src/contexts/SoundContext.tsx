@@ -27,6 +27,8 @@ interface SoundContextType {
     stopResultBgm: () => void;
     playRouletteTick: () => void;
     playDecidedFirst: () => void;
+    playStoryBgm: () => void;
+    stopStoryBgm: () => void;
 }
 
 const SoundContext = createContext<SoundContextType | undefined>(undefined);
@@ -85,20 +87,132 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [playDecidedFirst] = useSound('/sounds/decided_first.mp3', { volume: seVolume });
 
     // BGM
-    const [playLobbyBgm, { stop: stopLobbyBgm, sound: lobbyBgmSound }] = useSound('/sounds/bgm_lobby.mp3', {
+    const [activeBgm, setActiveBgm] = useState<'lobby' | 'game' | 'result' | 'story' | null>(null);
+    const [previousBgm, setPreviousBgm] = useState<'lobby' | 'game' | 'result' | null>(null);
+
+    // Refs to hold current state for access inside stable callbacks
+    const activeBgmRef = React.useRef(activeBgm);
+    const previousBgmRef = React.useRef(previousBgm);
+
+    // Helper to update state and ref immediately
+    const setActiveBgmHelper = React.useCallback((newState: 'lobby' | 'game' | 'result' | 'story' | null) => {
+        console.log(`[SoundContext] setActiveBgm: ${activeBgmRef.current} -> ${newState}`);
+        activeBgmRef.current = newState;
+        setActiveBgm(newState);
+    }, []);
+
+    const setPreviousBgmHelper = React.useCallback((newState: 'lobby' | 'game' | 'result' | null) => {
+        console.log(`[SoundContext] setPreviousBgm: ${previousBgmRef.current} -> ${newState}`);
+        previousBgmRef.current = newState;
+        setPreviousBgm(newState);
+    }, []);
+
+    const [playLobbyBgmRaw, { stop: stopLobbyBgmRaw, sound: lobbyBgmSound }] = useSound('/sounds/bgm_lobby.mp3', {
         loop: true,
         volume: bgmVolume
     });
 
-    const [playGameBgm, { stop: stopGameBgm, sound: gameBgmSound }] = useSound('/sounds/bgm_game.mp3', {
+    const [playGameBgmRaw, { stop: stopGameBgmRaw, sound: gameBgmSound }] = useSound('/sounds/bgm_game.mp3', {
         loop: true,
         volume: bgmVolume
     });
 
-    const [playResultBgm, { stop: stopResultBgm, sound: resultBgmSound }] = useSound('/sounds/bgm_result.mp3', {
+    const [playResultBgmRaw, { stop: stopResultBgmRaw, sound: resultBgmSound }] = useSound('/sounds/bgm_result.mp3', {
         loop: true,
         volume: bgmVolume
     });
+
+    const [playStoryBgmRaw, { stop: stopStoryBgmRaw, sound: storyBgmSound }] = useSound('/sounds/story.mp3', {
+        loop: true,
+        volume: bgmVolume
+    });
+
+    const stopAllBgm = React.useCallback(() => {
+        stopLobbyBgmRaw();
+        stopGameBgmRaw();
+        stopResultBgmRaw();
+        stopStoryBgmRaw();
+    }, [stopLobbyBgmRaw, stopGameBgmRaw, stopResultBgmRaw, stopStoryBgmRaw]);
+
+    const playLobbyBgm = React.useCallback(() => {
+        console.log(`[SoundContext] playLobbyBgm called. Current: ${activeBgmRef.current}`);
+        if (activeBgmRef.current === 'lobby') return;
+        stopAllBgm();
+        playLobbyBgmRaw();
+        setActiveBgmHelper('lobby');
+    }, [stopAllBgm, playLobbyBgmRaw, setActiveBgmHelper]);
+
+    const stopLobbyBgm = React.useCallback(() => {
+        console.log(`[SoundContext] stopLobbyBgm called. Current: ${activeBgmRef.current}`);
+        if (activeBgmRef.current === 'lobby') {
+            stopLobbyBgmRaw();
+            setActiveBgmHelper(null);
+        }
+    }, [stopLobbyBgmRaw, setActiveBgmHelper]);
+
+    const playGameBgm = React.useCallback(() => {
+        console.log(`[SoundContext] playGameBgm called. Current: ${activeBgmRef.current}`);
+        if (activeBgmRef.current === 'game') return;
+        stopAllBgm();
+        playGameBgmRaw();
+        setActiveBgmHelper('game');
+    }, [stopAllBgm, playGameBgmRaw, setActiveBgmHelper]);
+
+    const stopGameBgm = React.useCallback(() => {
+        console.log(`[SoundContext] stopGameBgm called. Current: ${activeBgmRef.current}`);
+        if (activeBgmRef.current === 'game') {
+            stopGameBgmRaw();
+            setActiveBgmHelper(null);
+        }
+    }, [stopGameBgmRaw, setActiveBgmHelper]);
+
+    const playResultBgm = React.useCallback(() => {
+        if (activeBgmRef.current === 'result') return;
+        stopAllBgm();
+        playResultBgmRaw();
+        setActiveBgmHelper('result');
+    }, [stopAllBgm, playResultBgmRaw, setActiveBgmHelper]);
+
+    const stopResultBgm = React.useCallback(() => {
+        if (activeBgmRef.current === 'result') {
+            stopResultBgmRaw();
+            setActiveBgmHelper(null);
+        }
+    }, [stopResultBgmRaw, setActiveBgmHelper]);
+
+    const playStoryBgm = React.useCallback(() => {
+        if (activeBgmRef.current === 'story') return;
+
+        // Save current BGM as previous if it's not story
+        if (activeBgmRef.current) {
+            setPreviousBgmHelper(activeBgmRef.current as 'lobby' | 'game' | 'result');
+        }
+
+        stopAllBgm();
+        playStoryBgmRaw();
+        setActiveBgmHelper('story');
+    }, [stopAllBgm, playStoryBgmRaw, setActiveBgmHelper, setPreviousBgmHelper]);
+
+    const stopStoryBgm = React.useCallback(() => {
+        if (activeBgmRef.current === 'story') {
+            stopStoryBgmRaw();
+            setActiveBgmHelper(null);
+
+            // Resume previous BGM
+            const prev = previousBgmRef.current;
+            if (prev === 'lobby') {
+                playLobbyBgmRaw();
+                setActiveBgmHelper('lobby');
+            } else if (prev === 'game') {
+                playGameBgmRaw();
+                setActiveBgmHelper('game');
+            } else if (prev === 'result') {
+                playResultBgmRaw();
+                setActiveBgmHelper('result');
+            }
+            setPreviousBgmHelper(null);
+        }
+    }, [stopStoryBgmRaw, playLobbyBgmRaw, playGameBgmRaw, playResultBgmRaw, setActiveBgmHelper, setPreviousBgmHelper]);
 
     // Update running BGM volume when state changes
     useEffect(() => {
@@ -111,34 +225,46 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (resultBgmSound) {
             resultBgmSound.volume(bgmVolume);
         }
-    }, [bgmVolume, lobbyBgmSound, gameBgmSound, resultBgmSound]);
+        if (storyBgmSound) {
+            storyBgmSound.volume(bgmVolume);
+        }
+    }, [bgmVolume, lobbyBgmSound, gameBgmSound, resultBgmSound, storyBgmSound]);
+
+    const contextValue = React.useMemo(() => ({
+        bgmVolume,
+        seVolume,
+        setBgmVolume,
+        setSeVolume,
+        playClick,
+        playHover,
+        playOpen,
+        playPickup,
+        playRotate,
+        playPlace,
+        playError,
+        playTurnStart,
+        playGameOver,
+        playPieceSpecial,
+        playGameFinish,
+        playLobbyBgm,
+        stopLobbyBgm,
+        playGameBgm,
+        stopGameBgm,
+        playResultBgm,
+        stopResultBgm,
+        playRouletteTick,
+        playDecidedFirst,
+        playStoryBgm,
+        stopStoryBgm,
+    }), [
+        bgmVolume, seVolume,
+        playClick, playHover, playOpen, playPickup, playRotate, playPlace, playError,
+        playTurnStart, playGameOver, playPieceSpecial, playGameFinish, playRouletteTick, playDecidedFirst,
+        playLobbyBgm, stopLobbyBgm, playGameBgm, stopGameBgm, playResultBgm, stopResultBgm, playStoryBgm, stopStoryBgm
+    ]);
 
     return (
-        <SoundContext.Provider value={{
-            bgmVolume,
-            seVolume,
-            setBgmVolume,
-            setSeVolume,
-            playClick,
-            playHover,
-            playOpen,
-            playPickup,
-            playRotate,
-            playPlace,
-            playError,
-            playTurnStart,
-            playGameOver,
-            playPieceSpecial,
-            playGameFinish,
-            playLobbyBgm,
-            stopLobbyBgm,
-            playGameBgm,
-            stopGameBgm,
-            playResultBgm,
-            stopResultBgm,
-            playRouletteTick,
-            playDecidedFirst,
-        }}>
+        <SoundContext.Provider value={contextValue}>
             {children}
         </SoundContext.Provider>
     );
