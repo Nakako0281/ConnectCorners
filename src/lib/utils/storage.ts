@@ -1,4 +1,4 @@
-import { SecureStorage } from '@/lib/secureStorage';
+import { secureGetItem, secureSetItem } from '../secureStorage';
 
 export const STORAGE_KEYS = {
     USER_NAME: 'connect_corners_user_name',
@@ -6,10 +6,11 @@ export const STORAGE_KEYS = {
 
 export const getUserName = (): string => {
     if (typeof window === 'undefined') return 'Player';
-    return SecureStorage.getItem<string>(STORAGE_KEYS.USER_NAME) || '';
+    const stored = secureGetItem<string>(STORAGE_KEYS.USER_NAME);
+    return stored || '';
 };
 
 export const setUserName = (name: string): void => {
     if (typeof window === 'undefined') return;
-    SecureStorage.setItem(STORAGE_KEYS.USER_NAME, name);
+    secureSetItem(STORAGE_KEYS.USER_NAME, name);
 };

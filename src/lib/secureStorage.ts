@@ -2,101 +2,98 @@ import CryptoJS from 'crypto-js';
 
 // Secret key for encryption and hashing.
 // In a real production app, this should be an environment variable,
-// but for a client-side only game, we obscure it here.
-const SECRET_KEY = process.env.NEXT_PUBLIC_GAME_SECRET || 'connect-corners-secure-key-v1-x8z9';
+// but for a client-side only game, we must embed it or generate it.
+// To make it slightly harder to guess, we can obscure it.
+const SECRET_KEY = process.env.NEXT_PUBLIC_GAME_SECRET || 'ConnectCorners_Secret_Key_v1_Salted';
 
-export const SecureStorage = {
-  /**
-   * Encrypts and saves data to localStorage.
-   * Format: EncryptedString (Base64)
-   * The encrypted string contains the data and is generated using AES.
-   * To verify integrity, we could add a separate hash, but AES decryption
-   * usually fails if data is tampered with (especially if formatted as JSON).
-   * However, to be extra safe and follow the request (SHA-256), we will
-   * store a JSON object { data: string, hash: string } where data is the
-   * encrypted content and hash is the HMAC-SHA256 of the unencrypted data.
-   */
-  setItem: <T>(key: string, value: T): void => {
-    if (typeof window === 'undefined') return;
+interface SecureStorageItem {
+  data: string; // Encrypted data (Base64)
+  hash: string; // HMAC hash of the data for integrity check
+}
 
-    try {
-      const jsonString = JSON.stringify(value);
+/**
+ * Encrypts data using AES and signs it with HMAC-SHA256.
+ * @param data The data to store (will be JSON stringified)
+ * @returns The encrypted string
+ */
+export const encryptData = (data: unknown): string => {
+  try {
+    const jsonString = JSON.stringify(data);
 
-      // 1. Generate Hash (HMAC-SHA256) of the original data for integrity check
-      const hash = CryptoJS.HmacSHA256(jsonString, SECRET_KEY).toString();
+    // Encrypt the data
+    const encrypted = CryptoJS.AES.encrypt(jsonString, SECRET_KEY).toString();
 
-      // 2. Encrypt the data using AES
-      const encrypted = CryptoJS.AES.encrypt(jsonString, SECRET_KEY).toString();
+    // Create a hash for integrity check
+    const hash = CryptoJS.HmacSHA256(jsonString, SECRET_KEY).toString();
 
-      // 3. Store both
-      const storageValue = JSON.stringify({
-        data: encrypted,
-        hash: hash
-      });
+    // Store both
+    const storageItem: SecureStorageItem = {
+      data: encrypted,
+      hash: hash
+    };
 
-      localStorage.setItem(key, storageValue);
-    } catch (e) {
-      console.error(`Failed to securely save ${key}`, e);
-    }
-  },
+    // Encode the final object to Base64 to make it look like a random string
+    return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(JSON.stringify(storageItem)));
+  } catch (error) {
+    console.error('Encryption failed:', error);
+    return '';
+  }
+};
 
-  /**
-   * Retrieves, decrypts, and verifies data from localStorage.
-   * Returns null if verification fails or data is missing.
-   */
-  getItem: <T>(key: string): T | null => {
-    if (typeof window === 'undefined') return null;
+/**
+ * Decrypts data and verifies its integrity.
+ * @param encryptedString The encrypted string from storage
+ * @returns The decrypted data or null if verification fails
+ */
+export const decryptData = <T>(encryptedString: string | null): T | null => {
+  if (!encryptedString) return null;
 
-    const stored = localStorage.getItem(key);
-    if (!stored) return null;
+  try {
+    // Decode Base64 wrapper
+    const decodedString = CryptoJS.enc.Base64.parse(encryptedString).toString(CryptoJS.enc.Utf8);
+    const storageItem: SecureStorageItem = JSON.parse(decodedString);
 
-    try {
-      // Try parsing the stored wrapper
-      let parsedStorage: { data: string; hash: string };
-      try {
-        parsedStorage = JSON.parse(stored);
-      } catch {
-        // Fallback: If it's not our wrapper format, it might be legacy data or tampered.
-        // For this implementation, we treat it as invalid/tampered.
-        console.warn(`Data for ${key} is not in secure format.`);
-        return null;
-      }
-
-      if (!parsedStorage.data || !parsedStorage.hash) {
-        return null;
-      }
-
-      // 1. Decrypt
-      const bytes = CryptoJS.AES.decrypt(parsedStorage.data, SECRET_KEY);
-      const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-
-      if (!decryptedString) {
-        console.error(`Decryption failed for ${key}`);
-        return null;
-      }
-
-      // 2. Verify Hash
-      const currentHash = CryptoJS.HmacSHA256(decryptedString, SECRET_KEY).toString();
-
-      if (currentHash !== parsedStorage.hash) {
-        console.error(`Integrity check failed for ${key}. Data may have been tampered with.`);
-        return null;
-      }
-
-      // 3. Parse JSON
-      return JSON.parse(decryptedString) as T;
-
-    } catch (e) {
-      console.error(`Failed to securely load ${key}`, e);
+    if (!storageItem.data || !storageItem.hash) {
       return null;
     }
-  },
 
-  /**
-   * Removes item from localStorage
-   */
-  removeItem: (key: string): void => {
-    if (typeof window === 'undefined') return;
-    localStorage.removeItem(key);
+    // Decrypt the data
+    const bytes = CryptoJS.AES.decrypt(storageItem.data, SECRET_KEY);
+    const decryptedJson = bytes.toString(CryptoJS.enc.Utf8);
+
+    if (!decryptedJson) {
+        return null;
+    }
+
+    // Verify hash
+    const currentHash = CryptoJS.HmacSHA256(decryptedJson, SECRET_KEY).toString();
+
+    if (currentHash !== storageItem.hash) {
+      console.warn('Data tampering detected. Hash mismatch.');
+      return null;
+    }
+
+    return JSON.parse(decryptedJson) as T;
+  } catch (error) {
+    console.error('Decryption failed:', error);
+    return null;
   }
+};
+
+/**
+ * Securely saves data to localStorage
+ */
+export const secureSetItem = (key: string, value: unknown): void => {
+  if (typeof window === 'undefined') return;
+  const encrypted = encryptData(value);
+  localStorage.setItem(key, encrypted);
+};
+
+/**
+ * Securely retrieves data from localStorage
+ */
+export const secureGetItem = <T>(key: string): T | null => {
+  if (typeof window === 'undefined') return null;
+  const item = localStorage.getItem(key);
+  return decryptData<T>(item);
 };

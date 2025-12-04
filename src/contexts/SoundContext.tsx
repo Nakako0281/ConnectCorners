@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import useSound from 'use-sound';
+import { secureGetItem, secureSetItem } from '@/lib/secureStorage';
 
 interface SoundContextType {
     bgmVolume: number;
@@ -36,7 +37,7 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Initialize from LocalStorage if available, otherwise default
     const [bgmVolume, setBgmVolumeState] = useState(() => {
         if (typeof window === 'undefined') return 0.3;
-        const saved = localStorage.getItem('connect-corners-bgm-volume');
+        const saved = secureGetItem<string>('connect-corners-bgm-volume');
         if (saved !== null) return parseFloat(saved);
 
         // Legacy migration
@@ -48,7 +49,7 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const [seVolume, setSeVolumeState] = useState(() => {
         if (typeof window === 'undefined') return 0.5;
-        const saved = localStorage.getItem('connect-corners-se-volume');
+        const saved = secureGetItem<string>('connect-corners-se-volume');
         if (saved !== null) return parseFloat(saved);
 
         // Legacy migration
@@ -60,12 +61,12 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const setBgmVolume = (vol: number) => {
         setBgmVolumeState(vol);
-        localStorage.setItem('connect-corners-bgm-volume', vol.toString());
+        secureSetItem('connect-corners-bgm-volume', vol.toString());
     };
 
     const setSeVolume = (vol: number) => {
         setSeVolumeState(vol);
-        localStorage.setItem('connect-corners-se-volume', vol.toString());
+        secureSetItem('connect-corners-se-volume', vol.toString());
     };
 
     // SE Sounds
