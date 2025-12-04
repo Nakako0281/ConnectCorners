@@ -690,6 +690,7 @@ export const Game: React.FC = () => {
         if (gameStatus !== 'playing') return;
         if (isStarting) return; // Wait for "Ready? Go!" to finish
         if (isRouletteActive) return; // Wait for Roulette to finish
+        if (specialPieceCutIn) return; // Wait for Cut-in to finish
 
         // If Multiplayer: Host handles AI turns
         // If Singleplayer: We handle AI turns (we are effectively host)
@@ -745,12 +746,12 @@ export const Game: React.FC = () => {
             }, 500);
             return () => clearTimeout(timer);
         }
-    }, [currentPlayerIndex, gameStatus, board, players, isHost, isMultiplayer, currentPlayer, isStarting, isRouletteActive]);
+    }, [currentPlayerIndex, gameStatus, board, players, isHost, isMultiplayer, currentPlayer, isStarting, isRouletteActive, specialPieceCutIn]);
 
     // Auto-pass for human players with no valid moves
     useEffect(() => {
         if (gameStatus !== 'playing') return;
-        if (isStarting || isRouletteActive) return;
+        if (isStarting || isRouletteActive || specialPieceCutIn) return;
         if (!currentPlayer || currentPlayer.hasPassed) return;
         if (!isMyTurn) return; // Only check for my turn
 
@@ -766,7 +767,7 @@ export const Game: React.FC = () => {
                 handlePass();
             }, 1000); // 1 second delay so user can see what happened
         }
-    }, [currentPlayerIndex, gameStatus, board, currentPlayer, isMyTurn]);
+    }, [currentPlayerIndex, gameStatus, board, currentPlayer, isMyTurn, specialPieceCutIn]);
 
     const handleRouletteComplete = useCallback(() => {
         setIsRouletteActive(false);
