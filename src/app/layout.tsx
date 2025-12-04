@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Yomogi } from "next/font/google";
 import "./globals.css";
 import { SoundProvider } from "@/contexts/SoundContext";
 
@@ -11,6 +11,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const yomogi = Yomogi({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-yomogi",
 });
 
 export const metadata: Metadata = {
@@ -26,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${yomogi.variable} antialiased`}
       >
         <SoundProvider>
           {children}
