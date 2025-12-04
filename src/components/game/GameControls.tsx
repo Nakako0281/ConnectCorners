@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Trophy, HelpCircle, FileText } from 'lucide-react';
+import { Trophy, HelpCircle, FileText, BookOpen } from 'lucide-react';
 import { VolumeControl } from './VolumeControl';
 import { AchievementModal } from './AchievementModal';
 import { HowToPlayModal } from './HowToPlayModal';
+import { StoryModal } from './StoryModal';
 import { CreditModal } from './CreditModal';
 import { useSoundContext } from '@/contexts/SoundContext';
 import {
@@ -18,10 +19,16 @@ interface GameControlsProps {
 }
 
 export const GameControls: React.FC<GameControlsProps> = ({ children }) => {
+    const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
     const [isAchievementModalOpen, setIsAchievementModalOpen] = useState(false);
     const [isHowToPlayModalOpen, setIsHowToPlayModalOpen] = useState(false);
     const [isCreditModalOpen, setIsCreditModalOpen] = useState(false);
     const { playClick } = useSoundContext();
+
+    const handleOpenStory = () => {
+        playClick();
+        setIsStoryModalOpen(true);
+    };
 
     const handleOpenAchievements = () => {
         playClick();
@@ -43,6 +50,22 @@ export const GameControls: React.FC<GameControlsProps> = ({ children }) => {
             <TooltipProvider>
                 <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
                     <VolumeControl />
+
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={handleOpenStory}
+                                className="text-slate-400 hover:text-white hover:bg-white/10"
+                            >
+                                <BookOpen className="w-5 h-5" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>ストーリー</p>
+                        </TooltipContent>
+                    </Tooltip>
 
                     <Tooltip>
                         <TooltipTrigger asChild>
@@ -95,6 +118,11 @@ export const GameControls: React.FC<GameControlsProps> = ({ children }) => {
                     {children}
                 </div>
             </TooltipProvider>
+
+            <StoryModal
+                isOpen={isStoryModalOpen}
+                onClose={() => setIsStoryModalOpen(false)}
+            />
 
             <AchievementModal
                 isOpen={isAchievementModalOpen}
