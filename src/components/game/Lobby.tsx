@@ -10,6 +10,7 @@ import { PlayerColor } from '@/lib/game/types';
 import { CHARACTERS } from '@/lib/game/characters';
 import { PieceView } from './Piece';
 import { GameControls } from './GameControls';
+import { StoryModal } from './StoryModal';
 import { getStats, ACHIEVEMENTS } from '@/lib/achievements';
 import { Lock } from 'lucide-react';
 import { getUserName, setUserName } from '@/lib/utils/storage';
@@ -97,6 +98,8 @@ export const Lobby: React.FC<LobbyProps> = ({
     // User Name State
     const [userName, setUserNameState] = useState('');
     const [isNameSet, setIsNameSet] = useState(false);
+    const [isFirstVisit, setIsFirstVisit] = useState(false);
+    const [showWelcomeStory, setShowWelcomeStory] = useState(false);
 
     // Calculate allBaseUnlocked
 
@@ -125,6 +128,8 @@ export const Lobby: React.FC<LobbyProps> = ({
         if (savedName) {
             setUserNameState(savedName);
             setIsNameSet(true);
+        } else {
+            setIsFirstVisit(true);
         }
     }, []);
 
@@ -141,6 +146,9 @@ export const Lobby: React.FC<LobbyProps> = ({
         playClick();
         setUserName(userName.trim());
         setIsNameSet(true);
+        if (isFirstVisit) {
+            setShowWelcomeStory(true);
+        }
     };
 
     const copyToClipboard = () => {
@@ -698,6 +706,10 @@ export const Lobby: React.FC<LobbyProps> = ({
             </motion.div>
 
             {/* ... (Keep existing modals) ... */}
+            <StoryModal
+                isOpen={showWelcomeStory}
+                onClose={() => setShowWelcomeStory(false)}
+            />
         </div>
     );
 };
