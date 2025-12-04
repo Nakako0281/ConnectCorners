@@ -133,3 +133,18 @@ export const CHARACTERS: Record<PlayerColor, Character> = {
         specialPieceShape: [[1, 0, 1], [1, 1, 1], [0, 1, 0]] // Mystery Shape (6 squares)
     }
 };
+
+export const UNLOCK_CONDITIONS: Record<PlayerColor, string | null> = {
+    BLUE: null,
+    RED: null,
+    GREEN: null,
+    YELLOW: null,
+    LIGHTBLUE: 'first_win',
+    PINK: 'perfect_game',
+    ORANGE: 'veteran',
+    PURPLE: 'win_streak_5',
+    BROWN: 'hidden_high_scorer',
+    SILVER: 'hidden_connect_master',
+    GOLD: 'hidden_perfect_master',
+    BLACK: 'complete_all',
+};
