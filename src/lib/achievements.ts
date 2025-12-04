@@ -1,4 +1,6 @@
 
+import { SecureStorage } from '@/lib/secureStorage';
+
 export interface Achievement {
   id: string;
   title: string;
@@ -42,22 +44,13 @@ const STORAGE_KEY = 'connect_corners_stats';
 
 export const getStats = (): PlayerStats => {
   if (typeof window === 'undefined') return initialStats;
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? { ...initialStats, ...JSON.parse(stored) } : initialStats;
-  } catch (e) {
-    console.error('Failed to load stats', e);
-    return initialStats;
-  }
+  const stored = SecureStorage.getItem<PlayerStats>(STORAGE_KEY);
+  return stored ? { ...initialStats, ...stored } : initialStats;
 };
 
 export const saveStats = (stats: PlayerStats) => {
   if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
-  } catch (e) {
-    console.error('Failed to save stats', e);
-  }
+  SecureStorage.setItem(STORAGE_KEY, stats);
 };
 
 export interface GameResult {
