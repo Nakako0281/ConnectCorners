@@ -135,7 +135,7 @@ export const StoryModal: React.FC<StoryModalProps> = ({ isOpen, onClose }) => {
                     </div>
 
                     {/* Right Side - Text */}
-                    <div className="w-1/2 flex flex-col h-full bg-[url('/paper-texture.png')]">
+                    <div className="w-1/2 flex flex-col h-full">
                         {/* Fixed Title Section */}
                         <div className="px-8 pt-8 sm:px-12 sm:pt-12 pb-4">
                             <div className="space-y-2">

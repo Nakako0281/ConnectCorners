@@ -122,11 +122,15 @@ export const Lobby: React.FC<LobbyProps> = ({
 
     React.useEffect(() => {
         setMounted(true);
-        playLobbyBgm();
+        if (isNameSet) {
+            playLobbyBgm();
+        } else {
+            stopLobbyBgm();
+        }
         return () => {
             stopLobbyBgm();
         };
-    }, [playLobbyBgm, stopLobbyBgm]);
+    }, [playLobbyBgm, stopLobbyBgm, isNameSet]);
 
     const handleSetUserName = () => {
         if (!userName.trim()) return;
@@ -199,7 +203,7 @@ export const Lobby: React.FC<LobbyProps> = ({
 
     // 1. Name Entry Screen
     if (!isNameSet) {
-        const hasSavedName = !!getUserName();
+        const hasSavedName = mounted && !!getUserName();
 
         return (
             <div className="relative w-full max-w-md mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10">
