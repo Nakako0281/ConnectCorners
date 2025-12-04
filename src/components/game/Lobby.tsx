@@ -12,8 +12,9 @@ import { PieceView } from './Piece';
 import { GameControls } from './GameControls';
 import { getStats, ACHIEVEMENTS } from '@/lib/achievements';
 import { Lock } from 'lucide-react';
-import { getUserName, setUserName } from '@/lib/utils/storage';
+import { getUserName, setUserName, STORAGE_KEYS } from '@/lib/utils/storage';
 import { LobbyPlayer } from '@/lib/game/types';
+import { StoryModal } from './StoryModal';
 
 const UNLOCK_CONDITIONS: Record<PlayerColor, string | null> = {
     BLUE: null,
@@ -96,7 +97,9 @@ export const Lobby: React.FC<LobbyProps> = ({
 
     // User Name State
     const [userName, setUserNameState] = useState('');
+
     const [isNameSet, setIsNameSet] = useState(false);
+    const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
 
     // Calculate allBaseUnlocked
 
@@ -130,17 +133,32 @@ export const Lobby: React.FC<LobbyProps> = ({
 
     React.useEffect(() => {
         setMounted(true);
-        playLobbyBgm();
+        if (isNameSet && !isStoryModalOpen) {
+            playLobbyBgm();
+        }
         return () => {
             stopLobbyBgm();
         };
-    }, [playLobbyBgm, stopLobbyBgm]);
+    }, [playLobbyBgm, stopLobbyBgm, isNameSet, isStoryModalOpen]);
 
     const handleSetUserName = () => {
         if (!userName.trim()) return;
         playClick();
         setUserName(userName.trim());
+
+        const hasSeen = typeof window !== 'undefined' && localStorage.getItem(STORAGE_KEYS.HAS_SEEN_OPENING);
+        if (!hasSeen) {
+            setIsStoryModalOpen(true);
+        }
+
         setIsNameSet(true);
+    };
+
+    const handleStoryClose = () => {
+        setIsStoryModalOpen(false);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(STORAGE_KEYS.HAS_SEEN_OPENING, 'true');
+        }
     };
 
     const copyToClipboard = () => {
@@ -703,6 +721,7 @@ export const Lobby: React.FC<LobbyProps> = ({
             </motion.div>
 
             {/* ... (Keep existing modals) ... */}
+            <StoryModal isOpen={isStoryModalOpen} onClose={handleStoryClose} />
         </div>
     );
 };
