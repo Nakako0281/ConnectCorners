@@ -135,7 +135,6 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, [stopLobbyBgmRaw, stopGameBgmRaw, stopResultBgmRaw, stopStoryBgmRaw]);
 
     const playLobbyBgm = React.useCallback(() => {
-        console.log(`[SoundContext] playLobbyBgm called. Current: ${activeBgmRef.current}`);
         if (activeBgmRef.current === 'lobby') return;
         stopAllBgm();
         playLobbyBgmRaw();
@@ -143,7 +142,6 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, [stopAllBgm, playLobbyBgmRaw, setActiveBgmHelper]);
 
     const stopLobbyBgm = React.useCallback(() => {
-        console.log(`[SoundContext] stopLobbyBgm called. Current: ${activeBgmRef.current}`);
         if (activeBgmRef.current === 'lobby') {
             stopLobbyBgmRaw();
             setActiveBgmHelper(null);
@@ -151,7 +149,6 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, [stopLobbyBgmRaw, setActiveBgmHelper]);
 
     const playGameBgm = React.useCallback(() => {
-        console.log(`[SoundContext] playGameBgm called. Current: ${activeBgmRef.current}`);
         if (activeBgmRef.current === 'game') return;
         stopAllBgm();
         playGameBgmRaw();
@@ -159,7 +156,6 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, [stopAllBgm, playGameBgmRaw, setActiveBgmHelper]);
 
     const stopGameBgm = React.useCallback(() => {
-        console.log(`[SoundContext] stopGameBgm called. Current: ${activeBgmRef.current}`);
         if (activeBgmRef.current === 'game') {
             stopGameBgmRaw();
             setActiveBgmHelper(null);
@@ -213,6 +209,35 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             setPreviousBgmHelper(null);
         }
     }, [stopStoryBgmRaw, playLobbyBgmRaw, playGameBgmRaw, playResultBgmRaw, setActiveBgmHelper, setPreviousBgmHelper]);
+
+    // Resume Audio Context on interaction
+    useEffect(() => {
+        const handleInteraction = () => {
+            // Check if we expect BGM to be playing but it's not
+            if (activeBgmRef.current === 'lobby' && lobbyBgmSound && !lobbyBgmSound.playing()) {
+                playLobbyBgmRaw();
+            } else if (activeBgmRef.current === 'game' && gameBgmSound && !gameBgmSound.playing()) {
+                playGameBgmRaw();
+            } else if (activeBgmRef.current === 'result' && resultBgmSound && !resultBgmSound.playing()) {
+                playResultBgmRaw();
+            } else if (activeBgmRef.current === 'story' && storyBgmSound && !storyBgmSound.playing()) {
+                playStoryBgmRaw();
+            }
+        };
+
+        window.addEventListener('click', handleInteraction);
+        window.addEventListener('keydown', handleInteraction);
+
+        return () => {
+            window.removeEventListener('click', handleInteraction);
+            window.removeEventListener('keydown', handleInteraction);
+        };
+    }, [
+        lobbyBgmSound, playLobbyBgmRaw,
+        gameBgmSound, playGameBgmRaw,
+        resultBgmSound, playResultBgmRaw,
+        storyBgmSound, playStoryBgmRaw
+    ]);
 
     // Update running BGM volume when state changes
     useEffect(() => {
