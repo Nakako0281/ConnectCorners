@@ -49,6 +49,7 @@ import { GameEndOverlay } from './GameEndOverlay';
 import { TurnNotification } from './TurnNotification';
 import { SpecialPieceCutIn } from './SpecialPieceCutIn';
 import { TurnRoulette } from './TurnRoulette';
+import { TitleScreen } from './TitleScreen';
 
 const createPlayer = (id: string, name: string, color: PlayerColor, isHuman: boolean): Player => ({
     id,
@@ -77,7 +78,7 @@ const TAILWIND_COLOR_MAP: Record<PlayerColor, string> = {
 
 export const Game: React.FC = () => {
     // Sound Context
-    const { playClick, playTurnStart, playPlace, playError, playGameBgm, stopGameBgm, playPieceSpecial, playGameFinish, playResultBgm, stopResultBgm } = useSoundContext();
+    const { playClick, playTurnStart, playPlace, playError, playGameBgm, stopGameBgm, playPieceSpecial, playGameFinish, playResultBgm, stopResultBgm, playLobbyBgm } = useSoundContext();
 
     // P2P State
     const { peerId, isHost, hostGame, joinGame, sendData, setOnData, setOnConnect, setOnDisconnect, disconnect, connections } = usePeer();
@@ -108,6 +109,7 @@ export const Game: React.FC = () => {
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
     const [turnNumber, setTurnNumber] = useState(1);
     const [gameStatus, setGameStatus] = useState<'lobby' | 'playing' | 'finished'>('lobby');
+    const [showTitle, setShowTitle] = useState(true);
 
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
     const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
@@ -978,6 +980,19 @@ export const Game: React.FC = () => {
     const isValidPreview = selectedPiece && hoverPos && currentPlayer
         ? isValidMove(board, previewShape!, hoverPos, currentPlayer.color, isFirstMove, startPos)
         : false;
+
+    // Title Screen
+    if (showTitle) {
+        return (
+            <TitleScreen onStart={() => {
+                playClick();
+                setShowTitle(false);
+                if (getUserName()) {
+                    playLobbyBgm();
+                }
+            }} />
+        );
+    }
 
     if (gameStatus === 'lobby') {
         return (
