@@ -987,9 +987,7 @@ export const Game: React.FC = () => {
             <TitleScreen onStart={() => {
                 playClick();
                 setShowTitle(false);
-                if (getUserName()) {
-                    playLobbyBgm();
-                }
+                playLobbyBgm();
             }} />
         );
     }
