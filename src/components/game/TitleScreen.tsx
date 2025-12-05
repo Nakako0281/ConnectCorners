@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface TitleScreenProps {
     onStart: () => void;
@@ -31,10 +32,15 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ onStart }) => {
                     className="relative"
                 >
                     <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full" />
-                    <img
+                    <Image
                         src="/title_logo.png"
                         alt="Connect Corners"
-                        className="w-full max-w-2xl drop-shadow-2xl relative z-10"
+                        width={0}
+                        height={0}
+                        sizes="100vw"
+                        style={{ width: '100%', height: 'auto' }}
+                        className="max-w-2xl drop-shadow-2xl relative z-10"
+                        priority
                     />
                 </motion.div>
 
