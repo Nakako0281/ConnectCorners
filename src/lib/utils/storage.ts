@@ -5,7 +5,7 @@ export const STORAGE_KEYS = {
 };
 
 export const getUserName = (): string => {
-    return SecureStorage.getItem(STORAGE_KEYS.USER_NAME, 'Player');
+    return SecureStorage.getItem(STORAGE_KEYS.USER_NAME, '');
 };
 
 export const setUserName = (name: string): void => {
