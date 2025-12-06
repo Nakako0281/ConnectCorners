@@ -886,11 +886,11 @@ export const Game: React.FC = () => {
 
             // Delay Turn Switch if Special Piece
             const isSpecial = piece.id === 'special';
-            const delayMs = isSpecial ? 2500 : 0; // 2.5s delay for special (wait for cut-in + read time)
+            const delayMs = 0; // No delay
 
-            if (isSpecial) {
-                setIsTurnTransitioning(true);
-            }
+            // if (isSpecial) {
+            //     setIsTurnTransitioning(true);
+            // }
 
             setTimeout(() => {
                 const nextIdx = nextTurnIndex(newPlayers, currentPlayerIndex);

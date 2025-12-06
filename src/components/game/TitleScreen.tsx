@@ -34,7 +34,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ onStart }) => {
                     <img
                         src="/title_logo.png"
                         alt="Connect Corners"
-                        className="w-full max-w-2xl drop-shadow-2xl relative z-10"
+                        className="w-full max-w-4xl drop-shadow-2xl relative z-10"
                     />
                 </motion.div>
 
