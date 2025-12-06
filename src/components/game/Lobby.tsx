@@ -700,6 +700,7 @@ export const Lobby: React.FC<LobbyProps> = ({
             <StoryModal
                 isOpen={showWelcomeStory}
                 onClose={() => setShowWelcomeStory(false)}
+                initialChapterId="chapter1"
             />
         </div>
     );
