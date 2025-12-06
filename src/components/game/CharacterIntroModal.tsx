@@ -7,6 +7,7 @@ import { Yomogi } from 'next/font/google';
 import { UNLOCK_CONDITIONS } from '@/lib/game/characters';
 import { getStats, ACHIEVEMENTS } from '@/lib/achievements';
 import { PlayerColor } from '@/lib/game/types';
+import { useSoundContext } from '@/contexts/SoundContext';
 
 const yomogi = Yomogi({
     weight: '400',
@@ -199,6 +200,7 @@ const CHARACTERS_DATA = [
 export const CharacterIntroModal: React.FC<CharacterIntroModalProps> = ({ isOpen, onClose }) => {
     const [page, setPage] = useState(0);
     const [unlockedCharacters, setUnlockedCharacters] = useState<typeof CHARACTERS_DATA>([]);
+    const { playClick } = useSoundContext();
     const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -241,12 +243,14 @@ export const CharacterIntroModal: React.FC<CharacterIntroModalProps> = ({ isOpen
 
     const handleNext = () => {
         if (page < unlockedCharacters.length - 1) {
+            playClick();
             setPage(page + 1);
         }
     };
 
     const handlePrev = () => {
         if (page > 0) {
+            playClick();
             setPage(page - 1);
         }
     };

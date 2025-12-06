@@ -29,6 +29,7 @@ interface StoryReaderProps {
 
 const StoryReader: React.FC<StoryReaderProps> = ({ chapter, onBack, onClose }) => {
     const [page, setPage] = useState(0);
+    const { playClick } = useSoundContext();
     const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -39,12 +40,14 @@ const StoryReader: React.FC<StoryReaderProps> = ({ chapter, onBack, onClose }) =
 
     const handleNext = () => {
         if (page < chapter.pages.length - 1) {
+            playClick();
             setPage(page + 1);
         }
     };
 
     const handlePrev = () => {
         if (page > 0) {
+            playClick();
             setPage(page - 1);
         }
     };
