@@ -3,7 +3,8 @@ import { BoardState, PlayerColor, Coordinate } from '@/lib/game/types';
 import { cn } from '@/lib/utils';
 import {
   BOARD_SIZE,
-  BONUS_SQUARES
+  BONUS_SQUARES,
+  DISPLAY_COLOR_MAP
 } from '@/lib/game/constants';
 import { Star } from 'lucide-react';
 
@@ -19,21 +20,6 @@ interface BoardProps {
   startPositions?: Record<PlayerColor, Coordinate>;
   onContextMenu?: () => void;
 }
-
-const COLOR_MAP: Record<PlayerColor, string> = {
-  BLUE: 'bg-blue-500/80',
-  YELLOW: 'bg-yellow-400/80',
-  RED: 'bg-red-500/80',
-  GREEN: 'bg-green-500/80',
-  LIGHTBLUE: 'bg-sky-400/80',
-  PINK: 'bg-pink-400/80',
-  ORANGE: 'bg-orange-500/80',
-  PURPLE: 'bg-purple-500/80',
-  BROWN: 'bg-gradient-to-br from-amber-400 via-amber-700 to-amber-900 ring-1 ring-amber-600/50',
-  SILVER: 'bg-gradient-to-br from-slate-200 via-slate-400 to-slate-600 ring-1 ring-slate-400/50',
-  GOLD: 'bg-gradient-to-br from-yellow-200 via-yellow-500 to-yellow-700 ring-1 ring-yellow-500/50',
-  BLACK: 'bg-gradient-to-br from-slate-600 via-slate-800 to-black ring-1 ring-slate-600/50',
-};
 
 const BoardCell = React.memo(({
   r,
@@ -78,7 +64,7 @@ const BoardCell = React.memo(({
       {startColor && !cell && (
         <div className={cn(
           "absolute inset-0 m-1 rounded-full opacity-100",
-          COLOR_MAP[startColor].split(' ')[0]
+          DISPLAY_COLOR_MAP[startColor]
         )} />
       )}
 
@@ -87,7 +73,7 @@ const BoardCell = React.memo(({
         <div
           className={cn(
             "absolute inset-0 border-white/10 border-[0.5px]",
-            COLOR_MAP[cell]
+            DISPLAY_COLOR_MAP[cell]
           )}
         />
       )}
@@ -97,7 +83,7 @@ const BoardCell = React.memo(({
         <div className={cn(
           "absolute inset-0 z-10",
           isValidPreview
-            ? `opacity - 50 ${COLOR_MAP[previewColor]} `
+            ? `opacity - 50 ${DISPLAY_COLOR_MAP[previewColor]} `
             : "bg-red-400 opacity-50"
         )} />
       )}
