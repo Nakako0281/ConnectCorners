@@ -620,7 +620,7 @@ export const Lobby: React.FC<LobbyProps> = ({
                 transition={{ duration: 0.8, type: "spring" }}
                 className="text-center mb-12 mt-20 md:mt-0 flex flex-col items-center"
             >
-                <div className="relative w-full max-w-lg">
+                <div className="relative w-full max-w-4xl">
                     <Image
                         src="/title_logo.png"
                         alt="Title Logo"

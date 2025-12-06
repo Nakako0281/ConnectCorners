@@ -1111,7 +1111,15 @@ export const Game: React.FC = () => {
 
             {/* Top Right Controls */}
             <GameControls showStoryAndCharacter={false}>
-                <Button variant="ghost" size="sm" onClick={handleReset} className="text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
+                <Button variant="ghost" size="sm" onClick={() => {
+                    if (isMultiplayer && gameStatus === 'playing') {
+                        // In multiplayer, "Quit" means disconnecting so others know you left
+                        handleBack();
+                    } else {
+                        // In single player or lobby, just reset
+                        handleReset();
+                    }
+                }} className="text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
                     <RefreshCw className="w-4 h-4 mr-2" /> Quit Game
                 </Button>
             </GameControls>
