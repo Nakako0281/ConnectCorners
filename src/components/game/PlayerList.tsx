@@ -3,6 +3,7 @@ import { Player, PlayerColor } from '@/lib/game/types';
 import { PieceView } from './Piece';
 import { CHARACTERS } from '@/lib/game/characters';
 import { TOTAL_SQUARES } from '@/lib/game/constants';
+import Image from 'next/image';
 
 interface PlayerListProps {
     players: Player[];
@@ -38,10 +39,12 @@ const PlayerListComponent = ({ players, currentPlayerId }: PlayerListProps) => {
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-3">
                                 <div className={`relative w-10 h-10 rounded-full overflow-hidden border-2 ${isCurrent ? 'border-white' : 'border-white/20'}`}>
-                                    <img
+                                    <Image
                                         src={CHARACTERS[p.color].imagePath}
                                         alt={CHARACTERS[p.color].name}
-                                        className="w-full h-full object-cover"
+                                        fill
+                                        sizes="40px"
+                                        className="object-cover"
                                     />
                                 </div>
                                 <div className="flex flex-col leading-none">
