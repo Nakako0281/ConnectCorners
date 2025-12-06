@@ -20,9 +20,9 @@ const COLOR_MAP: Record<PlayerColor, string> = {
     PINK: 'bg-pink-400/80',
     ORANGE: 'bg-orange-500/80',
     PURPLE: 'bg-purple-500/80',
-    BROWN: 'bg-gradient-to-br from-amber-600 via-amber-700 to-amber-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]',
+    BROWN: 'bg-gradient-to-br from-[#E6A686] via-[#B87333] to-[#5D3A1A] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]',
     SILVER: 'bg-gradient-to-br from-slate-300 via-slate-400 to-slate-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]',
-    GOLD: 'bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]',
+    GOLD: 'bg-gradient-to-br from-[#FFE570] via-[#D4AF37] to-[#806210] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]',
     BLACK: 'bg-gradient-to-br from-slate-600 via-slate-800 to-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]',
 };
 

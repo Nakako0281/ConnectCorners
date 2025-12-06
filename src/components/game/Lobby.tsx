@@ -27,9 +27,9 @@ const BG_COLOR_MAP: Record<PlayerColor, string> = {
     PINK: 'bg-pink-500',
     ORANGE: 'bg-orange-500',
     PURPLE: 'bg-purple-500',
-    BROWN: 'bg-amber-700',
+    BROWN: 'bg-[#B87333]',
     SILVER: 'bg-slate-400',
-    GOLD: 'bg-yellow-400',
+    GOLD: 'bg-[#D4AF37]',
     BLACK: 'bg-slate-900',
 };
 
@@ -42,9 +42,9 @@ const SHADOW_COLOR_MAP: Record<PlayerColor, string> = {
     PINK: '#ec4899',
     ORANGE: '#f97316',
     PURPLE: '#a855f7',
-    BROWN: '#b45309',
+    BROWN: '#B87333',
     SILVER: '#94a3b8',
-    GOLD: '#facc15',
+    GOLD: '#D4AF37',
     BLACK: '#0f172a',
 };
 
