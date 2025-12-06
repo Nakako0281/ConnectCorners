@@ -102,6 +102,7 @@ export const Game: React.FC = () => {
 
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
     const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
+    const [unlockedStoryChapter2, setUnlockedStoryChapter2] = useState(false);
     const [gameHistory, setGameHistory] = useState<Move[]>([]);
 
     // Interaction State
@@ -162,6 +163,7 @@ export const Game: React.FC = () => {
         setIsFlipped(false);
         setHoverPos(null);
         setScorePopups([]);
+        setUnlockedStoryChapter2(false);
 
         // Get unlocked characters for CPU selection
         const stats = getStats();
@@ -368,7 +370,7 @@ export const Game: React.FC = () => {
             const isWin = winner.color === myPlayerColor;
             const isPerfect = myPlayer.isPerfect;
 
-            const { newAchievements } = updateStats({
+            const { newAchievements, unlockedStoryChapter2 } = updateStats({
                 isWin,
                 isPerfect,
                 isMultiplayer,
@@ -377,6 +379,9 @@ export const Game: React.FC = () => {
 
             if (newAchievements.length > 0) {
                 setNewAchievements(newAchievements);
+            }
+            if (unlockedStoryChapter2) {
+                setUnlockedStoryChapter2(true);
             }
         }
 
@@ -929,6 +934,7 @@ export const Game: React.FC = () => {
         setIsMultiplayer(false);
         setIsResultModalOpen(false);
         setNewAchievements([]);
+        setUnlockedStoryChapter2(false);
     };
 
     const handleReset = () => {
@@ -965,6 +971,7 @@ export const Game: React.FC = () => {
             initSinglePlayer(myPlayerColor);
             setIsResultModalOpen(false);
             setNewAchievements([]);
+            setUnlockedStoryChapter2(false);
         }
     };
 
@@ -1221,6 +1228,7 @@ export const Game: React.FC = () => {
                 onPlayAgain={handleRestart}
                 onBackToTitle={handleBack}
                 newAchievements={newAchievements}
+                unlockedStoryChapter2={unlockedStoryChapter2}
             />
 
             {/* Score Popups */}

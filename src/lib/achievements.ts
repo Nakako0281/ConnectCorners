@@ -57,7 +57,7 @@ export interface GameResult {
   score: number;
 }
 
-export const updateStats = (result: GameResult): { newStats: PlayerStats, newAchievements: Achievement[] } => {
+export const updateStats = (result: GameResult): { newStats: PlayerStats, newAchievements: Achievement[], unlockedStoryChapter2: boolean } => {
   const currentStats = getStats();
   const newStats = { ...currentStats };
 
@@ -98,7 +98,10 @@ export const updateStats = (result: GameResult): { newStats: PlayerStats, newAch
 
   // Check if all base achievements are unlocked
   const baseAchievementIds = ACHIEVEMENTS.filter(a => !a.isHidden).map(a => a.id);
+  const wasAllBaseUnlocked = baseAchievementIds.every(id => currentStats.unlockedAchievements.includes(id));
   const allBaseUnlocked = baseAchievementIds.every(id => newStats.unlockedAchievements.includes(id));
+
+  const unlockedStoryChapter2 = !wasAllBaseUnlocked && allBaseUnlocked;
 
   // Hidden Achievements (Only check if base achievements are complete)
   if (allBaseUnlocked) {
@@ -114,5 +117,5 @@ export const updateStats = (result: GameResult): { newStats: PlayerStats, newAch
 
   saveStats(newStats);
 
-  return { newStats, newAchievements };
+  return { newStats, newAchievements, unlockedStoryChapter2 };
 };
