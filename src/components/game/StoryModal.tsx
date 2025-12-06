@@ -119,7 +119,7 @@ const StoryReader: React.FC<StoryReaderProps> = ({ chapter, onBack, onClose }) =
                     className="flex-1 overflow-y-auto px-8 pb-8 sm:px-12 sm:pb-12 pt-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-amber-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-amber-300"
                 >
                     <AnimatePresence mode="wait">
-                        <motion.p
+                        <motion.div
                             key={page}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -127,8 +127,44 @@ const StoryReader: React.FC<StoryReaderProps> = ({ chapter, onBack, onClose }) =
                             transition={{ duration: 0.3 }}
                             className={`text-slate-700 leading-loose text-lg font-medium whitespace-pre-wrap ${yomogi.className}`}
                         >
-                            {chapter.pages[page].description}
-                        </motion.p>
+                            {chapter.pages[page].content.map((item, index) => (
+                                <React.Fragment key={index}>
+                                    {item.type === 'text' ? (
+                                        <p className={`text-slate-700 leading-loose text-lg font-medium whitespace-pre-wrap mb-4 ${yomogi.className}`}>
+                                            {item.text}
+                                        </p>
+                                    ) : (
+                                        <div className="flex items-start gap-4 mb-6 mt-6 bg-white/50 p-4 rounded-xl border border-amber-100 shadow-sm">
+                                            <div className="flex-shrink-0 flex flex-col items-center gap-1">
+                                                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-amber-200 shadow-md bg-white">
+                                                    {item.icon === 'globe.svg' ? (
+                                                        <div className="w-full h-full flex items-center justify-center bg-blue-50 text-blue-500 font-bold text-xs">
+                                                            ALL
+                                                        </div>
+                                                    ) : (
+                                                        <Image
+                                                            src={`/Character/${item.icon}`}
+                                                            alt={item.speaker}
+                                                            width={56}
+                                                            height={56}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    )}
+                                                </div>
+                                                <span className={`text-[10px] font-bold text-amber-700 ${yomogi.className}`}>
+                                                    {item.speaker}
+                                                </span>
+                                            </div>
+                                            <div className="flex-1 pt-2">
+                                                <p className={`text-slate-800 leading-relaxed text-lg font-medium ${yomogi.className}`}>
+                                                    {item.text}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </React.Fragment>
+                            ))}
+                        </motion.div>
                     </AnimatePresence>
                 </div>
 

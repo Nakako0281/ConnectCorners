@@ -190,11 +190,9 @@ const CHARACTERS_DATA = [
         color: "BLACK",
         role: "正体不明の謎の存在",
         image: "/CharacterWholeBody/？？？-w.png",
-        description: `【性格】
-詳細不明。
-
-【容姿】
-詳細不明。`
+        description: `【作者より】
+ここまで遊んでくれて本当にありがとう！
+これからもConnectCornersをよろしくお願いします！`
     }
 ];
 
