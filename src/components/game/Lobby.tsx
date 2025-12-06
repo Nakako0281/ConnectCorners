@@ -285,7 +285,7 @@ export const Lobby: React.FC<LobbyProps> = ({
                 </div>
 
                 {/* Top Right Controls */}
-                <GameControls />
+                <GameControls showStoryAndCharacter={true} />
 
                 {/* Player Slots */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mb-8 mt-16">
@@ -471,7 +471,7 @@ export const Lobby: React.FC<LobbyProps> = ({
     if (viewMode === 'single_player_setup') {
         return (
             <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10 p-4">
-                <GameControls />
+                <GameControls showStoryAndCharacter={true} />
                 <div className={`w-full ${allBaseUnlocked ? 'max-w-3xl' : 'max-w-lg'} glass-panel p-6 rounded-xl mb-8`}>
                     <h2 className="text-3xl font-bold text-center text-white mb-2">キャラクター選択</h2>
                     <p className="text-center text-slate-400 mb-8">好きなキャラクターを選ぼう</p>
@@ -593,7 +593,7 @@ export const Lobby: React.FC<LobbyProps> = ({
     // 4. Initial Entry (Host/Join/Single)
     return (
         <div className="relative w-full max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10">
-            <GameControls />
+            <GameControls showStoryAndCharacter={true} />
             {/* ... (Keep existing background elements and title) ... */}
             {mounted && (
                 <div className="inset-0 overflow-hidden pointer-events-none -z-10">

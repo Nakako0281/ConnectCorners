@@ -17,9 +17,13 @@ import {
 
 interface GameControlsProps {
     children?: React.ReactNode;
+    showStoryAndCharacter?: boolean;
 }
 
-export const GameControls: React.FC<GameControlsProps> = ({ children }) => {
+export const GameControls: React.FC<GameControlsProps> = ({
+    children,
+    showStoryAndCharacter = true
+}) => {
     const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
     const [isAchievementModalOpen, setIsAchievementModalOpen] = useState(false);
     const [isHowToPlayModalOpen, setIsHowToPlayModalOpen] = useState(false);
@@ -58,37 +62,41 @@ export const GameControls: React.FC<GameControlsProps> = ({ children }) => {
                 <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
                     <VolumeControl />
 
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={handleOpenStory}
-                                className="text-slate-400 hover:text-white hover:bg-white/10"
-                            >
-                                <BookOpen className="w-5 h-5" />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>ストーリー</p>
-                        </TooltipContent>
-                    </Tooltip>
+                    {showStoryAndCharacter && (
+                        <>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={handleOpenStory}
+                                        className="text-slate-400 hover:text-white hover:bg-white/10"
+                                    >
+                                        <BookOpen className="w-5 h-5" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>ストーリー</p>
+                                </TooltipContent>
+                            </Tooltip>
 
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={handleOpenCharacter}
-                                className="text-slate-400 hover:text-white hover:bg-white/10"
-                            >
-                                <Users className="w-5 h-5" />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>キャラクター紹介</p>
-                        </TooltipContent>
-                    </Tooltip>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={handleOpenCharacter}
+                                        className="text-slate-400 hover:text-white hover:bg-white/10"
+                                    >
+                                        <Users className="w-5 h-5" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>キャラクター紹介</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </>
+                    )}
 
                     <Tooltip>
                         <TooltipTrigger asChild>

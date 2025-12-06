@@ -117,6 +117,7 @@ export const Game: React.FC = () => {
     const [specialPieceCutIn, setSpecialPieceCutIn] = useState<PlayerColor | null>(null);
     const [isRouletteActive, setIsRouletteActive] = useState(false);
     const [rouletteTargetIndex, setRouletteTargetIndex] = useState<number | null>(null);
+    const [isTurnTransitioning, setIsTurnTransitioning] = useState(false);
 
     // Score Animation State
     interface ScorePopupData {
@@ -846,6 +847,7 @@ export const Game: React.FC = () => {
             }]);
         }
 
+
         // Reset selection (Common)
         setSelectedPieceId(null);
         setRotation(0);
@@ -853,6 +855,14 @@ export const Game: React.FC = () => {
 
         if (isMultiplayer && !isHost) {
             // Guest: Send move to Host
+            // For guest, we also want to block input until update comes back, but standard ValidMove check handles it?
+            // Actually, we should locally update board for immediate feedback, then wait for server.
+            // But current logic sends MOVE and waits for UPDATE.
+            // We can just send MOVE.
+
+            // Note: If we had local optimistic updates, we would delay the turn switch UI here too.
+            // But for Guest, the "Turn X" UI depends on server UPDATE.
+            // So we just send the move.
             sendData({
                 type: 'MOVE',
                 payload: {
@@ -864,7 +874,6 @@ export const Game: React.FC = () => {
         } else {
             // Host or Single Player: Apply locally
             const newBoard = placePiece(board, shape, position, currentPlayer.color);
-
             setBoard(newBoard);
 
             const newPlayers = [...players];
@@ -875,15 +884,27 @@ export const Game: React.FC = () => {
             };
             setPlayers(newPlayers);
 
-            const nextIdx = nextTurnIndex(newPlayers, currentPlayerIndex);
-            setCurrentPlayerIndex(nextIdx);
+            // Delay Turn Switch if Special Piece
+            const isSpecial = piece.id === 'special';
+            const delayMs = isSpecial ? 2500 : 0; // 2.5s delay for special (wait for cut-in + read time)
 
-            const nextTurnNum = turnNumber + 1;
-            setTurnNumber(nextTurnNum);
-
-            if (isMultiplayer && isHost) {
-                broadcastUpdate(newBoard, newPlayers, nextIdx, nextTurnNum);
+            if (isSpecial) {
+                setIsTurnTransitioning(true);
             }
+
+            setTimeout(() => {
+                const nextIdx = nextTurnIndex(newPlayers, currentPlayerIndex);
+                setCurrentPlayerIndex(nextIdx);
+
+                const nextTurnNum = turnNumber + 1;
+                setTurnNumber(nextTurnNum);
+
+                setIsTurnTransitioning(false);
+
+                if (isMultiplayer && isHost) {
+                    broadcastUpdate(newBoard, newPlayers, nextIdx, nextTurnNum);
+                }
+            }, delayMs);
         }
     };
 
@@ -904,6 +925,7 @@ export const Game: React.FC = () => {
     };
 
     const handlePass = () => {
+        if (isTurnTransitioning) return;
         playClick();
         if (isMultiplayer && !isHost) {
             sendData({
@@ -976,7 +998,7 @@ export const Game: React.FC = () => {
     };
 
     const onBoardClick = useCallback((pos: Coordinate) => {
-        if (!isMyTurn || !selectedPiece || isStarting || isFinishing || specialPieceCutIn) return;
+        if (!isMyTurn || !selectedPiece || isStarting || isFinishing || specialPieceCutIn || isTurnTransitioning) return;
 
         const shape = getTransformedPiece(selectedPiece, rotation, isFlipped);
         const isFirstMove = currentPlayer.pieces.length === TOTAL_PIECES_COUNT;
@@ -1088,7 +1110,7 @@ export const Game: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-8 items-start justify-center p-8 h-screen w-full overflow-hidden relative">
 
             {/* Top Right Controls */}
-            <GameControls>
+            <GameControls showStoryAndCharacter={false}>
                 <Button variant="ghost" size="sm" onClick={handleReset} className="text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
                     <RefreshCw className="w-4 h-4 mr-2" /> Quit Game
                 </Button>
@@ -1161,7 +1183,7 @@ export const Game: React.FC = () => {
                             playerColor={currentPlayer.color}
                             selectedPieceId={selectedPieceId}
                             onSelectPiece={(p) => {
-                                if (isMyTurn) {
+                                if (isMyTurn && !isTurnTransitioning) {
                                     // Special Piece Restriction: Score >= 20
                                     if (p.id === 'special') {
                                         const remainingSquares = currentPlayer.pieces.reduce((acc, piece) => acc + piece.value, 0);

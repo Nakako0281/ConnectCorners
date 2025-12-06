@@ -270,7 +270,7 @@ export const StoryModal: React.FC<StoryModalProps & { initialChapterId?: string 
                     />
                 ) : (
                     // Chapter Selection Screen
-                    <div className="flex flex-col h-full bg-[#fdfbf7] p-8 sm:p-12 overflow-y-auto">
+                    <div className="flex flex-col h-full bg-[#fdfbf7] p-8 sm:p-12 overflow-hidden">
                         <DialogTitle className={`text-3xl sm:text-4xl font-bold text-slate-800 text-center mb-2 ${yomogi.className}`}>
                             Story Library
                         </DialogTitle>
