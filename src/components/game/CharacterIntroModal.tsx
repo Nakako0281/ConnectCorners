@@ -7,6 +7,7 @@ import { Yomogi } from 'next/font/google';
 import { UNLOCK_CONDITIONS } from '@/lib/game/characters';
 import { getStats, ACHIEVEMENTS } from '@/lib/achievements';
 import { PlayerColor } from '@/lib/game/types';
+import { useSoundContext } from '@/contexts/SoundContext';
 
 const yomogi = Yomogi({
     weight: '400',
@@ -184,12 +185,22 @@ const CHARACTERS_DATA = [
 まばゆく輝くウェーブのかかったブロンド（金色）ヘア。縦ロール気味。
 制服が隠れるほど、金の刺繍や宝石の装飾がジャラジャラついたマントを羽織っている。
 頭には小さなティアラを乗せ、常に扇子（もちろん金色）を優雅に仰いでいる。`
+    },
+    {
+        name: "？？？",
+        color: "BLACK",
+        role: "正体不明の謎の存在",
+        image: "/CharacterWholeBody/？？？-w.png",
+        description: `【作者より】
+ここまで遊んでくれて本当にありがとう！
+これからもConnectCornersをよろしくお願いします！`
     }
 ];
 
 export const CharacterIntroModal: React.FC<CharacterIntroModalProps> = ({ isOpen, onClose }) => {
     const [page, setPage] = useState(0);
     const [unlockedCharacters, setUnlockedCharacters] = useState<typeof CHARACTERS_DATA>([]);
+    const { playClick } = useSoundContext();
     const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -232,12 +243,14 @@ export const CharacterIntroModal: React.FC<CharacterIntroModalProps> = ({ isOpen
 
     const handleNext = () => {
         if (page < unlockedCharacters.length - 1) {
+            playClick();
             setPage(page + 1);
         }
     };
 
     const handlePrev = () => {
         if (page > 0) {
+            playClick();
             setPage(page - 1);
         }
     };

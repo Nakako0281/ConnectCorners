@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Trophy, Sparkles, X } from 'lucide-react';
+import { Trophy, Sparkles, X, BookOpen } from 'lucide-react';
 import { Player } from '@/lib/game/types';
 import { CHARACTERS } from '@/lib/game/characters';
 import { Achievement } from '@/lib/achievements';
@@ -13,6 +13,7 @@ interface GameResultModalProps {
     isOpen: boolean;
     players: Player[];
     newAchievements?: Achievement[];
+    unlockedStoryChapter2?: boolean;
     onPlayAgain: () => void;
     onBackToTitle: () => void;
     onClose: () => void;
@@ -22,6 +23,7 @@ export const GameResultModal: React.FC<GameResultModalProps> = ({
     isOpen,
     players,
     newAchievements = [],
+    unlockedStoryChapter2 = false,
     onPlayAgain,
     onBackToTitle,
     onClose
@@ -214,6 +216,26 @@ export const GameResultModal: React.FC<GameResultModalProps> = ({
                                         </motion.div>
                                     ))}
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Story Unlock Notification */}
+                        {unlockedStoryChapter2 && (
+                            <div className="bg-amber-50 p-4 border-b border-amber-100">
+                                <h3 className="text-sm font-bold text-amber-800 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                    <BookOpen className="w-4 h-4" /> New Story Unlocked!
+                                </h3>
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    className="bg-white p-2 rounded-lg border border-amber-200 shadow-sm flex items-center gap-3"
+                                >
+                                    <div className="text-2xl">📖</div>
+                                    <div>
+                                        <div className="font-bold text-slate-800 text-sm">Chapter 2: 新たなる脅威</div>
+                                        <div className="text-xs text-slate-500">ストーリーから読むことができます</div>
+                                    </div>
+                                </motion.div>
                             </div>
                         )}
 

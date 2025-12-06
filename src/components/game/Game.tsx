@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { cn } from '@/lib/utils';
 import { Board } from './Board';
 import { Hand } from './Hand';
 import { PieceView } from './Piece';
@@ -25,6 +26,7 @@ import {
     getAllValidMoves
 } from '@/lib/game/logic';
 import {
+    DISPLAY_COLOR_MAP,
     getInitialPieces,
     ALL_COLORS,
     CORNER_POSITIONS,
@@ -61,20 +63,7 @@ const createPlayer = (id: string, name: string, color: PlayerColor, isHuman: boo
     bonusScore: 0
 });
 
-const TAILWIND_COLOR_MAP: Record<PlayerColor, string> = {
-    BLUE: 'blue',
-    YELLOW: 'yellow',
-    RED: 'red',
-    GREEN: 'green',
-    LIGHTBLUE: 'sky',
-    PINK: 'pink',
-    ORANGE: 'orange',
-    PURPLE: 'purple',
-    BROWN: 'amber',
-    SILVER: 'slate',
-    GOLD: 'yellow',
-    BLACK: 'slate',
-};
+
 
 export const Game: React.FC = () => {
     // Sound Context
@@ -113,6 +102,7 @@ export const Game: React.FC = () => {
 
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
     const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
+    const [unlockedStoryChapter2, setUnlockedStoryChapter2] = useState(false);
     const [gameHistory, setGameHistory] = useState<Move[]>([]);
 
     // Interaction State
@@ -127,6 +117,7 @@ export const Game: React.FC = () => {
     const [specialPieceCutIn, setSpecialPieceCutIn] = useState<PlayerColor | null>(null);
     const [isRouletteActive, setIsRouletteActive] = useState(false);
     const [rouletteTargetIndex, setRouletteTargetIndex] = useState<number | null>(null);
+    const [isTurnTransitioning, setIsTurnTransitioning] = useState(false);
 
     // Score Animation State
     interface ScorePopupData {
@@ -173,6 +164,7 @@ export const Game: React.FC = () => {
         setIsFlipped(false);
         setHoverPos(null);
         setScorePopups([]);
+        setUnlockedStoryChapter2(false);
 
         // Get unlocked characters for CPU selection
         const stats = getStats();
@@ -326,21 +318,23 @@ export const Game: React.FC = () => {
             payload: {
                 gameState: gameState.board,
                 players: gamePlayers,
-                turnIndex: randomTurnIndex
+                turnIndex: randomTurnIndex,
+                turnNumber: 1
             }
         });
         // We still broadcast update for good measure, or we can skip it if we trust START_GAME
-        broadcastUpdate(gameState.board, gamePlayers, randomTurnIndex);
+        broadcastUpdate(gameState.board, gamePlayers, randomTurnIndex, 1);
     };
 
     // Broadcast Update (Host only)
-    const broadcastUpdate = (newBoard: BoardState, newPlayers: Player[], newTurnIndex: number) => {
+    const broadcastUpdate = (newBoard: BoardState, newPlayers: Player[], newTurnIndex: number, newTurnNumber: number) => {
         sendData({
             type: 'UPDATE',
             payload: {
                 gameState: newBoard,
                 players: newPlayers,
-                turnIndex: newTurnIndex
+                turnIndex: newTurnIndex,
+                turnNumber: newTurnNumber
             }
         });
     };
@@ -377,7 +371,7 @@ export const Game: React.FC = () => {
             const isWin = winner.color === myPlayerColor;
             const isPerfect = myPlayer.isPerfect;
 
-            const { newAchievements } = updateStats({
+            const { newAchievements, unlockedStoryChapter2 } = updateStats({
                 isWin,
                 isPerfect,
                 isMultiplayer,
@@ -386,6 +380,9 @@ export const Game: React.FC = () => {
 
             if (newAchievements.length > 0) {
                 setNewAchievements(newAchievements);
+            }
+            if (unlockedStoryChapter2) {
+                setUnlockedStoryChapter2(true);
             }
         }
 
@@ -443,6 +440,9 @@ export const Game: React.FC = () => {
                         setRouletteTargetIndex(data.payload.turnIndex);
                         setIsRouletteActive(true);
                     }
+                    if (typeof data.payload.turnNumber === 'number') {
+                        setTurnNumber(data.payload.turnNumber);
+                    }
                 }
                 setGameStatus('playing');
                 // setIsStarting(true); // Start animation AFTER roulette
@@ -497,6 +497,9 @@ export const Game: React.FC = () => {
                 setBoard(data.payload.gameState as BoardState);
                 setPlayers(data.payload.players);
                 setCurrentPlayerIndex(data.payload.turnIndex);
+                if (typeof data.payload.turnNumber === 'number') {
+                    setTurnNumber(data.payload.turnNumber);
+                }
 
                 // Determine my color
                 const me = data.payload.players.find((p: Player) => p.id === peerId);
@@ -543,7 +546,10 @@ export const Game: React.FC = () => {
                 const nextIdx = nextTurnIndex(newPlayers, currentPlayerIndex);
                 setCurrentPlayerIndex(nextIdx);
 
-                broadcastUpdate(board, newPlayers, nextIdx);
+                const nextTurnNum = turnNumber + 1;
+                setTurnNumber(nextTurnNum);
+
+                broadcastUpdate(board, newPlayers, nextIdx, nextTurnNum);
             }
             else if (data.type === 'GAME_OVER') {
                 handleGameEnd(data.payload.players);
@@ -639,7 +645,7 @@ export const Game: React.FC = () => {
                     // We need to wait for the state update to reflect? 
                     // Actually, we calculated 'newPlayers' locally, so we can broadcast that.
                     // We use the current 'board' and 'currentPlayerIndex' from closure.
-                    broadcastUpdate(board, newPlayers, currentPlayerIndex);
+                    broadcastUpdate(board, newPlayers, currentPlayerIndex, turnNumber);
 
                     // Optional: Show a toast or log
                     // alert(`Player disconnected. Switched to AI.`); // Too intrusive?
@@ -729,8 +735,11 @@ export const Game: React.FC = () => {
                     const nextIdx = nextTurnIndex(newPlayers, currentPlayerIndex);
                     setCurrentPlayerIndex(nextIdx);
 
+                    const nextTurnNum = turnNumber + 1;
+                    setTurnNumber(nextTurnNum);
+
                     if (isMultiplayer && isHost) {
-                        broadcastUpdate(newBoard, newPlayers, nextIdx);
+                        broadcastUpdate(newBoard, newPlayers, nextIdx, nextTurnNum);
                     }
                 } else {
                     // Pass
@@ -740,8 +749,11 @@ export const Game: React.FC = () => {
                     const nextIdx = nextTurnIndex(newPlayers, currentPlayerIndex);
                     setCurrentPlayerIndex(nextIdx);
 
+                    const nextTurnNum = turnNumber + 1;
+                    setTurnNumber(nextTurnNum);
+
                     if (isMultiplayer && isHost) {
-                        broadcastUpdate(board, newPlayers, nextIdx); // Board didn't change
+                        broadcastUpdate(board, newPlayers, nextIdx, nextTurnNum); // Board didn't change
                     }
                 }
             }, 500);
@@ -835,6 +847,7 @@ export const Game: React.FC = () => {
             }]);
         }
 
+
         // Reset selection (Common)
         setSelectedPieceId(null);
         setRotation(0);
@@ -842,6 +855,14 @@ export const Game: React.FC = () => {
 
         if (isMultiplayer && !isHost) {
             // Guest: Send move to Host
+            // For guest, we also want to block input until update comes back, but standard ValidMove check handles it?
+            // Actually, we should locally update board for immediate feedback, then wait for server.
+            // But current logic sends MOVE and waits for UPDATE.
+            // We can just send MOVE.
+
+            // Note: If we had local optimistic updates, we would delay the turn switch UI here too.
+            // But for Guest, the "Turn X" UI depends on server UPDATE.
+            // So we just send the move.
             sendData({
                 type: 'MOVE',
                 payload: {
@@ -853,7 +874,6 @@ export const Game: React.FC = () => {
         } else {
             // Host or Single Player: Apply locally
             const newBoard = placePiece(board, shape, position, currentPlayer.color);
-
             setBoard(newBoard);
 
             const newPlayers = [...players];
@@ -864,12 +884,27 @@ export const Game: React.FC = () => {
             };
             setPlayers(newPlayers);
 
-            const nextIdx = nextTurnIndex(newPlayers, currentPlayerIndex);
-            setCurrentPlayerIndex(nextIdx);
+            // Delay Turn Switch if Special Piece
+            const isSpecial = piece.id === 'special';
+            const delayMs = isSpecial ? 2500 : 0; // 2.5s delay for special (wait for cut-in + read time)
 
-            if (isMultiplayer && isHost) {
-                broadcastUpdate(newBoard, newPlayers, nextIdx);
+            if (isSpecial) {
+                setIsTurnTransitioning(true);
             }
+
+            setTimeout(() => {
+                const nextIdx = nextTurnIndex(newPlayers, currentPlayerIndex);
+                setCurrentPlayerIndex(nextIdx);
+
+                const nextTurnNum = turnNumber + 1;
+                setTurnNumber(nextTurnNum);
+
+                setIsTurnTransitioning(false);
+
+                if (isMultiplayer && isHost) {
+                    broadcastUpdate(newBoard, newPlayers, nextIdx, nextTurnNum);
+                }
+            }, delayMs);
         }
     };
 
@@ -890,6 +925,7 @@ export const Game: React.FC = () => {
     };
 
     const handlePass = () => {
+        if (isTurnTransitioning) return;
         playClick();
         if (isMultiplayer && !isHost) {
             sendData({
@@ -903,8 +939,12 @@ export const Game: React.FC = () => {
             setSelectedPieceId(null);
             const nextIdx = nextTurnIndex(newPlayers, currentPlayerIndex);
             setCurrentPlayerIndex(nextIdx);
+
+            const nextTurnNum = turnNumber + 1;
+            setTurnNumber(nextTurnNum);
+
             if (isMultiplayer && isHost) {
-                broadcastUpdate(board, newPlayers, nextIdx);
+                broadcastUpdate(board, newPlayers, nextIdx, nextTurnNum);
             }
         }
     };
@@ -916,6 +956,7 @@ export const Game: React.FC = () => {
         setIsMultiplayer(false);
         setIsResultModalOpen(false);
         setNewAchievements([]);
+        setUnlockedStoryChapter2(false);
     };
 
     const handleReset = () => {
@@ -952,11 +993,12 @@ export const Game: React.FC = () => {
             initSinglePlayer(myPlayerColor);
             setIsResultModalOpen(false);
             setNewAchievements([]);
+            setUnlockedStoryChapter2(false);
         }
     };
 
     const onBoardClick = useCallback((pos: Coordinate) => {
-        if (!isMyTurn || !selectedPiece || isStarting || isFinishing || specialPieceCutIn) return;
+        if (!isMyTurn || !selectedPiece || isStarting || isFinishing || specialPieceCutIn || isTurnTransitioning) return;
 
         const shape = getTransformedPiece(selectedPiece, rotation, isFlipped);
         const isFirstMove = currentPlayer.pieces.length === TOTAL_PIECES_COUNT;
@@ -1068,7 +1110,7 @@ export const Game: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-8 items-start justify-center p-8 h-screen w-full overflow-hidden relative">
 
             {/* Top Right Controls */}
-            <GameControls>
+            <GameControls showStoryAndCharacter={false}>
                 <Button variant="ghost" size="sm" onClick={handleReset} className="text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
                     <RefreshCw className="w-4 h-4 mr-2" /> Quit Game
                 </Button>
@@ -1081,7 +1123,7 @@ export const Game: React.FC = () => {
                         CONNECT CORNERS
                     </h1>
                     <div className="flex items-center gap-2 mb-4">
-                        <div className={`w-4 h-4 rounded-full bg-${TAILWIND_COLOR_MAP[currentPlayer.color]}-500 shadow-[0_0_10px_currentColor]`} style={{ color: `var(--color-${TAILWIND_COLOR_MAP[currentPlayer.color]}-500)` }} />
+                        <div className={cn("w-4 h-4 rounded-full shadow-[0_0_10px_currentColor]", DISPLAY_COLOR_MAP[currentPlayer.color])} />
                         <span className="font-medium text-slate-300">
                             Turn {turnNumber}: <span style={{ color: currentPlayer.color }} className="font-bold">{CHARACTERS[currentPlayer.color].japaneseName}</span>
                             {isMyTurn ? " (You)" : " (Waiting...)"}
@@ -1141,7 +1183,7 @@ export const Game: React.FC = () => {
                             playerColor={currentPlayer.color}
                             selectedPieceId={selectedPieceId}
                             onSelectPiece={(p) => {
-                                if (isMyTurn) {
+                                if (isMyTurn && !isTurnTransitioning) {
                                     // Special Piece Restriction: Score >= 20
                                     if (p.id === 'special') {
                                         const remainingSquares = currentPlayer.pieces.reduce((acc, piece) => acc + piece.value, 0);
@@ -1208,6 +1250,7 @@ export const Game: React.FC = () => {
                 onPlayAgain={handleRestart}
                 onBackToTitle={handleBack}
                 newAchievements={newAchievements}
+                unlockedStoryChapter2={unlockedStoryChapter2}
             />
 
             {/* Score Popups */}

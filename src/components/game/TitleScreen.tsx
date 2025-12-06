@@ -74,13 +74,25 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({ onStart }) => {
 
 // Background Piece Animation (Simplified version from Lobby)
 const BackgroundPiece = ({ index }: { index: number }) => {
-    const [initialState] = useState(() => ({
-        x: Math.random() * 100 - 50, // vw
-        y: Math.random() * 100 - 50, // vh
-        scale: Math.random() * 0.5 + 0.5,
-        duration: 15 + Math.random() * 15,
-        delay: Math.random() * 5
-    }));
+    const [initialState, setInitialState] = useState<{
+        x: number;
+        y: number;
+        scale: number;
+        duration: number;
+        delay: number;
+    } | null>(null);
+
+    React.useEffect(() => {
+        setInitialState({
+            x: Math.random() * 100 - 50, // vw
+            y: Math.random() * 100 - 50, // vh
+            scale: Math.random() * 0.5 + 0.5,
+            duration: 15 + Math.random() * 15,
+            delay: Math.random() * 5
+        });
+    }, []);
+
+    if (!initialState) return null;
 
     const colors = ['bg-blue-500', 'bg-red-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-orange-500'];
     const color = colors[index % colors.length];

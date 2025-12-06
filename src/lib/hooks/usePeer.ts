@@ -5,8 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { PlayerColor, Coordinate } from '../game/types';
 
 export type NetworkMessage =
-    | { type: 'START_GAME', payload: { gameState?: any, players?: any[], turnIndex?: number } }
-    | { type: 'UPDATE', payload: { gameState: any, players: any[], turnIndex: number } }
+    | { type: 'START_GAME', payload: { gameState?: any, players?: any[], turnIndex?: number, turnNumber?: number } }
+    | { type: 'UPDATE', payload: { gameState: any, players: any[], turnIndex: number, turnNumber?: number } }
     | { type: 'MOVE', payload: { pieceId: string, shape: number[][], position: Coordinate } }
     | { type: 'JOIN', payload: { name: string, color: PlayerColor } }
     | { type: 'LOBBY_UPDATE', payload: { players: any[] } }
