@@ -17,37 +17,35 @@ export const SecureStorage = {
 
     getItem: <T>(key: string, defaultValue: T): T => {
         if (typeof window === 'undefined') return defaultValue;
+
+        const item = localStorage.getItem(key);
+        if (!item) return defaultValue;
+
+        // 1. Try to decrypt and parse
         try {
-            const encrypted = localStorage.getItem(key);
-            if (!encrypted) return defaultValue;
+            const bytes = CryptoJS.AES.decrypt(item, SECRET_KEY);
+            const decrypted = bytes.toString(CryptoJS.enc.Utf8);
 
-            let decrypted: string | null = null;
-
-            try {
-                const bytes = CryptoJS.AES.decrypt(encrypted, SECRET_KEY);
-                decrypted = bytes.toString(CryptoJS.enc.Utf8);
-            } catch (e) {
-                // Verification failed, might be legacy data
+            if (decrypted) {
+                return JSON.parse(decrypted) as T;
             }
-
-            if (!decrypted) {
-                // Try parsing as legacy plain JSON
-                try {
-                    const legacy = JSON.parse(encrypted);
-                    // If valid JSON, migrate it? or just return it. 
-                    // Let's just return it for now to avoid auto-migration logic loops or complexity.
-                    return legacy as T;
-                } catch {
-                    // Not legacy JSON either, return default
-                    return defaultValue;
-                }
-            }
-
-            return JSON.parse(decrypted) as T;
         } catch (e) {
-            console.error('Failed to load from secure storage', e);
-            return defaultValue;
+            // Decryption failed or JSON parse of decrypted data failed
+            // Continue to try legacy parsing
         }
+
+        // 2. If decryption failed or result was empty, try parsing original item (Legacy support)
+        try {
+            return JSON.parse(item) as T;
+        } catch (e) {
+            // Not legacy JSON either
+        }
+
+        // 3. Fallback: Data is corrupted or completely invalid
+        console.warn(`Failed to recover data for key "${key}", resetting to default.`);
+        // Optional: Remove invalid data to prevent persistent warnings?
+        // localStorage.removeItem(key); 
+        return defaultValue;
     },
 
     removeItem: (key: string): void => {
