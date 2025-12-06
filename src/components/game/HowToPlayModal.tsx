@@ -115,7 +115,7 @@ export const HowToPlayModal: React.FC<HowToPlayModalProps> = ({ isOpen, onClose 
                             </div>
                             <div className="text-xs text-slate-400">
                                 ※ゲームデータはローカルストレージに保存しているため、ブラウザのキャッシュを削除するとデータも削除されます。<br />
-                                ※シークレットモードでもプレイ可能ですが、データは保存されません。
+                                ※シークレットモードでもプレイ可能ですが、データは保存されません。<br />
                                 ※画面サイズが合わない場合は、ブラウザの機能で拡大/縮小をして調整してください。
                             </div>
                         </div>
