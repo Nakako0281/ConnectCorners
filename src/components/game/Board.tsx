@@ -29,10 +29,10 @@ const COLOR_MAP: Record<PlayerColor, string> = {
   PINK: 'bg-pink-400/80',
   ORANGE: 'bg-orange-500/80',
   PURPLE: 'bg-purple-500/80',
-  BROWN: 'bg-amber-700/80',
-  SILVER: 'bg-slate-400/80',
-  GOLD: 'bg-yellow-400/80',
-  BLACK: 'bg-slate-900/80',
+  BROWN: 'bg-gradient-to-br from-amber-400 via-amber-700 to-amber-900 ring-1 ring-amber-600/50',
+  SILVER: 'bg-gradient-to-br from-slate-200 via-slate-400 to-slate-600 ring-1 ring-slate-400/50',
+  GOLD: 'bg-gradient-to-br from-yellow-200 via-yellow-500 to-yellow-700 ring-1 ring-yellow-500/50',
+  BLACK: 'bg-gradient-to-br from-slate-600 via-slate-800 to-black ring-1 ring-slate-600/50',
 };
 
 const BoardCell = React.memo(({
