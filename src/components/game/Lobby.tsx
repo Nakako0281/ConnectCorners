@@ -122,15 +122,19 @@ export const Lobby: React.FC<LobbyProps> = ({
 
     React.useEffect(() => {
         setMounted(true);
-        if (isNameSet) {
+        if (isNameSet && !showWelcomeStory) {
             playLobbyBgm();
         } else {
+            // Check if we are NOT showing the story before stopping
+            // Actually, if showWelcomeStory is true, we WANT to stop lobby bgm (or let it stop)
+            // But StoryModal handles its own BGM.
+            // If we stop here, it should be fine.
             stopLobbyBgm();
         }
         return () => {
             stopLobbyBgm();
         };
-    }, [playLobbyBgm, stopLobbyBgm, isNameSet]);
+    }, [playLobbyBgm, stopLobbyBgm, isNameSet, showWelcomeStory]);
 
     const handleSetUserName = () => {
         if (!userName.trim()) return;

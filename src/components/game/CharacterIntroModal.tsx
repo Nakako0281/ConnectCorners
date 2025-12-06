@@ -25,7 +25,7 @@ const CHARACTERS_DATA = [
         name: "リズ (Riz)",
         color: "BLUE",
         role: "冷静沈着なリーダー格",
-        image: "/CharacterWholeBody/Riz-w.png",
+        image: "/CharacterWholeBody/Riz-w.webp",
         description: `【性格】
 成績優秀で、幾何学を愛する真面目な性格。
 常に数手先を読む理論派だが、想定外の動き（特にビットの行動）には弱い。
@@ -40,7 +40,7 @@ const CHARACTERS_DATA = [
         name: "ロッカ (Rocca)",
         color: "RED",
         role: "猪突猛進のエースアタッカー",
-        image: "/CharacterWholeBody/Rocca-w.png",
+        image: "/CharacterWholeBody/Rocca-w.webp",
         description: `【性格】
 情熱的で負けず嫌い。「細かいことはいいからドーンと行こう！」がモットー。
 攻撃的な配置が得意で、相手の陣地に切り込むのが大好き。
@@ -55,7 +55,7 @@ const CHARACTERS_DATA = [
         name: "マロ (Mallo)",
         color: "GREEN",
         role: "おっとり癒やし系の守護神",
-        image: "/CharacterWholeBody/Mallo-w.png",
+        image: "/CharacterWholeBody/Mallo-w.webp",
         description: `【性格】
 争いごとは苦手だが、守りに入ると鉄壁の強さを誇る。
 「みんなの居場所（陣地）を守りたいの」と言いながら、着実に自分のエリアを広げる。
@@ -70,7 +70,7 @@ const CHARACTERS_DATA = [
         name: "ピコ (Pico)",
         color: "YELLOW",
         role: "神出鬼没のトリックスター",
-        image: "/CharacterWholeBody/Pico-w.png",
+        image: "/CharacterWholeBody/Pico-w.webp",
         description: `【性格】
 イタズラ好きで、セオリー無視の変な手を打つのが大好き。
 「ここ繋げたら面白くない？」と、誰も予想しない場所にピースを置いて場を混乱させる天才肌。
@@ -85,7 +85,7 @@ const CHARACTERS_DATA = [
         name: "ミズキ (Mizuki)",
         color: "LIGHTBLUE",
         role: "理知的なクールビューティー",
-        image: "/CharacterWholeBody/Mizuki-w.png",
+        image: "/CharacterWholeBody/Mizuki-w.webp",
         description: `【性格】
 頭脳明晰で論理的。データ分析が得意で、リズとは最高の研究パートナー。
 感情を表に出すことは少ないが、勝利への執念は人一倍強い。
@@ -100,7 +100,7 @@ const CHARACTERS_DATA = [
         name: "アムール (Amour)",
         color: "PINK",
         role: "愛と芸術のロマンチスト",
-        image: "/CharacterWholeBody/Amour-w.png",
+        image: "/CharacterWholeBody/Amour-w.webp",
         description: `【性格】
 ロマンチックで感情豊か。ゲームを「芸術」として捉えており、美しい配置を追求する。
 自分の陣地を「愛の城」と呼び、他人に侵略されると大げさに落ち込む。
@@ -115,7 +115,7 @@ const CHARACTERS_DATA = [
         name: "ソレイユ (Soleil)",
         color: "ORANGE",
         role: "天真爛漫なムードメーカー",
-        image: "/CharacterWholeBody/Soleil-w.png",
+        image: "/CharacterWholeBody/Soleil-w.webp",
         description: `【性格】
 太陽のように明るくポジティブなムードメーカー。場が暗くなると、すぐに冗談を言って笑わせようとする。
 直感と運でピースを置くタイプで、その予測不能さが時に驚異的な戦略を生む。
@@ -130,7 +130,7 @@ const CHARACTERS_DATA = [
         name: "ノワール (Noir)",
         color: "PURPLE",
         role: "孤高のミステリアスな魔女",
-        image: "/CharacterWholeBody/Noir-w.png",
+        image: "/CharacterWholeBody/Noir-w.webp",
         description: `【性格】
 無口で常に物静か。普段何を考えているか読み取りにくいため、部員からは「魔女」と呼ばれている。
 最も少ないピース数で勝利することを美徳としており、不要なピースは極力置かないミニマリスト戦略家。
@@ -145,7 +145,7 @@ const CHARACTERS_DATA = [
         name: "テラ (Terra)",
         color: "BROWN",
         role: "古代遺跡の守護者",
-        image: "/CharacterWholeBody/Terra-w.png",
+        image: "/CharacterWholeBody/Terra-w.webp",
         description: `【性格】
 古代宇宙文明の遺跡を守る一族の末裔。口数は少なく、任務に忠実な仕事人。
 最新機器よりも、先祖代々伝わる古代の道具（レリック）を信頼している。
@@ -160,7 +160,7 @@ const CHARACTERS_DATA = [
         name: "ルナ (Luna)",
         color: "SILVER",
         role: "未来を見通す眠り姫",
-        image: "/CharacterWholeBody/Luna-w.png",
+        image: "/CharacterWholeBody/Luna-w.webp",
         description: `【性格】
 「……次の手、見えちゃった」が口癖。常に眠そうで、部室のソファで宙に浮きながら寝ている。
 予知能力（直感）が鋭すぎて、逆に考えすぎて動けなくなることもある。
@@ -175,7 +175,7 @@ const CHARACTERS_DATA = [
         name: "オーラ (Aura)",
         color: "GOLD",
         role: "輝くゴージャスお嬢様",
-        image: "/CharacterWholeBody/Aura-w.png",
+        image: "/CharacterWholeBody/Aura-w.webp",
         description: `【性格】
 宇宙一の大富豪の娘で、超セレブな自信家。「勝利も輝きも、全て私のもの！」が口癖。
 高飛車だが、実は努力家で、最高の家庭教師（AI）をつけて戦略を学んでいる。
@@ -190,7 +190,7 @@ const CHARACTERS_DATA = [
         name: "？？？",
         color: "BLACK",
         role: "正体不明の謎の存在",
-        image: "/CharacterWholeBody/？？？-w.png",
+        image: "/CharacterWholeBody/？？？-w.webp",
         description: `【作者より】
 ここまで遊んでくれて本当にありがとう！
 これからもConnectCornersをよろしくお願いします！`

@@ -95,7 +95,8 @@ const BoardCell = React.memo(({
     prev.isPreview === next.isPreview &&
     prev.isValidPreview === next.isValidPreview &&
     prev.previewColor === next.previewColor &&
-    prev.startColor === next.startColor
+    prev.startColor === next.startColor &&
+    prev.onClick === next.onClick
   );
 });
 
