@@ -334,9 +334,9 @@ export const Lobby: React.FC<LobbyProps> = ({
                 </div>
 
                 {/* Character Selection Grid */}
-                <div className="w-full max-w-3xl glass-panel p-6 rounded-xl mb-8">
+                <div className={`w-full ${allBaseUnlocked ? 'max-w-3xl' : 'max-w-lg'} glass-panel p-6 rounded-xl mb-8`}>
                     <h3 className="text-center text-slate-400 mb-4 uppercase tracking-widest text-sm font-semibold">Select Character</h3>
-                    <div className="grid grid-cols-6 gap-3">
+                    <div className={`grid ${allBaseUnlocked ? 'grid-cols-6' : 'grid-cols-4'} gap-3`}>
                         {ALL_COLORS.map((color) => {
                             const unlockCondition = UNLOCK_CONDITIONS[color];
                             const isLocked = !!(unlockCondition && !unlockedAchievements.includes(unlockCondition));
@@ -472,11 +472,11 @@ export const Lobby: React.FC<LobbyProps> = ({
         return (
             <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center min-h-[80vh] z-10 p-4">
                 <GameControls />
-                <div className="w-full max-w-3xl glass-panel p-6 rounded-xl mb-8">
+                <div className={`w-full ${allBaseUnlocked ? 'max-w-3xl' : 'max-w-lg'} glass-panel p-6 rounded-xl mb-8`}>
                     <h2 className="text-3xl font-bold text-center text-white mb-2">キャラクター選択</h2>
                     <p className="text-center text-slate-400 mb-8">好きなキャラクターを選ぼう</p>
 
-                    <div className="grid grid-cols-6 gap-3">
+                    <div className={`grid ${allBaseUnlocked ? 'grid-cols-6' : 'grid-cols-4'} gap-3`}>
                         {ALL_COLORS.map((color) => {
                             const unlockCondition = UNLOCK_CONDITIONS[color];
                             const isLocked = !!(unlockCondition && !unlockedAchievements.includes(unlockCondition));
