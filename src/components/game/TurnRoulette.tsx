@@ -3,6 +3,7 @@ import { Player } from '@/lib/game/types';
 import { CHARACTERS } from '@/lib/game/characters';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSoundContext } from '@/contexts/SoundContext';
+import Image from 'next/image';
 
 interface TurnRouletteProps {
     players: Player[];
@@ -107,11 +108,13 @@ export const TurnRoulette: React.FC<TurnRouletteProps> = ({ players, targetPlaye
                                     ${isTarget ? 'z-10' : ''}
                                 `}
                             >
-                                <div className="w-12 h-12 rounded-full overflow-hidden shadow-inner bg-white/10">
-                                    <img
+                                <div className="relative w-12 h-12 rounded-full overflow-hidden shadow-inner bg-white/10">
+                                    <Image
                                         src={CHARACTERS[player.color].imagePath}
                                         alt={CHARACTERS[player.color].name}
-                                        className="w-full h-full object-cover"
+                                        fill
+                                        sizes="48px"
+                                        className="object-cover"
                                     />
                                 </div>
                                 <span className="font-bold text-lg truncate w-full"

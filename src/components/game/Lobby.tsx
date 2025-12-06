@@ -15,7 +15,7 @@ import { getStats, ACHIEVEMENTS } from '@/lib/achievements';
 import { Lock } from 'lucide-react';
 import { getUserName, setUserName } from '@/lib/utils/storage';
 import { LobbyPlayer } from '@/lib/game/types';
-
+import Image from 'next/image';
 
 
 const BG_COLOR_MAP: Record<PlayerColor, string> = {
@@ -301,10 +301,12 @@ export const Lobby: React.FC<LobbyProps> = ({
                                     <>
                                         {/* Character Image */}
                                         {player.color ? (
-                                            <img
+                                            <Image
                                                 src={CHARACTERS[player.color].imagePath}
                                                 alt={player.color}
-                                                className="absolute inset-0 w-full h-full object-cover opacity-80"
+                                                fill
+                                                sizes="(max-width: 768px) 50vw, 25vw"
+                                                className="object-cover opacity-80"
                                             />
                                         ) : (
                                             <div className="absolute inset-0 flex items-center justify-center text-slate-600">
@@ -380,10 +382,12 @@ export const Lobby: React.FC<LobbyProps> = ({
                                 >
                                     <div className="absolute inset-0 rounded-xl overflow-hidden">
                                         <div className={`absolute inset-0 opacity-20 ${BG_COLOR_MAP[color]} mix-blend-overlay`} />
-                                        <img
+                                        <Image
                                             src={CHARACTERS[color].imagePath}
                                             alt={CHARACTERS[color].name}
-                                            className="w-full h-full object-cover"
+                                            fill
+                                            sizes="100px"
+                                            className="object-cover"
                                         />
                                         {isTaken && (
                                             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
@@ -510,10 +514,12 @@ export const Lobby: React.FC<LobbyProps> = ({
                                 >
                                     <div className="absolute inset-0 rounded-xl overflow-hidden">
                                         <div className={`absolute inset-0 opacity-20 ${BG_COLOR_MAP[color]} mix-blend-overlay`} />
-                                        <img
+                                        <Image
                                             src={CHARACTERS[color].imagePath}
                                             alt={CHARACTERS[color].name}
-                                            className="w-full h-full object-cover"
+                                            fill
+                                            sizes="100px"
+                                            className="object-cover"
                                         />
                                         {isLocked && (
                                             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
@@ -608,9 +614,19 @@ export const Lobby: React.FC<LobbyProps> = ({
                 initial={{ opacity: 0, y: -50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, type: "spring" }}
-                className="text-center mb-12 mt-20 md:mt-0"
+                className="text-center mb-12 mt-20 md:mt-0 flex flex-col items-center"
             >
-                <img src="title_logo.png" alt="Title Logo" />
+                <div className="relative w-full max-w-lg">
+                    <Image
+                        src="/title_logo.png"
+                        alt="Title Logo"
+                        width={0}
+                        height={0}
+                        sizes="100vw"
+                        style={{ width: '100%', height: 'auto' }}
+                        priority
+                    />
+                </div>
                 <p className="text-slate-400 mt-4 text-xl flex items-center justify-center gap-3">
                     <span>Welcome, <span className="text-white font-bold">{userName}</span></span>
                     <Button
